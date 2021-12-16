@@ -1,0 +1,249 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+    Version="10.0"
+    VendorName="SlickEdit"
+    WorkingDir="../src/Assembly/"
+    VCSProject=""
+    VCSLocalPath=""
+    VCSAuxPath="">
+    <Config
+        Name="Release"
+        OutputFile=""
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                RunFromDir="%rw"
+                ShowOnMenu="HideIfNoCmdLine">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build Assembly"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynBuildAssembly"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                RunFromDir="%rw"
+                ShowOnMenu="HideIfNoCmdLine">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                RunFromDir="%rw"
+                ShowOnMenu="HideIfNoCmdLine">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                RunFromDir="%rw"
+                ShowOnMenu="HideIfNoCmdLine">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Component Information"
+                MenuCaption="Component &amp;Information..."
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="show_com_info"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate C# Classes"
+                MenuCaption="Gener&amp;ate C# Classes"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynGenerateCSClasses"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate Synergy Test Skeletons"
+                MenuCaption="Generate Synergy Test S&amp;keletons..."
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynStartSkeletonGen"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="BuildAssembly"
+                MenuCaption="&amp;Build and Register"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="makeit"/>
+            </Target>
+        </Menu>
+    </Config>
+    <Files>
+        <Folder
+            Name="Source Files"
+            Filters="*.cs">
+            <F N="../src/Assembly/ChronoTrack/AssemblyInfo.cs"/>
+            <F N="../src/Assembly/ChronoTrack/ChronoTrack.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Consultant_fee.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Consultant_fee_summary.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Consultant_fee_summaryDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Consultant_feeDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Consultant_schedule.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Country.cs"/>
+            <F N="../src/Assembly/ChronoTrack/CountryDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_breif.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_breifDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_contact.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_contactDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_contract.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_contractDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_location.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Customer_locationDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/CustomerDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Expense_type.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Expense_typeDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Fee_type.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Fee_typeDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Gantt_view.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Gantt_viewDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/IChronoTrack.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_activity.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_activity_summary.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_activity_summaryDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_activityDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_attachment.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_attachmentDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_combined.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_combinedDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_consultant.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_consultantDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_expense.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_expense_summary.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_expense_summaryDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_expenseDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_note.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_note_summary.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_note_summaryDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_noteDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_summary.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_summaryDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_task.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_task_summary.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_task_summaryDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Project_taskDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/ProjectDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Request.cs"/>
+            <F N="../src/Assembly/ChronoTrack/RequestDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/State.cs"/>
+            <F N="../src/Assembly/ChronoTrack/StateDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Task_type.cs"/>
+            <F N="../src/Assembly/ChronoTrack/Task_typeDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/User.cs"/>
+            <F N="../src/Assembly/ChronoTrack/User_breif.cs"/>
+            <F N="../src/Assembly/ChronoTrack/User_breifDT.cs"/>
+            <F N="../src/Assembly/ChronoTrack/UserDT.cs"/>
+        </Folder>
+        <Folder
+            Name="Batch Files"
+            Filters="*.bat"/>
+        <Folder
+            Name="Other Files"
+            Filters="">
+            <F N="../src/Assembly/makeit.bat"/>
+        </Folder>
+        <Folder
+            Name="Schema Files"
+            Filters="*.xml">
+            <F N="../smc/smcschema.xml"/>
+        </Folder>
+    </Files>
+    <Macro>
+        <ExecMacro CmdLine="syn_set_sdkvars 2.0"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem "/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Set this to the base folder definition"/>
+        <ExecMacro CmdLine='rem *************************************************************"'/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set NOVCS=yes"/>
+        <ExecMacro CmdLine="syn_set SRCDEV=C"/>
+        <ExecMacro CmdLine="syn_set DEVAREA=Development\SynPSG"/>
+        <ExecMacro CmdLine="syn_set WORKSPACE=ChronoTrack"/>
+        <ExecMacro CmdLine="syn_set PROJECT=Assembly"/>
+        <ExecMacro CmdLine="syn_set COMMONAREA=NetCommon"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem This sets the root folder"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set ROOTFOLDER=%(DEVAREA)\%(WORKSPACE)"/>
+        <ExecMacro CmdLine="syn_set DEVROOT=%(SRCDEV):\%(ROOTFOLDER)"/>
+        <ExecMacro CmdLine="syn_set SFWINIPATH=%(SRCDEV):\%(DEVAREA)\ini"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the base SynPSG NET wrapping core libray"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SynPSGNetHDR=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\genhdr"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CORE=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\Core"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_WINDEMO=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\WinDemo"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CHRONOTRACK=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\ChronoTrack"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SynPSGNetLIB=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\lib"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the core library details"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set CORELIB=%(SRCDEV):\%(DEVAREA)\Core\lib"/>
+        <ExecMacro CmdLine="syn_set COREHDR=%(SRCDEV):\%(DEVAREA)\Core\hdr"/>
+        <ExecMacro CmdLine="syn_set COREDEF=%(SRCDEV):\%(DEVAREA)\Core\src\Includes"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem change this depending if it's a development configuration"/>
+        <ExecMacro CmdLine="rem or a release configuration"/>
+        <ExecMacro CmdLine="rem these should be =nothing for release"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set DFLAGS=-d"/>
+        <ExecMacro CmdLine="syn_set LDFLAGS=-d"/>
+        <ExecMacro CmdLine="syn_set VARIANT_FLAGS="/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define configuration builder settings"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set OSTYPE=WINNT"/>
+        <ExecMacro CmdLine="syn_set SYSTEM_TYPE=WindowsNT"/>
+        <ExecMacro CmdLine="syn_set CONF=%(SRCDEV):\Development\SynPSG\Builder\conf\"/>
+        <ExecMacro CmdLine="syn_set DEPSEXE=%(SRCDEV):\Development\SynPSG\Builder\exe\"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define here the required environment variables"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SRC=%(DEVROOT)\src\%(PROJECT)"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set RPSMFIL=%(DEVROOT)\rps\rpsmain.ism"/>
+        <ExecMacro CmdLine="syn_set RPSTFIL=%(DEVROOT)\rps\rpstext.ism"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set OLIB=%(DEVROOT)\lib"/>
+        <ExecMacro CmdLine="syn_set OBJ=%(DEVROOT)\obj\%(PROJECT)"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set EXE=%(DEVROOT)\exe"/>
+        <ExecMacro CmdLine="syn_set DEF=%(DEVROOT)\def"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SYNEXPDIR=%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine="syn_set SYNIMPDIR=%(SynPSGNetHDR),%(COREHDR),%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set XFPL_SMCPATH=%(DEVROOT)\smc\"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SYNCSCOPT=/debug:full "/>
+    </Macro>
+</Project>

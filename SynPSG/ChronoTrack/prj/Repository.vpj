@@ -1,0 +1,288 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+    Version="10.0"
+    VendorName="SlickEdit"
+    WorkingDir="../rps/"
+    VCSProject=""
+    VCSLocalPath=""
+    VCSAuxPath="">
+    <Config
+        Name="Release"
+        OutputFile=""
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbl" %(SYN_DBG) -XT "%p%n%e"'/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="build -nologo"/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                RunFromDir="%rw"
+                ShowOnMenu="HideIfNoCmdLine">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbr" -d "%n"'/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbr" "%n"'/>
+            </Target>
+            <Target
+                Name="Compile Scripts"
+                MenuCaption="Co&amp;mpile Scripts"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynCompileScripts"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Compile Scripts Setup"
+                MenuCaption="Compile Scripts Set&amp;up..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynSetupCompileScripts"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate Synergy Test Skeletons"
+                MenuCaption="Generate Synergy Test S&amp;keletons..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynStartSkeletonGen"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate Synergy Prototypes"
+                MenuCaption="Generate Synergy Pro&amp;totypes..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynGeneratePrototypes"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Export Repository Schema"
+                MenuCaption="&amp;Export Repository Schema"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1"
+                SaveOption="SaveAll">
+                <Exec CmdLine="rps_export"/>
+            </Target>
+            <Target
+                Name="Import Repository Schema"
+                MenuCaption="&amp;Import Repository Schema"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1"
+                SaveOption="SaveAll">
+                <Exec CmdLine="rps_import"/>
+            </Target>
+            <Target
+                Name="Create New Files From RPS Definitions"
+                MenuCaption="&amp;Create New Files From RPS Definitions"
+                RunFromDir="%(DEVROOT)\rps"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="create_files"/>
+            </Target>
+            <Target
+                Name="Unload Files (ISAM to Sequential)"
+                MenuCaption="&amp;Unload Files (ISAM to Sequential)"
+                RunFromDir="%(DEVROOT)\rps"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="unload_files"/>
+            </Target>
+            <Target
+                Name="Load Files (Sequential to ISAM)"
+                MenuCaption="&amp;Load Files (Sequential to ISAM)"
+                RunFromDir="%(DEVROOT)\rps"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="load_files"/>
+            </Target>
+        </Menu>
+        <PreBuildCommands>
+            <Exec CmdLine="set MAKE_MAKEIT_FILE=YES"/>
+            <Exec CmdLine="set MAKE_MAKEIT_UNIX_FILE=YES"/>
+            <Exec CmdLine="build -nologo clean"/>
+        </PreBuildCommands>
+        <PostBuildCommands>
+            <Exec CmdLine="echo endlocal &gt;&gt; makeit.bat"/>
+            <Exec CmdLine="set MAKE_MAKEIT_FILE=NO"/>
+            <Exec CmdLine="set MAKE_MAKEIT_UNIX_FILE=NO"/>
+        </PostBuildCommands>
+    </Config>
+    <Files>
+        <Folder
+            Name="Source Files"
+            Filters="*.dbl;*.tpl">
+            <F N="../rps/rpsschema.sch"/>
+        </Folder>
+        <Folder
+            Name="Header Files"
+            Filters="*.def;*.dbh"/>
+        <Folder
+            Name="File Descriptions"
+            Filters="*.xdl">
+            <F N="../xdl/activity.xdl"/>
+            <F N="../xdl/attachment.xdl"/>
+            <F N="../xdl/consultant.xdl"/>
+            <F N="../xdl/contact.xdl"/>
+            <F N="../xdl/contract.xdl"/>
+            <F N="../xdl/country.xdl"/>
+            <F N="../xdl/customer.xdl"/>
+            <F N="../xdl/expense.xdl"/>
+            <F N="../xdl/expensetype.xdl"/>
+            <F N="../xdl/fee.xdl"/>
+            <F N="../xdl/feetype.xdl"/>
+            <F N="../xdl/location.xdl"/>
+            <F N="../xdl/login_audit.xdl"/>
+            <F N="../xdl/note.xdl"/>
+            <F N="../xdl/project.xdl"/>
+            <F N="../xdl/replication.xdl"/>
+            <F N="../xdl/request.xdl"/>
+            <F N="../xdl/state.xdl"/>
+            <F N="../xdl/task.xdl"/>
+            <F N="../xdl/tasktype.xdl"/>
+            <F N="../xdl/user.xdl"/>
+        </Folder>
+        <Folder
+            Name="Unloaded Data Files"
+            Filters="*.seq">
+            <F N="../dat/activity.seq"/>
+            <F N="../dat/attachment.seq"/>
+            <F N="../dat/consultant.seq"/>
+            <F N="../dat/contact.seq"/>
+            <F N="../dat/contract.seq"/>
+            <F N="../dat/country.seq"/>
+            <F N="../dat/customer.seq"/>
+            <F N="../dat/expense.seq"/>
+            <F N="../dat/expensetype.seq"/>
+            <F N="../dat/fee.seq"/>
+            <F N="../dat/feetype.seq"/>
+            <F N="../dat/location.seq"/>
+            <F N="../dat/note.seq"/>
+            <F N="../dat/project.seq"/>
+            <F N="../dat/request.seq"/>
+            <F N="../dat/state.seq"/>
+            <F N="../dat/task.seq"/>
+            <F N="../dat/tasktype.seq"/>
+            <F N="../dat/user.seq"/>
+        </Folder>
+        <Folder
+            Name="Toolkit Script Files"
+            Filters="*.wsc"/>
+        <Folder
+            Name="Other Files"
+            Filters="">
+            <F N="../rps/create_files.bat"/>
+            <F N="../rps/load_files.bat"/>
+            <F N="../rps/makefile.mak"/>
+            <F N="../rps/makeit.bat"/>
+            <F N="../rps/makeit_unix"/>
+            <F N="../rps/rps_export.bat"/>
+            <F N="../rps/rps_import.bat"/>
+            <F N="../rps/unload_files.bat"/>
+        </Folder>
+    </Files>
+    <Macro>
+        <ExecMacro CmdLine="rem "/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Set this to the base folder definition"/>
+        <ExecMacro CmdLine='rem *************************************************************"'/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set NOVCS=yes"/>
+        <ExecMacro CmdLine="syn_set SRCDEV=C"/>
+        <ExecMacro CmdLine="syn_set DEVAREA=Development\SynPSG"/>
+        <ExecMacro CmdLine="syn_set WORKSPACE=ChronoTrack"/>
+        <ExecMacro CmdLine="syn_set PROJECT=Repository"/>
+        <ExecMacro CmdLine="syn_set COMMONAREA=NetCommon"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem This sets the root folder"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set ROOTFOLDER=%(DEVAREA)\%(WORKSPACE)"/>
+        <ExecMacro CmdLine="syn_set DEVROOT=%(SRCDEV):\%(ROOTFOLDER)"/>
+        <ExecMacro CmdLine="syn_set SFWINIPATH=%(SRCDEV):\%(DEVAREA)\ini"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the base SynPSG NET wrapping core libray"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SynPSGNetHDR=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\genhdr"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetLIB_CORE=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\lib"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CORE=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\Core"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_WINDEMO=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\WinDemo"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CHRONOTRACK=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\ChronoTrack"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the core library details"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set COREEXE=%(SRCDEV):\%(DEVAREA)\Core\exe"/>
+        <ExecMacro CmdLine="syn_set CORELIB=%(SRCDEV):\%(DEVAREA)\Core\lib"/>
+        <ExecMacro CmdLine="syn_set COREHDR=%(SRCDEV):\%(DEVAREA)\Core\hdr"/>
+        <ExecMacro CmdLine="syn_set COREDEF=%(SRCDEV):\%(DEVAREA)\Core\src\Includes"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem change this depending if it's a development configuration"/>
+        <ExecMacro CmdLine="rem or a release configuration"/>
+        <ExecMacro CmdLine="rem these should be =nothing for release"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set DFLAGS=-d"/>
+        <ExecMacro CmdLine="syn_set LDFLAGS=-d"/>
+        <ExecMacro CmdLine="syn_set VARIANT_FLAGS="/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define configuration builder settings"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set OSTYPE=WINNT"/>
+        <ExecMacro CmdLine="syn_set SYSTEM_TYPE=WindowsNT"/>
+        <ExecMacro CmdLine="syn_set CONF=%(SRCDEV):\Development\SynPSG\Builder\conf\"/>
+        <ExecMacro CmdLine="syn_set DEPSEXE=%(SRCDEV):\Development\SynPSG\Builder\exe\"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define here the required environment variables"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set RPSMFIL=%(DEVROOT)\rps\rpsmain.ism"/>
+        <ExecMacro CmdLine="syn_set RPSTFIL=%(DEVROOT)\rps\rpstext.ism"/>
+        <ExecMacro CmdLine="syn_set DAT=%(DEVROOT)\dat"/>
+        <ExecMacro CmdLine="syn_set XDL=%(DEVROOT)\xdl"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set CODEGEN_EXE=%(SRCDEV):\Development\SynPSG\Builder\exe"/>
+        <ExecMacro CmdLine="syn_set PATH=%(PATH);%(CODEGEN_EXE)"/>
+    </Macro>
+</Project>

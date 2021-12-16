@@ -1,0 +1,226 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+    Version="10.0"
+    VendorName="SlickEdit"
+    WorkingDir="../src/Subroutines/"
+    VCSProject=""
+    VCSLocalPath=""
+    VCSAuxPath="">
+    <Config
+        Name="Release"
+        OutputFile=""
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbl" %(SYN_DBG) -XT "%p%n%e"'/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="build -nologo"/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                RunFromDir="%rw"
+                ShowOnMenu="HideIfNoCmdLine">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbr" -d "%n"'/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbr" "%n"'/>
+            </Target>
+            <Target
+                Name="Compile Scripts"
+                MenuCaption="Co&amp;mpile Scripts"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynCompileScripts"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Compile Scripts Setup"
+                MenuCaption="Compile Scripts Set&amp;up..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynSetupCompileScripts"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate Synergy Test Skeletons"
+                MenuCaption="Generate Synergy Test S&amp;keletons..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynStartSkeletonGen"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate Synergy Prototypes"
+                MenuCaption="Generate Synergy Pro&amp;totypes..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynGeneratePrototypes"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Build Test Programs"
+                MenuCaption="&amp;Build Test Programs"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1"
+                SaveOption="SaveWorkspaceFiles">
+                <Exec CmdLine="build test -nologo"/>
+            </Target>
+        </Menu>
+        <PostBuildCommands>
+            <Exec CmdLine="echo endlocal &gt;&gt;makeit.bat"/>
+            <Exec CmdLine="set MAKE_MAKEIT_FILE=NO"/>
+            <Exec CmdLine="set MAKE_MAKEIT_UNIX_FILE=NO"/>
+        </PostBuildCommands>
+        <PreBuildCommands>
+            <Exec CmdLine="set MAKE_MAKEIT_FILE=YES"/>
+            <Exec CmdLine="set MAKE_MAKEIT_UNIX_FILE=YES"/>
+            <Exec CmdLine="build -nologo clean"/>
+            <Exec CmdLine="build -nologo dbldeps"/>
+        </PreBuildCommands>
+    </Config>
+    <Files>
+        <Folder
+            Name="Source Files"
+            Filters="*.dbl;*.tpl">
+            <F N="../src/Subroutines/GetApplicationUserSettings.dbl"/>
+            <F N="../src/Subroutines/SetApplicationUserSettings.dbl"/>
+            <F N="../src/Subroutines/ValidateUser.dbl"/>
+        </Folder>
+        <Folder
+            Name="Header Files"
+            Filters="*.def;*.dbh">
+            <F N="../def/ChronoTrackSubs.def"/>
+        </Folder>
+        <Folder
+            Name="Toolkit Script Files"
+            Filters="*.wsc"/>
+        <Folder
+            Name="Other Files"
+            Filters="">
+            <F N="../src/Subroutines/makefile.mak"/>
+            <F N="../src/Subroutines/makeit.bat"/>
+            <F N="../src/Subroutines/makeit_unix"/>
+        </Folder>
+    </Files>
+    <Macro>
+        <ExecMacro CmdLine="syn_set NOVCS=yes"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem "/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Set this to the base folder definition"/>
+        <ExecMacro CmdLine='rem *************************************************************"'/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set NOVCS=yes"/>
+        <ExecMacro CmdLine="syn_set SRCDEV=C"/>
+        <ExecMacro CmdLine="syn_set DEVAREA=Development\SynPSG"/>
+        <ExecMacro CmdLine="syn_set WORKSPACE=ChronoTrack"/>
+        <ExecMacro CmdLine="syn_set PROJECT=Subroutines"/>
+        <ExecMacro CmdLine="syn_set COMMONAREA=NetCommon"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem This sets the root folder"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set ROOTFOLDER=%(DEVAREA)\%(WORKSPACE)"/>
+        <ExecMacro CmdLine="syn_set DEVROOT=%(SRCDEV):\%(ROOTFOLDER)"/>
+        <ExecMacro CmdLine="syn_set SFWINIPATH=%(SRCDEV):\%(DEVAREA)\ini"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the base SynPSG NET wrapping core libray"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SynPSGNetHDR=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\genhdr"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetLIB_CORE=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\lib"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CORE=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\ChronoTrack"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_WINDEMO=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\WinDemo"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CHRONOTRACK=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\ChronoTrack"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the core library details"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set COREEXE=%(SRCDEV):\%(DEVAREA)\Core\exe"/>
+        <ExecMacro CmdLine="syn_set CORELIB=%(SRCDEV):\%(DEVAREA)\Core\lib"/>
+        <ExecMacro CmdLine="syn_set COREHDR=%(SRCDEV):\%(DEVAREA)\Core\hdr"/>
+        <ExecMacro CmdLine="syn_set COREDEF=%(SRCDEV):\%(DEVAREA)\Core\src\Includes"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem change this depending if it's a development configuration"/>
+        <ExecMacro CmdLine="rem or a release configuration"/>
+        <ExecMacro CmdLine="rem these should be =nothing for release"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set DFLAGS=-d"/>
+        <ExecMacro CmdLine="syn_set LDFLAGS=-d"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define configuration builder settings"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set OSTYPE=WINNT"/>
+        <ExecMacro CmdLine="syn_set SYSTEM_TYPE=WindowsNT"/>
+        <ExecMacro CmdLine="syn_set CONF=%(SRCDEV):\Development\SynPSG\Builder\conf\"/>
+        <ExecMacro CmdLine="syn_set DEPSEXE=%(SRCDEV):\Development\SynPSG\Builder\exe\"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define here the required environment variables"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SRC=%(DEVROOT)\src\%(PROJECT)"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SYNDEFNS=SynPSG.ChronoTrack.Subroutines"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set RPSMFIL=%(DEVROOT)\rps\rpsmain.ism"/>
+        <ExecMacro CmdLine="syn_set RPSTFIL=%(DEVROOT)\rps\rpstext.ism"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set OLIB=%(DEVROOT)\lib"/>
+        <ExecMacro CmdLine="syn_set OBJ=%(DEVROOT)\obj\%(PROJECT)"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set EXE=%(DEVROOT)\exe"/>
+        <ExecMacro CmdLine="syn_set DEF=%(DEVROOT)\def"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set PRJEXPDIR=%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine="syn_set SYNEXPDIR=%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine="syn_set SYNIMPDIR=%(SynPSGNetHDR),%(COREHDR),%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem runtime settings"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set DATA=%(DEVROOT)\dat"/>
+        <ExecMacro CmdLine="syn_set CHRONOTRACK_DEBUG_MODE=OFF"/>
+    </Macro>
+</Project>

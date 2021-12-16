@@ -1,0 +1,350 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+    Version="10.0"
+    VendorName="SlickEdit"
+    WorkingDir="../src/DataEntities/"
+    BuildSystem=""
+    BuildMakeFile=""
+    VCSProject=""
+    VCSLocalPath=""
+    VCSAuxPath="">
+    <Config
+        Name="Release"
+        OutputFile=""
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw"
+                ClearProcessBuffer="1">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbl" %(SYN_DBG) -XT -W0  "%p%n%e"'/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="build -nologo"/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                RunFromDir="%rw"
+                ShowOnMenu="HideIfNoCmdLine">
+                <Exec CmdLine=""/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbr" -d exe:ChronoTrackMaint'/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(DBLDIR)\bin\dbr" exe:ChronoTrackMaint'/>
+            </Target>
+            <Target
+                Name="Compile Scripts"
+                MenuCaption="Co&amp;mpile Scripts"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynCompileScripts"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Compile Scripts Setup"
+                MenuCaption="Compile Scripts Set&amp;up..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynSetupCompileScripts"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate Synergy Test Skeletons"
+                MenuCaption="Generate Synergy Test S&amp;keletons..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynStartSkeletonGen"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="Generate Synergy Prototypes"
+                MenuCaption="Generate Synergy Pro&amp;totypes..."
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll"
+                RunFromDir="%rw">
+                <Exec
+                    CmdLine="SynGeneratePrototypes"
+                    Type="Slick-C"/>
+            </Target>
+            <Target
+                Name="SimpleBuild"
+                MenuCaption="&amp;Simple Build"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1"
+                SaveOption="SaveWorkspaceFiles">
+                <Exec CmdLine="build -nologo"/>
+            </Target>
+            <Target
+                Name="Build Test Programs"
+                MenuCaption="&amp;Build Test Programs"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1"
+                SaveOption="SaveWorkspaceFiles">
+                <Exec CmdLine="build test -nologo"/>
+            </Target>
+        </Menu>
+        <PreBuildCommands>
+            <Exec CmdLine="set MAKE_MAKEIT_FILE=YES"/>
+            <Exec CmdLine="set MAKE_MAKEIT_UNIX_FILE=YES"/>
+            <Exec CmdLine="build -nologo clean"/>
+            <Exec CmdLine="build -nologo dbldeps"/>
+        </PreBuildCommands>
+        <PostBuildCommands>
+            <Exec CmdLine="echo endlocal &gt;&gt;makeit.bat"/>
+            <Exec CmdLine="set MAKE_MAKEIT_FILE=NO"/>
+            <Exec CmdLine="set MAKE_MAKEIT_UNIX_FILE=NO"/>
+        </PostBuildCommands>
+    </Config>
+    <Files>
+        <Folder
+            Name="Source Files"
+            Filters="*.dbl;*.tpl">
+            <F N="../src/DataEntities/ConsultantFeeDataEntity.dbc"/>
+            <F N="../src/DataEntities/ConsultantFeeDefineTable.dbc"/>
+            <F N="../src/DataEntities/ConsultantFeePreStore.dbc"/>
+            <F N="../src/DataEntities/ConsultantFeePreUpdate.dbc"/>
+            <F N="../src/DataEntities/ConsultantFeeUpdateFields.dbc"/>
+            <F N="../src/DataEntities/CountryDataEntity.dbc"/>
+            <F N="../src/DataEntities/CountryDefineTable.dbc"/>
+            <F N="../src/DataEntities/CountryPreStore.dbc"/>
+            <F N="../src/DataEntities/CountryPreUpdate.dbc"/>
+            <F N="../src/DataEntities/CountryUpdateFields.dbc"/>
+            <F N="../src/DataEntities/CustomerContactDataEntity.dbc"/>
+            <F N="../src/DataEntities/CustomerContactDefineTable.dbc"/>
+            <F N="../src/DataEntities/CustomerContactPreStore.dbc"/>
+            <F N="../src/DataEntities/CustomerContactPreUpdate.dbc"/>
+            <F N="../src/DataEntities/CustomerContactUpdateFields.dbc"/>
+            <F N="../src/DataEntities/CustomerContractDataEntity.dbc"/>
+            <F N="../src/DataEntities/CustomerContractDefineTable.dbc"/>
+            <F N="../src/DataEntities/CustomerContractPreStore.dbc"/>
+            <F N="../src/DataEntities/CustomerContractPreUpdate.dbc"/>
+            <F N="../src/DataEntities/CustomerContractUpdateFields.dbc"/>
+            <F N="../src/DataEntities/CustomerDataEntity.dbc"/>
+            <F N="../src/DataEntities/CustomerDefineTable.dbc"/>
+            <F N="../src/DataEntities/CustomerFormatTrans.dbc"/>
+            <F N="../src/DataEntities/CustomerLocationDataEntity.dbc"/>
+            <F N="../src/DataEntities/CustomerLocationDefineTable.dbc"/>
+            <F N="../src/DataEntities/CustomerLocationPreStore.dbc"/>
+            <F N="../src/DataEntities/CustomerLocationPreUpdate.dbc"/>
+            <F N="../src/DataEntities/CustomerLocationUpdateFields.dbc"/>
+            <F N="../src/DataEntities/CustomerOnDelete.dbc"/>
+            <F N="../src/DataEntities/CustomerPreStore.dbc"/>
+            <F N="../src/DataEntities/CustomerPreUpdate.dbc"/>
+            <F N="../src/DataEntities/CustomerUpdateFields.dbc"/>
+            <F N="../src/DataEntities/ExpenseTypeDataEntity.dbc"/>
+            <F N="../src/DataEntities/ExpenseTypeDefineTable.dbc"/>
+            <F N="../src/DataEntities/ExpenseTypePreStore.dbc"/>
+            <F N="../src/DataEntities/ExpenseTypePreUpdate.dbc"/>
+            <F N="../src/DataEntities/ExpenseTypeUpdateFields.dbc"/>
+            <F N="../src/DataEntities/FeeTypeDataEntity.dbc"/>
+            <F N="../src/DataEntities/FeeTypeDefineTable.dbc"/>
+            <F N="../src/DataEntities/FeeTypePreStore.dbc"/>
+            <F N="../src/DataEntities/FeeTypeUpdateFields.dbc"/>
+            <F N="../src/DataEntities/GanttViewCollectionLoad.dbc"/>
+            <F N="../src/DataEntities/GanttViewDataEntity.dbc"/>
+            <F N="../src/DataEntities/GanttViewDataIO.dbc"/>
+            <F N="../src/DataEntities/GanttViewDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectActivityDataEntity.dbc"/>
+            <F N="../src/DataEntities/ProjectActivityDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectActivityPreStore.dbc"/>
+            <F N="../src/DataEntities/ProjectActivityPreUpdate.dbc"/>
+            <F N="../src/DataEntities/ProjectActivityUpdateFields.dbc"/>
+            <F N="../src/DataEntities/ProjectAttachmentDataEntity.dbc"/>
+            <F N="../src/DataEntities/ProjectAttachmentDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectAttachmentPreStore.dbc"/>
+            <F N="../src/DataEntities/ProjectAttachmentUpdateFields.dbc"/>
+            <F N="../src/DataEntities/ProjectCollectionLoad.dbc"/>
+            <F N="../src/DataEntities/ProjectConsultantDataEntity.dbc"/>
+            <F N="../src/DataEntities/ProjectConsultantDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectConsultantPreStore.dbc"/>
+            <F N="../src/DataEntities/ProjectConsultantPreUpdate.dbc"/>
+            <F N="../src/DataEntities/ProjectConsultantUpdateFields.dbc"/>
+            <F N="../src/DataEntities/ProjectDataConsistency.dbc"/>
+            <F N="../src/DataEntities/ProjectDataEntity.dbc"/>
+            <F N="../src/DataEntities/ProjectDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectExpenseDataEntity.dbc"/>
+            <F N="../src/DataEntities/ProjectExpenseDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectExpensePreStore.dbc"/>
+            <F N="../src/DataEntities/ProjectExpensePreUpdate.dbc"/>
+            <F N="../src/DataEntities/ProjectExpenseUpdateFields.dbc"/>
+            <F N="../src/DataEntities/ProjectFormatTrans.dbc"/>
+            <F N="../src/DataEntities/ProjectNoteDataEntity.dbc"/>
+            <F N="../src/DataEntities/ProjectNoteDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectNotePreStore.dbc"/>
+            <F N="../src/DataEntities/ProjectNotePreUpdate.dbc"/>
+            <F N="../src/DataEntities/ProjectNoteUpdateFields.dbc"/>
+            <F N="../src/DataEntities/ProjectOnDelete.dbc"/>
+            <F N="../src/DataEntities/ProjectPostStore.dbc"/>
+            <F N="../src/DataEntities/ProjectPreStore.dbc"/>
+            <F N="../src/DataEntities/ProjectPreUpdate.dbc"/>
+            <F N="../src/DataEntities/ProjectTaskDataEntity.dbc"/>
+            <F N="../src/DataEntities/ProjectTaskDefineTable.dbc"/>
+            <F N="../src/DataEntities/ProjectTaskOnDelete.dbc"/>
+            <F N="../src/DataEntities/ProjectTaskPreStore.dbc"/>
+            <F N="../src/DataEntities/ProjectTaskPreUpdate.dbc"/>
+            <F N="../src/DataEntities/ProjectTaskUpdateFields.dbc"/>
+            <F N="../src/DataEntities/ProjectUpdateFields.dbc"/>
+            <F N="../src/DataEntities/RequestDataEntity.dbc"/>
+            <F N="../src/DataEntities/RequestDefineTable.dbc"/>
+            <F N="../src/DataEntities/RequestPreStore.dbc"/>
+            <F N="../src/DataEntities/RequestPreUpdate.dbc"/>
+            <F N="../src/DataEntities/RequestUpdateFields.dbc"/>
+            <F N="../src/DataEntities/StateDataEntity.dbc"/>
+            <F N="../src/DataEntities/StateDefineTable.dbc"/>
+            <F N="../src/DataEntities/StateFormatTrans.dbc"/>
+            <F N="../src/DataEntities/StatePreStore.dbc"/>
+            <F N="../src/DataEntities/StatePreUpdate.dbc"/>
+            <F N="../src/DataEntities/StateUpdateFields.dbc"/>
+            <F N="../src/DataEntities/TaskTypeDataEntity.dbc"/>
+            <F N="../src/DataEntities/TaskTypeDefineTable.dbc"/>
+            <F N="../src/DataEntities/TaskTypePreStore.dbc"/>
+            <F N="../src/DataEntities/TaskTypePreUpdate.dbc"/>
+            <F N="../src/DataEntities/TaskTypeUpdateFields.dbc"/>
+            <F N="../src/DataEntities/UserCollectionLoad.dbc"/>
+            <F N="../src/DataEntities/UserDataEntity.dbc"/>
+            <F N="../src/DataEntities/UserDefineTable.dbc"/>
+            <F N="../src/DataEntities/UserPreStore.dbc"/>
+            <F N="../src/DataEntities/UserPreUpdate.dbc"/>
+            <F N="../src/DataEntities/UserUpdateFields.dbc"/>
+        </Folder>
+        <Folder
+            Name="Header Files"
+            Filters="*.def;*.dbh">
+            <F N="../def/ChronoTrack.def"/>
+        </Folder>
+        <Folder
+            Name="Toolkit Script Files"
+            Filters="*.wsc"/>
+        <Folder
+            Name="Other Files"
+            Filters="">
+            <F N="../src/DataEntities/clsdeps.mak"/>
+            <F N="../src/DataEntities/deps.mak"/>
+            <F N="../src/DataEntities/makefile.mak"/>
+            <F N="../src/DataEntities/makeit.bat"/>
+            <F N="../src/DataEntities/makeit_unix"/>
+        </Folder>
+    </Files>
+    <Macro>
+        <ExecMacro CmdLine="syn_set NOVCS=yes"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem "/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Set this to the base folder definition"/>
+        <ExecMacro CmdLine='rem *************************************************************"'/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set NOVCS=yes"/>
+        <ExecMacro CmdLine="syn_set SRCDEV=C"/>
+        <ExecMacro CmdLine="syn_set DEVAREA=Development\SynPSG"/>
+        <ExecMacro CmdLine="syn_set WORKSPACE=ChronoTrack"/>
+        <ExecMacro CmdLine="syn_set PROJECT=DataEntities"/>
+        <ExecMacro CmdLine="syn_set COMMONAREA=NetCommon"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem This sets the root folder"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set ROOTFOLDER=%(DEVAREA)\%(WORKSPACE)"/>
+        <ExecMacro CmdLine="syn_set DEVROOT=%(SRCDEV):\%(ROOTFOLDER)"/>
+        <ExecMacro CmdLine="syn_set SFWINIPATH=%(SRCDEV):\%(DEVAREA)\ini"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the base SynPSG NET wrapping core libray"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SynPSGNetHDR=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\genhdr"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetLIB_CORE=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\lib"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CORE=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\ChronoTrack"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_WINDEMO=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\WinDemo"/>
+        <ExecMacro CmdLine="syn_set SynPSGNetSRC_CHRONOTRACK=%(SRCDEV):\%(DEVAREA)\%(COMMONAREA)\src\ChronoTrack"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the core library details"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set COREEXE=%(SRCDEV):\%(DEVAREA)\Core\exe"/>
+        <ExecMacro CmdLine="syn_set CORELIB=%(SRCDEV):\%(DEVAREA)\Core\lib"/>
+        <ExecMacro CmdLine="syn_set COREHDR=%(SRCDEV):\%(DEVAREA)\Core\hdr"/>
+        <ExecMacro CmdLine="syn_set COREDEF=%(SRCDEV):\%(DEVAREA)\Core\src\Includes"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem These setings are for the System library details"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SYSTEMEXE=%(SRCDEV):\%(DEVAREA)\System\exe"/>
+        <ExecMacro CmdLine="syn_set SYSTEMHDR=%(SRCDEV):\%(DEVAREA)\System\hdr"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem change this depending if it's a development configuration"/>
+        <ExecMacro CmdLine="rem or a release configuration"/>
+        <ExecMacro CmdLine="rem these should be =nothing for release"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set DFLAGS=-d"/>
+        <ExecMacro CmdLine="syn_set LDFLAGS=-d"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define configuration builder settings"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set OSTYPE=WINNT"/>
+        <ExecMacro CmdLine="syn_set SYSTEM_TYPE=WindowsNT"/>
+        <ExecMacro CmdLine="syn_set CONF=%(SRCDEV):\Development\SynPSG\Builder\conf\"/>
+        <ExecMacro CmdLine="syn_set DEPSEXE=%(SRCDEV):\Development\SynPSG\Builder\exe\"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem Define here the required environment variables"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SRC=%(DEVROOT)\src\%(PROJECT)"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set SYNDEFNS=SynPSG.ChronoTrack.DataEntities"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set RPSMFIL=%(DEVROOT)\rps\rpsmain.ism"/>
+        <ExecMacro CmdLine="syn_set RPSTFIL=%(DEVROOT)\rps\rpstext.ism"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set OLIB=%(DEVROOT)\lib"/>
+        <ExecMacro CmdLine="syn_set OBJ=%(DEVROOT)\obj\%(PROJECT)"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set EXE=%(DEVROOT)\exe"/>
+        <ExecMacro CmdLine="syn_set DEF=%(DEVROOT)\def"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set PRJEXPDIR=%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine="syn_set SYNEXPDIR=%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine="syn_set SYNIMPDIR=%(SynPSGNetHDR),%(SYSTEMHDR),%(COREHDR),%(DEVROOT)\hdr"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine="rem runtime settings"/>
+        <ExecMacro CmdLine="rem *************************************************************"/>
+        <ExecMacro CmdLine=""/>
+        <ExecMacro CmdLine="syn_set DAT=%(DEVROOT)\dat"/>
+        <ExecMacro CmdLine="syn_set CHRONOTRACK_DEBUG_MODE=OFF"/>
+    </Macro>
+</Project>
