@@ -1,0 +1,14 @@
+<!DOCTYPE Workspace SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpw.dtd">
+<Workspace Version="10.0" VendorName="SlickEdit" OEMVendorName="Synergy/DE Workbench 9.1.5">
+	<Projects>
+		<Project File="prj/Applications.vpj" />
+		<Project File="prj/Assembly.vpj" />
+		<Project File="prj/DataEntities.vpj" />
+		<Project File="prj/Repository.vpj" />
+		<Project File="prj/Server.vpj" />
+		<Project File="prj/ServerTest.vpj" />
+		<Project File="prj/SqlApi.vpj" />
+		<Project File="prj/Subroutines.vpj" />
+		<Project File="prj/Toolkit.vpj" />
+	</Projects>
+</Workspace>

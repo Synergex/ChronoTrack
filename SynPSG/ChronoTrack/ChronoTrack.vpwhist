@@ -1,0 +1,37 @@
+[Global]
+CurrentProject=prj\Applications.vpj
+[ProjectDates]
+prj\Applications.vpj=20090828113413524
+prj\Assembly.vpj=20090828113410684
+prj\DataEntities.vpj=20090828113407908
+prj\Repository.vpj=20090828113356020
+prj\Server.vpj=20090828113353133
+prj\ServerTest.vpj=20090828113350461
+prj\SqlApi.vpj=20090828113347574
+prj\Subroutines.vpj=20090828113344773
+prj\Toolkit.vpj=20090828113340362
+[TreeExpansion2]
++ prj\Applications.vpj
++ prj\Assembly.vpj
++ prj\DataEntities.vpj
++ prj\Repository.vpj
++ prj\Server.vpj
++ prj\ServerTest.vpj
++ prj\SqlApi.vpj
++ prj\Subroutines.vpj
++ prj\Toolkit.vpj
+scroll:0
+[State]
+SCREEN: 1280 1024 -1282 53 1280 859 0 0 M 0 0 0 0 1001 500 0
+CWD: src\Applications
+FILEHIST: 9
+src\Subroutines\makeit.bat
+F:\temp\roger\runtime.txt
+F:\temp\roger\out.txt
+F:\temp\rcm.lis
+..\Builder\conf\builtins.sfw
+\Users\RichardLaptop\AppData\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook\8AAVZQWI\error (2).lis
+F:\Downloads\temp\in.txt
+src\Server\ProjectTaskRoutines.dbl
+src\Server\UserRoutines.dbl
+TBCLASS: 0 0
