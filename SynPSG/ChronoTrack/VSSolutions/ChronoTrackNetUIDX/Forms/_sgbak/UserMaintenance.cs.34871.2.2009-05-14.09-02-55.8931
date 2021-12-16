@@ -1,0 +1,230 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using DevExpress.XtraEditors;
+using SynPSGNetCore.Interop;
+using DevExpress.XtraEditors.Repository;
+using DevExpress.XtraGrid.Views.Layout;
+using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraPrintingLinks;
+using System.Diagnostics;
+
+namespace ChronoTrackNetUIDX.Forms
+{
+    public partial class UserMaintenance : Form//DevExpress.XtraEditors.XtraForm
+    {
+        //need a copy of the interop object
+        private SynInterop interop;
+
+        public UserMaintenance(SynInterop i)
+        {
+            InitializeComponent();
+            interop = i;
+        }
+
+        /// <summary>
+        /// Routine to allow the client to bind the binding source
+        /// </summary>
+        /// <param>Binding source</param>
+        public void SetDataSource(DataTable user, DataTable country, DataTable state)
+        {
+            interop.DebugMessage("binding UI data source");
+            countryBindingSource.DataSource = country;
+            userBindingSource.DataSource = user;
+            stateBindingSource.DataSource = state;
+        }
+
+        /// <summary>
+        /// SetFocus is required becuase the form controls will not
+        /// accept focus until the form is dislayed after a u_update()
+        /// </summary>
+        public void SetFocus()
+        {
+//            txtUserID.Focus();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            if (ChronoTrackNetUICommon.Generic.Handles_Cancel(interop, this, userBindingSource))
+                Close();
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            if (ChronoTrackNetUICommon.Generic.Handles_Save(interop, this, userBindingSource))
+                Close();
+        }
+
+        private void txtPicture_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        {
+/*            openFileDialog.FileName = txtPicture.Text;
+            openFileDialog.ShowDialog(this);
+            txtPicture.Text = openFileDialog.FileName;
+            refreshImage();*/
+        }
+
+        private void txtPicture_EditValueChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void btnCountryMnt_Click(object sender, EventArgs e)
+        {
+            interop.SendMenuSignal("CountryMnt");
+        }
+
+        private void btnStateMnt_Click(object sender, EventArgs e)
+        {
+            interop.SendMenuSignal("StateMnt");
+        }
+
+        private void formatDisplay()
+        {
+            //based on the country change formatting, etc
+
+/*            if (comboCountry.EditValue!= null)
+            {
+                switch (comboCountry.EditValue.ToString())
+                {
+                    case "UK":
+                        txtOfficePhoneUS.Visible = false;
+                        txtMobilePhoneUS.Visible = false;
+                        txtOfficePhoneUK.Visible = true;
+                        txtMobilePhoneUK.Visible = true;
+                        labelState.Visible = false;
+                        comboState.Visible = false;
+                        labelZip.Location = zipUKLabelPoint;
+                        txtZip.Location = zipUKEditPoint;
+                        btnStateMnt.Visible = false;
+                        labelZip.Text = "Post code";
+                        break;
+                    case "US":
+                        txtOfficePhoneUS.Visible = true;
+                        txtMobilePhoneUS.Visible = true;
+                        txtOfficePhoneUK.Visible = false;
+                        txtMobilePhoneUK.Visible = false;
+                        labelState.Visible = true;
+                        comboState.Visible = true;
+                        btnStateMnt.Visible = true;
+                        labelZip.Location = zipUSLabelPoint;
+                        txtZip.Location = zipUSEditPoint;
+                        labelZip.Text = "Zip code";
+                        break;
+                    default:
+                        break;
+                }
+            }*/
+        }
+
+        private void refreshImage()
+        {
+            //when the picture file is validated, attempt to load the picture
+            try
+            {
+//                pictureBox.ImageLocation = txtPicture.Text;
+  //              pictureBox.Load();
+            }
+            catch
+            {
+            }
+        }
+
+        private void comboCountry_Properties_EditValueChanged(object sender, EventArgs e)
+        {
+            formatDisplay();
+        }
+
+        private void userBindingSource_CurrentItemChanged(object sender, EventArgs e)
+        {
+            refreshImage();
+        }
+
+        private void layoutView1_CardExpanded(object sender, DevExpress.XtraGrid.Views.Base.RowEventArgs e)
+        {
+
+        }
+
+        private void layoutViewField_colCountry_id_1_TextChanged(object sender, EventArgs e)
+        {
+            MessageBox.Show("changed");
+        }
+
+        private void layoutView1_ValidatingEditor(object sender, DevExpress.XtraEditors.Controls.BaseContainerValidateEditorEventArgs e)
+        {
+            //is it the country field thats changed
+            if (layoutView1.FocusedColumn.Name == "colCountry_id")
+            {
+                //yes, check if we are uk
+                if (e.Value.ToString() == "GB")
+                {
+                    //yes, UK, so modify state and zip
+                    colState.Visible = false;
+                    //layoutViewField_colZip_1.Text = "Post code";
+                }
+                else
+                {
+                    //No,so modify to allow
+                    colState.Visible = true;
+                    //layoutViewField_colZip_1.Text = "Zip";
+                }
+            }
+            e.Valid = true;
+        }
+
+        private void layoutView1_CustomUnboundColumnData(object sender, DevExpress.XtraGrid.Views.Base.CustomColumnDataEventArgs e)
+        {
+            if (e.Column.FieldName == "imageColumn" && e.IsGetData)
+            {
+                try
+                {
+                    LayoutView view = sender as LayoutView;
+
+                    pictureName = (string)view.GetRowCellValue(e.RowHandle, "Picture_file");
+
+                    Image img = Image.FromFile(string.Concat("C:\\Development\\SynPSG\\ChronoTrack\\dat\\", pictureName));
+
+                    e.Value = img;
+                }
+                catch
+                {
+                }
+            }
+
+        }
+
+        private string pictureName = "";
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            Process viewIt;
+            userGridControl.ExportToPdf(@"C:\UserReport.pdf");
+            viewIt = new Process();
+            viewIt.StartInfo.FileName = @"C:\UserReport.pdf";
+            viewIt.Start();
+
+
+        }
+
+        private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            switch (e.ClickedItem.Name)
+            {
+                case "toolDelete":
+                    if (MessageBox.Show("Delete user?", "Confirmation",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        layoutView1.DeleteRow(layoutView1.FocusedRowHandle);
+                    }
+                    break;
+                case "toolAdd":
+                    layoutView1.AddNewRow();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
