@@ -1,0 +1,227 @@
+.script
+.date_generated "05/16/2009, 11:00"
+.version "9.1.5b"
+
+.column mnuFile, "File"
+.entry mb_exit, "Exit", select(x)
+.end
+
+.column mnuMaint, "Maintenance"
+.entry userMntTab, "User maintenance"
+.entry countryMnt, "Country maintenance"
+.entry stateMnt, "State maintenance"
+.entry feetypmny, "Fee type maintenance"
+.entry custmnt, "Customer Maintenance"
+.line
+.entry appoptns, "Application options"
+.entry chngpw, "Change password"
+.end
+
+.column mnuPrj, "Projects"
+.entry rqstrsc, "Resource requester"
+.entry prjcreate, "Project creator"
+.line
+.entry prjcentr, "Project center"
+.end
+
+.column mnuHelp, "Help"
+.entry about, "About"
+.end
+
+.input usermnt, 19, 77
+.placement 6, 12
+.title "User Maintenance"
+.button MB_COMMIT, text("Save"), select("S")
+.button mb_cancel, text("Cancel"), select("C")
+.repository_structure USER
+.field USER_ID, pos(2, 2), fpos(2, 12), nochange_method, nodrill_method
+.field PASSWORD, pos(2, 35), fpos(2, 45)
+.field INACTIVE, fpos(2, 63)
+.field FIRST_NAME, pos(4, 2), prompt("First"), fpos(4, 8)
+.field LAST_NAME, pos(4, 40), prompt("Last"), fpos(4, 46)
+.field TITLE, pos(6, 3), fpos(6, 15)
+.field ADDR1, pos(8, 3), fpos(8, 15)
+.field ADDR2, fpos(9, 15)
+.field ADDR3, fpos(10, 15)
+.field ADDR4, fpos(11, 15)
+.field STATE, pos(13, 3), fpos(13, 15), nochange_method
+.field ZIP, pos(13, 25), fpos(13, 35)
+.field COUNTRY_ID, pos(14, 3), fpos(14, 15), nochange_method
+.field OFFICE_PHONE, pos(16, 3), fpos(16, 17)
+.field MOBILE_PHONE, pos(16, 40), fpos(16, 54)
+.field EMAIL, pos(17, 3), fpos(17, 11), view_length(60)
+.field IS_EMPLOYEE, fpos(19, 10), nochange_method
+.field IS_MANAGER, fpos(19, 22), nochange_method
+.field IS_CONSULTANT, fpos(19, 34), nochange_method
+.field PICTURE_FILE, pos(18, 3), fpos(18, 11), nochange_method, -
+     nodrill_method
+.button_set end
+.set key, USER, USER_ID
+.set data, USER, PASSWORD, INACTIVE, FIRST_NAME, LAST_NAME, TITLE, ADDR1, -
+     ADDR2, ADDR3, ADDR4, STATE, ZIP, COUNTRY_ID, OFFICE_PHONE, -
+     MOBILE_PHONE, EMAIL, IS_EMPLOYEE, IS_MANAGER, IS_CONSULTANT, -
+     PICTURE_FILE
+.set all, USER, USER_ID, PASSWORD, INACTIVE, FIRST_NAME, LAST_NAME, -
+     TITLE, ADDR1, ADDR2, ADDR3, ADDR4, STATE, ZIP, COUNTRY_ID, -
+     OFFICE_PHONE, MOBILE_PHONE, EMAIL, IS_EMPLOYEE, IS_MANAGER, -
+     IS_CONSULTANT, PICTURE_FILE
+.end
+
+.input frmlogin, 4, 28
+.placement 3, 4
+.title "ChronoTrack - Login"
+.button i_ok, text("Login"), select("L")
+.button cancel, text("Cancel"), select("C")
+.repository_structure USER
+.field USER_ID, pos(2, 2), fpos(2, 12), nochange_method, nodrill_method
+.field PASSWORD, pos(4, 2), fpos(4, 12)
+.set all, USER, USER_ID, PASSWORD
+.end
+
+.input prjmnt, 20, 75
+.placement 2, 2
+.title "Project creator"
+.repository_structure PROJECT
+.field CUSTOMER_ID, pos(2, 2), fpos(2, 14)
+.field DESCRIPTION, pos(4, 2), fpos(4, 14)
+.field START_DATE, pos(6, 2), fpos(6, 14)
+.field END_DATE, pos(6, 32), fpos(6, 42)
+.field LEAD_CONSULTANT, pos(8, 2), fpos(8, 14)
+.field COORDINATOR, pos(8, 34), fpos(8, 46)
+.button MB_COMMIT, text("Save"), select("S")
+.button MB_CANCEL, text("Cancel"), select("S")
+.field TEXT_ARRAY, pos(10, 2), fpos(11, 2)
+.button_set end
+.set data, PROJECT, CUSTOMER_ID, DESCRIPTION, START_DATE, END_DATE, -
+     LEAD_CONSULTANT, COORDINATOR, TEXT_ARRAY
+.set all, PROJECT, CUSTOMER_ID, DESCRIPTION, START_DATE, END_DATE, -
+     LEAD_CONSULTANT, COORDINATOR, TEXT_ARRAY
+.end
+
+.input cntrymnt, 6, 59
+.placement 2, 2
+.title "Country Maintenance"
+.repository_structure COUNTRY
+.field COUNTRY_ID, pos(2, 2), prompt("Country ID"), fpos(2, 14)
+.field COUNTRY_NAME, pos(3, 2), fpos(3, 14)
+.field DIALING_CODE, pos(5, 2), prompt("International Dialing Code"), -
+     fpos(5, 30)
+.field CURRENCY_CODE, pos(5, 40), fpos(5, 54)
+.button MB_COMMIT, text("Save"), select("S")
+.button MB_CANCEL, text("Cancel"), select("C")
+.button_set end
+.set key, COUNTRY, COUNTRY_ID
+.set data, COUNTRY, COUNTRY_NAME, CURRENCY_CODE
+.set all, COUNTRY, COUNTRY_ID, COUNTRY_NAME, CURRENCY_CODE
+.end
+
+.input FeeTypeMnt, 4, 56
+.placement 2, 2
+.title "Fee Type Maintenance"
+.repository_structure FEE_TYPE
+.field FEE_TYPE_ID, pos(2, 3), fpos(2, 16)
+.field DESCRIPTION, pos(3, 3), fpos(3, 16)
+.field HAS_UNITS, fpos(4, 16)
+.button MB_COMMIT, text("Save"), select("S")
+.button MB_CANCEL, text("Cancel"), select("C")
+.button_set end
+.set key, FEE_TYPE, FEE_TYPE_ID
+.set data, FEE_TYPE, DESCRIPTION, HAS_UNITS
+.set all, FEE_TYPE, FEE_TYPE_ID, DESCRIPTION, HAS_UNITS
+.end
+
+.input StateMnt, 4, 45
+.placement 2, 2
+.title "State Maintenance"
+.repository_structure STATE
+.field CODE, pos(2, 4), fpos(2, 11)
+.field NAME, pos(3, 4), fpos(3, 11)
+.button MB_COMMIT, text("Save"), select("S")
+.button MB_CANCEL, text("Cancel"), select("C")
+.button_set end
+.set key, STATE, CODE
+.set data, STATE, NAME
+.set all, STATE, CODE, NAME
+.end
+
+.input CusConMnt, 15, 84
+.placement 2, 2
+.title "Customer Contact Maintenance"
+.repository_structure CUSTOMER_CONTACT
+.field CUSTOMER_ID, pos(2, 3), fpos(2, 15)
+.field CONTACT_ID, pos(4, 3), fpos(4, 16)
+.field FIRST_NAME, pos(5, 3), fpos(5, 16)
+.field LAST_NAME, pos(6, 3), fpos(6, 16)
+.field TITLE, pos(7, 3), fpos(7, 16)
+.field CURRENT_LOCATION, pos(4, 25), fpos(4, 42)
+.field OFFICE_PHONE, pos(9, 3), fpos(9, 16)
+.field MOBILE_PHONE, pos(10, 3), fpos(10, 16)
+.field EMAIL, pos(12, 3), fpos(12, 9)
+.field PICTURE_FILE, pos(14, 2), fpos(14, 16)
+.button MB_COMMIT, text("Save"), select("S")
+.button MB_CANCEL, text("Cancel"), select("C")
+.button_set end
+.set key, CUSTOMER_CONTACT, CUSTOMER_ID, CONTACT_ID
+.set data, CUSTOMER_CONTACT, FIRST_NAME, LAST_NAME, TITLE, -
+     CURRENT_LOCATION, OFFICE_PHONE, MOBILE_PHONE, EMAIL, PICTURE_FILE
+.set all, CUSTOMER_CONTACT, CUSTOMER_ID, CONTACT_ID, FIRST_NAME, -
+     LAST_NAME, TITLE, CURRENT_LOCATION, OFFICE_PHONE, MOBILE_PHONE, -
+     EMAIL, PICTURE_FILE
+.end
+
+.input CusLocMnt, 16, 84
+.placement 2, 2
+.title "Customer Location Maintenance"
+.repository_structure CUSTOMER_LOCATION_INPUT
+.field CUSTOMER_ID, pos(2, 3), fpos(2, 15)
+.field LOCATION_ID, pos(4, 3), fpos(4, 15)
+.field DESCRIPTION, pos(5, 3), fpos(5, 15)
+.field ADDR1, pos(7, 3), fpos(7, 15)
+.field ADDR2, fpos(8, 15)
+.field ADDR3, fpos(9, 15)
+.field ADDR4, fpos(11, 15)
+.field STATE, pos(13, 15), fpos(13, 21)
+.field ZIP, pos(13, 28), fpos(13, 37)
+.field COUNTRY_ID, pos(13, 50), fpos(13, 58)
+.field PHONE, pos(15, 2), fpos(15, 15)
+.field CUSTOMER_ID_DSP, fpos(2, 30)
+.button MB_COMMIT, text("Save"), select("S")
+.button MB_CANCEL, text("Cancel"), select("C")
+.button_set end
+.set key, CUSTOMER_LOCATION_INPUT, CUSTOMER_ID, LOCATION_ID
+.set data, CUSTOMER_LOCATION_INPUT, DESCRIPTION, ADDR1, ADDR2, ADDR3, -
+     ADDR4, STATE, ZIP, COUNTRY_ID, PHONE
+.set all, CUSTOMER_LOCATION_INPUT, CUSTOMER_ID, LOCATION_ID, DESCRIPTION, -
+     ADDR1, ADDR2, ADDR3, ADDR4, STATE, ZIP, COUNTRY_ID, PHONE, -
+     CUSTOMER_ID_DSP
+.end
+
+.input CusMnt, 8, 60
+.placement 2, 3
+.title "Customer Maintenance"
+.repository_structure CUSTOMER
+.field CUSTOMER_ID, pos(2, 3), fpos(2, 16)
+.field COMPANY, pos(3, 3), fpos(3, 16)
+.field TECH_CONTACT_ID, pos(5, 3), fpos(5, 26)
+.field LEGAL_CONTACT_ID, pos(6, 3), fpos(6, 26)
+.field CURRENT_CONTRACT, pos(8, 3), fpos(8, 17)
+.button MB_COMMIT, text("Save"), select("S")
+.button MB_CANCEL, text("Cancel"), select("C")
+.button_set end
+.set key, CUSTOMER, CUSTOMER_ID
+.set data, CUSTOMER, COMPANY, TECH_CONTACT_ID, LEGAL_CONTACT_ID, -
+     CURRENT_CONTRACT
+.set all, CUSTOMER, CUSTOMER_ID, COMPANY, TECH_CONTACT_ID, -
+     LEGAL_CONTACT_ID, CURRENT_CONTRACT
+.end
+
+.input prjList, 1, 98
+.placement 3, 5
+.border on, dragbar(on)
+.repository_structure PROJECT
+.field PROJECT_ID, noprompt, fpos(1, 1)
+.field DESCRIPTION, noprompt, fpos(1, 21)
+.field CONTRACT_ID, noprompt, fpos(1, 10), nochange_method, -
+     nodrill_method
+.field CURRENT_STATUS, noprompt, fpos(1, 82)
+.end

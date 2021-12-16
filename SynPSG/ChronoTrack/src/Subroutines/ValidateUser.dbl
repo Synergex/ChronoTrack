@@ -1,0 +1,116 @@
+;;**********************************************************************
+;;
+;; Title:       ValidateUser.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: validate user details
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+;;
+
+.include "DEF:ChronoTrack.def"
+
+;;; <summary>
+;;; Allow user authentication
+;;; </summary>
+;;; <returns>
+;;; True if successful, false if login failed.
+;;; Error returned in errorDetails parameter
+;;; </returns
+;;; <param name="userName">pass in the user name to authenticate</param>
+;;; <param name="password">password enty</param>
+;;; <param name="errorDetails">return error reason if login failed</param>
+function ValidateUser       ,boolean
+    in  req userName        ,string
+    in  req password        ,string
+    out req errorDetails    ,string
+    in  opt noDotNet        ,boolean
+    endparams
+
+stack record localRecord
+    user            ,@UserDataEntity
+    result          ,boolean
+    holdUserName    ,string
+    holdPassword    ,string
+endrecord
+proc
+
+    init localRecord
+    clear UserDataEntity.LoggedInUser
+
+    holdUserName = username.ToUpper()
+
+    try
+    begin
+        ;;create an instance of the user class
+        if (^passed(noDotNet)) then
+            user = new UserDataEntity(noDotNet, TableView.Full)
+        else
+            user = new UserDataEntity(false, TableView.Full)
+
+        ;;validate the entered details
+        if (user.IO.Locate(holdUserName, Q_PRIMARY, false) == true)
+        then
+        begin
+            holdPassword = new string(password + " ")
+            if (user.Password .eq. holdPassword)
+            then
+            begin
+                ;;valid user
+                UserDataEntity.LoggedInUser = holdUserName
+                result = true
+            end
+            else
+            begin
+                result = false
+                errorDetails = "Invalid passwod."
+            end
+        end
+        else
+        begin
+            result = false
+            errorDetails = "Unknown user."
+        end
+    end
+    catch (e, @Exception)
+    begin
+        errorDetails = e.Message
+        result = false
+    end
+    endtry
+
+    freturn result
+
+endfunction
+
