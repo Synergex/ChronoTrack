@@ -1,0 +1,146 @@
+;;**********************************************************************
+;;
+;; Title:       CustomerContactMaintenance.dbl
+;;
+;; Type:        Application
+;;
+;; Description: Maintenance program allowing customer contact maintenance
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+subroutine CustomerContactMaintenance
+    in      req wm                  ,@WindowManager
+    in      req customerID          ,string
+    inout   req customer            ,@CustomerDataEntity
+    inout   req customerContact     ,@CustomerContactDataEntity
+    inout   req customerLocation    ,@CustomerLocationDataEntity
+    inout   req country             ,@CountryDataEntity
+    inout   req state               ,@StateDataEntity
+    endparams
+
+.include "WND:tools.def"
+.include "DEF:ChronoTrackMacros.def"
+
+.if ^variant .eq. 4     ;;for ALL build force this to infragistics
+.ifdef UINameSpace
+.undefine UINameSpace
+.endc
+.define UINameSpace   ChronoTrackNetUI.Forms
+.define INFRAGISTICS_VERSION
+.endc;^variant .eq. 4
+
+literal
+    winTitle    ,a* ,"Customer contact maintenance"
+endliteral
+
+record
+.ifdef UINameSpace
+    frmCustContactMaint,UIClassMacro(CustomerContactMaintenance)
+.endc
+    winID              ,int
+endrecord
+
+proc
+.ifdef UINameSpace
+    wm.Environment(true, "Loading " + winTitle + " objects....")
+    wm.DisableMenu("mnuMaint")
+    wm.DisableMenu("mnuPrj")
+
+    try
+    begin
+
+        ;;load the window
+        frmCustContactMaint = new UINameSpace.CustomerContactMaintenance(wm.SynInteropInstance)
+
+        ;;assign data bindings
+        frmCustContactMaint.SetDataTable(customerID, customerContact.ResultsTable(customerID), customerLocation.ResultsTable(customerID))
+        frmCustContactMaint.DefaultCombos()
+
+        winID = wm.tkWindow(frmCustContactMaint, 15, 72, winTitle, true)
+        frmCustContactMaint.Size = wm.FormGetSize(winID)
+
+        wm.PlaceForm(winID)
+        frmCustContactMaint.SetFocus()
+
+        repeat
+        begin
+            wm.processForm(winID)
+            using g_entnam select
+            ("MB_CANCEL"),
+            begin
+                exitloop
+            end
+            ("MB_COMMIT"),
+            begin
+                ;;commit data if required
+                customerContact.DataTable.Commit()
+                exitloop
+            end
+            ("LOCTNMNT"),
+            begin
+                ;;process contact loations
+                CustomerLocationMaintenance(wm, frmCustContactMaint.CustomerID, customer, customerContact, customerLocation, country, state)
+                frmCustContactMaint.DefaultCombos()
+            end
+            ("MB_EXIT"),
+            begin
+                exitloop
+            end
+            (),
+            begin
+                ;;ignore all other entries
+                nop
+            end
+            endusing
+        end
+
+        customerContact.DataTable.Cancel()
+
+    end
+    catch (e, @Exception)
+    begin
+        u_message(e.Message)
+    end
+    endtry
+
+    wm.Environment(false, "")
+
+.endc
+    xreturn
+
+endsubroutine
+

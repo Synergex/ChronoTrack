@@ -1,0 +1,173 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectCreator.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: Project creation routine.  This is the tab page version.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+.if ^variant .eq. 4
+subroutine ProjectCreator_tab
+    inout   req pageID      ,int
+    in      req tabID       ,int
+    in      req wm          ,@WindowManager
+    endparams
+
+.include "WND:tools.def"
+.include "DEF:ChronoTrackMacros.def"
+
+.include 'project' repository, record = "projectRec" ,end
+
+literal
+    winTitle    ,a* ,"Project Creation"
+endliteral
+
+static record
+    ;;routine objects
+    currentUser ,@UserDataEntity
+    frmProject  ,@ChronoTrackNetUI.Forms.ProjectCreate
+    project     ,@ProjectDataEntity
+    customer    ,@CustomerDataEntity
+    user        ,@UserDataEntity
+    index       ,int
+    appSettings ,sAppUserOptions
+endrecord
+
+proc
+
+
+    if (!pageID)
+    begin
+
+        try
+        begin
+            ;;first check if the user is allowed into here
+            currentUser = new UserDataEntity(false, TableView.Full)
+            GetApplicationUserSettings(appSettings)
+            currentUser.IO.Locate(appSettings.default_user_name, Q_PRIMARY, false)
+            if (!currentUser.IsManager)
+            begin
+                u_msgbox("Not authorised, you must be a manager to create projects"
+                &   , D_MOK .bor. D_MICONSTOP, winTitle)
+                xreturn
+            end
+
+            ;;load the window
+            frmProject = new ChronoTrackNetUI.Forms.ProjectCreate(wm.SynInteropInstance)
+            pageID = wm.tkWindow(frmProject, 0, 0, winTitle)
+
+            ;;assign to tab container
+            index = ts_tabset(DTS_WINDOW, tabID, pageID, "ProjectCreator_tab")
+            ts_tabset(DTS_ACTIVE, tabID, index)
+
+            frmProject.Size = wm.FormGetSize(pageID)
+
+            ;;create data entities
+            project = new ProjectDataEntity(false, TableView.Full)
+
+            user = new UserDataEntity(false, TableView.Breif)
+            customer  = new CustomerDataEntity(false, TableView.Breif)
+
+            GetApplicationUserSettings(appSettings)
+
+            ;;assign data bindings
+            frmProject.SetDataSource(project.NewProject(appSettings.default_user_name), customer.ResultsTable(TableView.Breif), user.ResultsTable(TableView.Breif))
+
+            wm.PlaceForm(pageID)
+
+        end
+        catch (e, @Exception)
+        begin
+            u_message(e.Message)
+        end
+        endtry
+
+        xreturn ;;tab created
+
+    end
+
+    ;;process the tab page
+
+    repeat
+    begin
+        frmProject.SetFocus()
+        wm.processForm(pageID)
+        using g_entnam select
+        ("MB_CANCEL", "MB_EXIT"),
+        begin
+            project.DataTable.Table.RejectChanges()
+            call closeDownTab
+            exitloop
+        end
+        ("MB_COMMIT"),
+        begin
+            ;;commit data if required
+            project.DataTable.Commit()
+            call closeDownTab
+            exitloop
+        end
+        ("TS_"),
+            exitloop    ;;let the tab processor handle it
+        endusing
+    end
+
+    xreturn
+
+closeDownTab,
+    ;;clear down the tab and it's objects.
+    ts_tabset(DTS_REMOVE, tabID, index)
+    u_window(D_DELETE, pageID)
+    clear pageID
+    frmProject = ^null
+    user = ^null
+    currentUser = ^null
+    project = ^null
+    customer = ^null
+    return
+
+endsubroutine
+.else
+;;this is a stub routine when not building ALL version, which uses tab processing
+subroutine ProjectCreator_tab
+    inout   req pageID      ,int
+    in      req tabID       ,int
+    in      req wm          ,@WindowManager
+    endparams
+proc
+    xreturn
+endsubroutine
+.endc;;variant .eq. 4

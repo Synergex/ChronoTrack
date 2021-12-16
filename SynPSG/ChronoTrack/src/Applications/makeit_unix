@@ -1,0 +1,163 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+#
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=ChronoTrack ; export WORKSPACE
+PROJECT=Applications ; export PROJECT
+COMMONAREA=NetCommon ; export COMMONAREA
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetSRC_CHRONOTRACK=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CHRONOTRACK
+
+SynPSGNetLIB=$SRCDEV/$DEVAREA/$COMMONAREA/lib ; export SynPSGNetLIB
+
+# *************************************************************
+# These setings are for the core library details
+# *************************************************************
+
+COREEXE=$SRCDEV/$DEVAREA/Core/exe ; export COREEXE
+CORELIB=$SRCDEV/$DEVAREA/Core/lib ; export CORELIB
+COREHDR=$SRCDEV/$DEVAREA/Core/hdr ; export COREHDR
+COREDEF=$SRCDEV/$DEVAREA/Core/src/Includes ; export COREDEF
+
+# *************************************************************
+# These setings are for the System library details
+# *************************************************************
+
+SYSTEMEXE=$SRCDEV/$DEVAREA/System/exe ; export SYSTEMEXE
+SYSTEMHDR=$SRCDEV/$DEVAREA/System/hdr ; export SYSTEMHDR
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+NAMESPACE=* ; export NAMESPACE
+SYNDEFNS= ; export SYNDEFNS
+
+SRC=$DEVROOT/src/$PROJECT ; export SRC
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+
+OLIB=$DEVROOT/lib ; export OLIB
+OBJ=$DEVROOT/obj/$PROJECT ; export OBJ
+
+EXE=$DEVROOT/exe ; export EXE
+IMG=$DEVROOT/img ; export IMG
+DEF=$DEVROOT/def ; export DEF
+
+SYNEXPDIR=$DEVROOT/hdr ; export SYNEXPDIR
+SYNIMPDIR=$SynPSGNetHDR,$COREHDR,$DEVROOT/hdr ; export SYNIMPDIR
+
+# *************************************************************
+# runtime settings
+# *************************************************************
+
+DAT=$DEVROOT/dat ; export DAT
+CHRONOTRACK_DEBUG_MODE=OFF ; export CHRONOTRACK_DEBUG_MODE
+SYNNET_DEBUG=1 ; export SYNNET_DEBUG
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then 
+ COMPILEFLAGS=;export COMPILEFLAGS 
+ LINKERFLAGS=;export LINKERFLAGS 
+fi 
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $OLIB/AppRoutines.olb 
+rm -f $OBJ/AppRoutines.dbo 
+rm -f $OBJ/ChronoTrackMaint.dbo 
+rm -f $OBJ/ChronoTrack.dbo 
+rm -f $OBJ/LoginForm.dbo 
+rm -f $OBJ/xfpl_log.dbo 
+rm -f $OBJ/UserMaintenance.dbo 
+rm -f $OBJ/UserMaintenance_tab.dbo 
+rm -f $OBJ/ProjectCreator.dbo 
+rm -f $OBJ/ProjectCreator_tab.dbo 
+rm -f $OBJ/AboutWindow.dbo 
+rm -f $OBJ/ChangePassword.dbo 
+rm -f $OBJ/OptionsMaintenance.dbo 
+rm -f $OBJ/CountryMaintenance.dbo 
+rm -f $OBJ/StateMaintenance.dbo 
+rm -f $OBJ/FeeTypeMaintenance.dbo 
+rm -f $OBJ/RequestCreator.dbo 
+rm -f $OBJ/ProjectCenter.dbo 
+rm -f $OBJ/ProjectManager_tab.dbo 
+rm -f $OBJ/ProjectManager.dbo 
+rm -f $OBJ/CustomerMaintenance.dbo 
+rm -f $OBJ/CustomerContactMaintenance.dbo 
+rm -f $OBJ/CustomerLocationMaintenance.dbo 
+rm -f $SYNEXPDIR/$NAMESPACE-loginform.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-xfpl_log.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-usermaintenance.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-usermaintenance_tab.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectcreator.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectcreator_tab.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-aboutwindow.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-changepassword.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-optionsmaintenance.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-countrymaintenance.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-statemaintenance.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-feetypemaintenance.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-requestcreator.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectcenter.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectmanager_tab.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectmanager.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customermaintenance.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontactmaintenance.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerlocationmaintenance.dbh 
+if [ "$NAMESPACE" != "*" ] 
+then 
+  rm -f $SYNEXPDIR/$NAMESPACE-*.dbh 
+fi 
+dblproto  $VARIANT_FLAGS  SRC:LoginForm.dbl SRC:xfpl_log.dbl SRC:UserMaintenance.dbl SRC:UserMaintenance_tab.dbl SRC:ProjectCreator.dbl SRC:ProjectCreator_tab.dbl SRC:AboutWindow.dbl SRC:ChangePassword.dbl SRC:OptionsMaintenance.dbl SRC:CountryMaintenance.dbl SRC:StateMaintenance.dbl SRC:FeeTypeMaintenance.dbl SRC:RequestCreator.dbl SRC:ProjectCenter.dbl SRC:ProjectManager_tab.dbl SRC:ProjectManager.dbl SRC:CustomerMaintenance.dbl SRC:CustomerContactMaintenance.dbl SRC:CustomerLocationMaintenance.dbl 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS -o OBJ:AppRoutines.dbo  SRC:LoginForm.dbl SRC:xfpl_log.dbl SRC:UserMaintenance.dbl SRC:UserMaintenance_tab.dbl SRC:ProjectCreator.dbl SRC:ProjectCreator_tab.dbl SRC:AboutWindow.dbl SRC:ChangePassword.dbl SRC:OptionsMaintenance.dbl SRC:CountryMaintenance.dbl SRC:StateMaintenance.dbl SRC:FeeTypeMaintenance.dbl SRC:RequestCreator.dbl SRC:ProjectCenter.dbl SRC:ProjectManager_tab.dbl SRC:ProjectManager.dbl SRC:CustomerMaintenance.dbl SRC:CustomerContactMaintenance.dbl SRC:CustomerLocationMaintenance.dbl 
+dblibr -ca OLIB:AppRoutines.olb OBJ:AppRoutines.dbo 
+dblink $LINKERFLAGS -l EXE:AppRoutines.elb OLIB:AppRoutines.olb 
+dblproto $VARIANT_FLAGS SRC:ChronoTrackMaint.dbl 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ChronoTrackMaint.dbo SRC:ChronoTrackMaint.dbl 
+dblink $LINKERFLAGS -o EXE:ChronoTrackMaint.dbr OBJ:ChronoTrackMaint.dbo  EXE:AppRoutines.elb  SYSTEMEXE:SynPSGSystem.elb SYSTEMEXE:SynPSGSystemIO.elb SYSTEMEXE:SynPSGSystemNet.elb SYSTEMEXE:SynPSGSystemText.elb COREEXE:CoreUtilities.elb COREEXE:CoreDataEntities.elb EXE:DataEntities.elb EXE:ChronoTrackSubs.elb WND:tklib.elb 
+dblproto $VARIANT_FLAGS SRC:ChronoTrack.dbl 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ChronoTrack.dbo SRC:ChronoTrack.dbl 
+dblink $LINKERFLAGS -o EXE:ChronoTrack.dbr OBJ:ChronoTrack.dbo  EXE:AppRoutines.elb  SYSTEMEXE:SynPSGSystem.elb SYSTEMEXE:SynPSGSystemIO.elb SYSTEMEXE:SynPSGSystemNet.elb SYSTEMEXE:SynPSGSystemText.elb COREEXE:CoreUtilities.elb COREEXE:CoreDataEntities.elb EXE:DataEntities.elb EXE:ChronoTrackSubs.elb WND:tklib.elb 

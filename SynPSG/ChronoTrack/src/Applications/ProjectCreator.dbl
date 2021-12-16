@@ -1,0 +1,202 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectCreator.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: Project creation routine.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+subroutine ProjectCreator
+    in      req wm          ,@WindowManager
+    endparams
+
+.include "WND:tools.def"
+.include "DEF:ChronoTrackMacros.def"
+
+.if ^variant .eq. 4     ;;for ALL build force this to infragistics
+.ifdef UINameSpace
+.undefine UINameSpace
+.endc
+.define UINameSpace   ChronoTrackNetUI.Forms
+.define INFRAGISTICS_VERSION
+.endc;^variant .eq. 4
+
+.include 'project' repository, record = "projectRec" ,end
+
+literal
+    winTitle    ,a* ,"Project Creation"
+endliteral
+
+record
+    currentUser ,@UserDataEntity
+    ;;routine objects
+.ifdef UINameSpace
+    frmProject  ,UIClassMacro(ProjectCreate)
+.endc
+    project     ,@ProjectDataEntity
+    customer    ,@CustomerDataEntity
+    contact     ,@CustomerContactDataEntity
+    location    ,@CustomerLocationDataEntity
+    user        ,@UserDataEntity
+    winID       ,int
+    result      ,boolean
+    appSettings ,sAppUserOptions
+endrecord
+
+proc
+
+
+    try
+    begin
+        ;;first check if the user is allowed into here
+        currentUser = new UserDataEntity(false, TableView.Full)
+        GetApplicationUserSettings(appSettings)
+        currentUser.IO.Locate(appSettings.default_user_name, Q_PRIMARY, false)
+        if (!currentUser.IsManager)
+        begin
+            u_msgbox("Not authorised, you must be a manager to create projects"
+            &   , D_MOK .bor. D_MICONSTOP, winTitle)
+            xreturn
+        end
+        wm.Environment(true, "Loading " + winTitle + " objects....")
+        wm.DisableMenu("mnuMaint")
+
+        ;;load the window
+.ifdef UINameSpace
+        frmProject = new UINameSpace.ProjectCreate(wm.SynInteropInstance)
+.else
+        i_ldinp(winID,, "prjmnt",,, result)
+        if (result) throw new Exception("Unable to load project creator input window")
+.endc
+        ;;create data entities
+        project = new ProjectDataEntity(false, TableView.Full)
+
+        user = new UserDataEntity(false, TableView.Breif)
+        customer  = new CustomerDataEntity(false, TableView.Breif)
+        contact = new CustomerContactDataEntity(false, TableView.Full)
+        location = new CustomerLocationDataEntity(false, TableView.Full)
+
+        GetApplicationUserSettings(appSettings)
+
+.ifdef UINameSpace
+        ;;assign data bindings
+        frmProject.SetDataSource(project.NewProject(appSettings.default_user_name), customer.ResultsTable(TableView.Breif), user.ResultsTable(TableView.Breif))
+
+        winID = wm.tkWindow(frmProject, 18, 65, winTitle, true)
+        frmProject.Size = wm.FormGetSize(winID)
+.else
+.endc
+        TransactionViewer.ClearView()
+
+        wm.PlaceForm(winID)
+
+        repeat
+        begin
+.ifdef UINameSpace
+            frmProject.SetFocus()
+.else
+            ;;toolkit input processing loop
+            i_input(winID, "data", projectRec = project.IO.DataArea,,,,D_NOTERM)
+
+            ;;is input complete
+            if (!g_select)
+            begin
+                m_signal("MB_COMMIT")
+            end
+
+            ;;need to update the class data
+            user.IO.DataArea = projectRec
+.endc
+            wm.processForm(winID)
+            using g_entnam select
+            ("LDCONT"),
+            begin
+                data cID,   a10
+                cID = frmProject.CustomerID
+                frmProject.SetContactTable(contact.ResultsTable(cID))
+            end
+            ("LDLOCN"),
+            begin
+                data c1ID   ,a10
+                data c2ID   ,a10
+                c1ID = frmProject.CustomerID
+                c2ID = frmProject.ContactID
+                frmProject.SetLocationTable(location.ResultsTable(c1ID + c2ID))
+            end
+            ("MB_CANCEL"),
+            begin
+                exitloop
+            end
+            ("MB_COMMIT"),
+            begin
+                ;;commit data if required
+.ifdef UINameSpace
+                project.DataTable.Commit()
+.else
+                result = project.IO.Create()
+                if (!result)
+                    u_message(user.IO.LastErrorMessage)
+.endc
+            exitloop
+            end
+            ("MB_EXIT"),
+            begin
+                exitloop
+            end
+            endusing
+        end
+
+        ;;show any changes made to the database
+        TransactionViewer.ShowView(winTitle)
+
+.ifdef UINameSpace
+        project.DataTable.Cancel()
+.endc
+
+    end
+    catch (e, @Exception)
+    begin
+        u_message(e.Message)
+    end
+    endtry
+
+    wm.Environment(false, "")
+
+    xreturn
+
+endsubroutine
+

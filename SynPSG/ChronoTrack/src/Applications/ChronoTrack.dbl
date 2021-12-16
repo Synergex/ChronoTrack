@@ -1,0 +1,296 @@
+;;**********************************************************************
+;;
+;; Title:       ChronoTrack.dbl
+;;
+;; Type:        Application
+;;
+;; Description: Front end applicaiton for ChronoTrack.  Uses all
+;;              UI types (Toolkit, Infragistics, DevExpress, Microsoft)
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+main ChronoTrack
+
+.include "DEF:ChronoTrackMacros.def"
+
+.if ^variant .eq. 4
+;;data elements
+record
+    country         ,@CountryDataEntity
+    state           ,@StateDataEntity
+endrecord
+
+;;window manager
+record
+    wm              ,@WindowManager
+endrecord
+
+;;window ID's
+record
+    tabID           ,int
+    index           ,int
+    winID           ,int
+endrecord
+
+;;main menu form
+record
+    frmMainMenu     ,@ChronoTrackNetUIDX.Forms.MainMenu
+    menuWinID       ,int
+endrecord
+
+;;general
+record
+    errFlag         ,boolean
+endrecord
+
+.include "WND:tools.def"
+.include "DBLDIR:windows.def"
+
+proc
+
+    call programInitialsation
+
+    if (!errFlag) call processMenu
+
+    call programTerminate
+
+    ;;logical end of program
+    stop
+
+;;****************************************************************************
+programInitialsation,
+
+
+    ;;program initialisation
+    ;;create the window manager object
+    debugInfo("program Starting and creating window manager object")
+    wm = new WindowManager("EXE:ChronoTrack.ism", "ChronoTrack")
+
+    ;;login
+    if (errFlag = !LoginForm(wm))
+        return
+
+    ;;load the menu columns
+    debugInfo("Load menu columns")
+    errFlag = wm.LoadMenu("mnuFile", true)
+    if (!errFlag) errFlag = wm.LoadMenu("mnuMaint", false)
+    if (!errFlag) errFlag = wm.LoadMenu("mnuPrj", false)
+    if (!errFlag) errFlag = wm.LoadMenu("mnuHelp", false)
+
+    if (errFlag)
+    begin
+        debugInfo("unable to load required columns, program terminating")
+        u_message("unable to load required columns, program terminating")
+    end
+
+    if (!errFlag)
+    begin
+        ;;create the required static data objects
+        debugInfo("Creating static tables")
+        try
+        begin
+            country = new CountryDataEntity(false, TableView.Full)
+            country.DataTable.PerformReloadTable=false
+            state = new StateDataEntity(false, TableView.Full)
+            state.DataTable.PerformReloadTable=false
+        end
+        catch (e, @Exception)
+        begin
+            u_message(e.Message)
+            errFlag = true
+        end
+        endtry
+
+    end
+
+    if (!errFlag)
+    begin
+        ;;create the tab container
+        tabID = ts_tabset(DTS_CREATE, "container", w_info(WIF_SROWS), w_info(WIF_SCOLS))
+        w_brdr(tabID, WB_OFF)
+        w_proc(WP_STATE, tabID, WPS_MAXIMIZED)
+
+        ;;load the main menu form
+        frmMainMenu = new ChronoTrackNetUIDX.Forms.MainMenu(wm.SynInteropInstance)
+        menuWinID = wm.tkWindow(frmMainMenu, 0, 0, "Launcher")
+
+        index = ts_tabset(DTS_WINDOW, tabID, menuWinID, "processMenu")
+        frmMainMenu.Size = wm.FormGetSize(menuWinID)
+    end
+
+    if (!errFlag)
+    begin
+        e_method(D_METH_APPCLOSE, "AppClose")
+    end
+    return
+
+;;****************************************************************************
+processMenu,
+
+    wm.ClearFooter()
+
+    repeat
+    begin
+        ts_process(tabID, tabID, wm, country, state)
+        using g_entnam select
+        ("MB_EXIT", "PRGEXIT"),
+        begin
+            exitloop
+        end
+        endusing
+    end
+
+    return
+
+;;****************************************************************************
+programTerminate,
+
+    ;;this shuts down the toolit, etc
+    wm = ^null
+
+    return
+
+.else
+    proc
+
+.endc;;^variant .eq. 4
+
+endmain
+
+subroutine processMenu
+    in      req pageID      ,int
+    in      req tabID       ,int
+    in      req wm          ,@WindowManager
+    inout   req countryObj  ,@CountryDataEntity
+    inout   req stateObj    ,@StateDataEntity
+    endparams
+
+.include "WND:tools.def"
+
+static record
+    userPageID              ,int    ,0
+    projectCreatePageID     ,int    ,0
+    projectManagerPageID    ,int    ,0
+    index                   ,int
+endrecord
+proc
+
+    repeat
+    begin
+        wm.processForm(pageID)
+        ;;what has the user selected
+        using g_entnam select
+        ("MB_EXIT", "PRGEXIT"),
+        begin
+            exitloop
+        end
+        ("USERMNTTAB"),
+        begin
+            ;;check the tab still exists
+
+            index = ts_tabset(DTS_TABINDEX, tabID, DTS_WINDOW, userPageID)
+
+            if (!index)
+                clear userPageID
+
+            if (!userPageID) then
+            begin
+                UserMaintenance_tab(userPageID, TabID, wm, countryObj, stateObj)
+            end
+            else
+            begin
+                ts_tabset(DTS_ACTIVE, tabID, index)
+            end
+            exitloop    ;;let the tab processor do the rest
+        end
+        ("USERMNT "),
+            UserMaintenance(wm, countryObj, stateObj)
+        ("COUNTRYMNT"),
+            CountryMaintenance(wm, countryObj)
+        ("STATEMNT"),
+            StateMaintenance(wm, stateObj)
+        ("FEETYPMNT"),
+            FeeTypeMaintenance(wm)
+        ("CUSTMNT"),
+            CustomerMaintenance(wm, countryObj, stateObj)
+        ("RQSTRSC"),
+            RequestCreator(wm)
+        ("PRJCREATE"),
+            ProjectCreator(wm)
+        ("APPOPTNS"),
+            OptionsMaintenance(wm)
+        ("ABOUT"),
+            AboutWindow(wm)
+        ("CHNGPW"),
+            ChangePassword(wm)
+        ("PRJCENTR"),
+            ProjectCenter(wm)
+        ("PRJMGR"),
+            begin
+                ;;check the tab still exists
+
+                index = ts_tabset(DTS_TABINDEX, tabID, DTS_WINDOW, projectManagerPageID)
+
+                if (!index)
+                    clear projectManagerPageID
+
+                if (!projectManagerPageID) then
+                begin
+                    ProjectManager_tab(projectManagerPageID, TabID, wm)
+                end
+                else
+                begin
+                    ts_tabset(DTS_ACTIVE, tabID, index)
+                end
+                exitloop    ;;let the tab processor do the rest
+            end
+        ("TS_"),
+            exitloop    ;;let the tab processor handle it
+        endusing
+
+    end
+
+    xreturn
+
+endsubroutine
+
+;;; <summary>
+;;; signal to close down the program.
+;;; </summary>
+subroutine AppClose
+proc
+    m_signal("MB_EXIT")
+    xreturn
+endsubroutine

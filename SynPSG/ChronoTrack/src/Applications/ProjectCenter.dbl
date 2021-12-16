@@ -1,0 +1,152 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectCenter.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: Project center routine, allows viewing, creation and maintenance
+;;              of projects and requests
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+subroutine ProjectCenter
+    in      req wm          ,@WindowManager
+    endparams
+
+.include "WND:tools.def"
+.include "DEF:ChronoTrackMacros.def"
+
+.if ^variant .eq. 4     ;;for ALL build force this to infragistics
+.ifdef UINameSpace
+.undefine UINameSpace
+.endc
+.define UINameSpace   ChronoTrackNetUI.Forms
+.define INFRAGISTICS_VERSION
+.endc;^variant .eq. 4
+
+literal
+    winTitle    ,a* ,"Project Viewer"
+endliteral
+
+record
+.ifdef UINameSpace
+    frmProject  ,UIClassMacro(ProjectView)
+.endc
+    user        ,@UserDataEntity
+    gantt       ,@GanttViewDataEntity
+    winID       ,int
+    appSettings ,sAppUserOptions
+endrecord
+
+proc
+
+
+    wm.Environment(true, "Loading " + winTitle + " objects....")
+    wm.DisableMenu("mnuMaint")
+    wm.DisableMenu("mnuPrj")
+    wm.HideMenu()
+    wm.HideWindow(D_ALL)
+
+.ifdef UINameSpace
+    try
+    begin
+
+        ;;get options
+        GetApplicationUserSettings(appSettings)
+
+        ;;load the window
+        frmProject = new UINameSpace.ProjectView(wm.SynInteropInstance)
+
+        ;;create data entities
+        user = new UserDataEntity(false, TableView.Breif)
+        UserDataEntity.CurrentUser = appSettings.default_user_name
+
+        gantt = new GanttViewDataEntity(false)
+
+        ;;assign data bindings
+        frmProject.SetDataSource(user.ResultsTable(TableView.Breif), gantt.ResultsTable(""))
+
+        winID = wm.tkWindow(frmProject, 0, 0, winTitle, true)
+        frmProject.Size = wm.FormResize
+
+        TransactionViewer.ClearView()
+
+        wm.PlaceForm(winID)
+        frmProject.SetFocus(appSettings.default_view_state)
+
+        repeat
+        begin
+            wm.processForm(winID)
+            using g_entnam select
+            ("MB_CANCEL", "MB_EXIT"),
+            begin
+                exitloop
+            end
+            ("NEWPRJ"),
+            begin
+                wm.ShowMenu()
+                ProjectCreator(wm)
+                wm.HideMenu()
+                gantt.ResultsTable("")
+                frmProject.RefreshFormData()
+                frmProject.SetFocus(appSettings.default_view_state)
+            end
+            ("NEWRES"),
+            begin
+                RequestCreator(wm)
+                gantt.ResultsTable("")
+                frmProject.RefreshFormData()
+            end
+            endusing
+        end
+
+        ;;show any changes made to the database
+        TransactionViewer.ShowView(winTitle)
+
+
+    end
+    catch (e, @Exception)
+    begin
+        u_message(e.Message)
+    end
+    endtry
+
+    wm.Environment(false, "")
+
+.endc
+    xreturn
+
+endsubroutine
+

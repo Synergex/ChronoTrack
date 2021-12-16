@@ -1,0 +1,290 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectManager_tab.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: Project manager routine, allows viewing, creation and maintenance
+;;              of projects
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+.if ^variant .eq. 4
+subroutine ProjectManager_tab
+    inout   req pageID      ,int
+    in      req tabID       ,int
+    in      req wm          ,@WindowManager
+    endparams
+
+.include "WND:tools.def"
+.include "DBLDIR:windows.def"
+.include "DEF:ChronoTrackMacros.def"
+
+.include 'project' repository, record = "project" ,end
+
+literal
+    winTitle    ,a* ,"Project Viewer"
+endliteral
+
+static record
+    frmProject          ,@ChronoTrackNetUI.Forms.ProjectCentre
+    prj                 ,@ProjectDataEntity
+    task                ,@ProjectTaskDataEntity
+    activity            ,@ProjectActivityDataEntity
+    attachment          ,@ProjectAttachmentDataEntity
+    fee                 ,@ProjectConsultantDataEntity
+    exp                 ,@ProjectExpenseDataEntity
+    note                ,@ProjectNoteDataEntity
+    customer            ,@CustomerDataEntity
+    customerLocation    ,@CustomerLocationDataEntity
+    customerContact     ,@CustomerContactDataEntity
+    taskType            ,@TaskTypeDataEntity
+    feeSource           ,@FeeTypeDataEntity
+    userSource          ,@UserDataEntity
+    expSource           ,@ExpenseTypeDataEntity
+    index               ,int
+    appSettings         ,sAppUserOptions
+    projectNumber       ,a8
+endrecord
+
+proc
+
+
+    if (!pageID)
+    begin
+        try
+        begin
+
+            ;;get options
+            GetApplicationUserSettings(appSettings)
+
+            call getProjectNumber
+
+            if (!g_select)
+            begin
+                ;;load the window
+                frmProject = new ChronoTrackNetUI.Forms.ProjectCentre(wm.SynInteropInstance)
+
+                pageID = wm.tkWindow(frmProject, 0, 0, winTitle)
+
+                index = ts_tabset(DTS_WINDOW, tabID, pageID, "ProjectManager_tab")
+                ts_tabset(DTS_ACTIVE, tabID, index)
+
+                frmProject.Size = wm.FormGetSize(pageID)
+
+                ;;create data entities
+                prj = new ProjectDataEntity(false, TableView.Full)
+                task = new ProjectTaskDataEntity(false, TableView.Full)
+                activity = new ProjectActivityDataEntity(false, TableView.Full)
+                attachment = new ProjectAttachmentDataEntity(false, TableView.Full)
+                fee = new ProjectConsultantDataEntity(false, TableView.Full)
+                exp = new ProjectExpenseDataEntity(false, TableView.Full)
+                note = new ProjectNoteDataEntity(false, TableView.Full)
+                customer = new CustomerDataEntity(false, TableView.Breif)
+                customerLocation = new CustomerLocationDataEntity(false, TableView.Full)
+                customerContact = new CustomerContactDataEntity(false, TableView.Full)
+                taskType  = new TaskTypeDataEntity(false, TableView.Full)
+                feeSource = new FeeTypeDataEntity(false, TableView.Full)
+                userSource = new UserDataEntity(false, TableView.Full)
+                expSource = new ExpenseTypeDataEntity(false, TableView.Full)
+
+                ;;assign data bindings
+                frmProject.SetDataSource(prj.ResultsTable(projectNumber),
+                &   task.ResultsTable(projectNumber),
+                &   activity.ResultsTable(projectNumber),
+                &   attachment.ResultsTable(projectNumber),
+                &   fee.ResultsTable(projectNumber),
+                &   exp.ResultsTable(projectNumber),
+                &   note.ResultsTable(projectNumber),
+                &   customer.ResultsTable(TableView.Breif, prj.CustomerCode),
+                &   customerLocation.ResultsTable(prj.CustomerCode),
+                &   customerContact.ResultsTable(prj.CustomerCode),
+                &   taskType.ResultsTable(), feeSource.ResultsTable(),
+                &   userSource.ResultsTable(TableView.Full), expSource.ResultsTable(),
+                &   appSettings.default_user_name)
+
+                frmProject.SetFocus()
+
+                ;;make sure I come back into here!
+                m_signal("PRJCENTR")
+            end
+
+            exit
+
+getProjectNumber,
+
+            begin
+                data winID  ,int
+                data clsID  ,int
+                data lstID  ,int
+                data req    ,int
+
+                clear g_select, g_entnam
+
+                e_enter()
+
+                i_ldinp(winID,, "prjList", D_NOPLC)
+                l_class(clsID, "clsPrj", 5, 20, 10 ,1,,,,,,"prjLoad", "ACTIVEX")
+                l_create(lstID, winID, project,, "clsPrj")
+                l_sect(lstID, "Project ID|Contract|Details|Status", D_HEADER)
+                w_brdr(lstID, WB_TITLE, "Please select the required project")
+                l_button(lstID, DSB_ADD, "MB_SELECT", DSB_TEXT, "Select")
+                l_button(lstID, DSB_ADD, "MB_CANCEL", DSB_TEXT, "Cancel")
+                l_place(lstID)
+                l_select(lstID, req = D_LNOP, project)
+
+                if (!g_select || g_select && g_entnam == "MB_SELECT")
+                    projectNumber = project.Project_id, "XXXXXXXX"
+
+                e_exit()
+                u_update()
+            end
+
+            return
+
+        end
+        catch (e, @Exception)
+        begin
+            u_message(e.Message)
+        end
+        endtry
+
+        xreturn
+    end
+
+    ;;process the tab window
+    repeat
+    begin
+        wm.processForm(pageID)
+
+        using g_entnam select
+        ("MB_CANCEL", "MB_EXIT"),
+        begin
+            ;;delete the tab
+            call cancelTables
+            call closeDownTab
+            exitloop
+        end
+        ("MB_COMMIT"),
+        begin
+            ;;commit data if required
+            prj.DataTable.Commit()
+            task.DataTable.Commit()
+            activity.DataTable.Commit()
+            attachment.DataTable.Commit()
+            fee.DataTable.Commit()
+            exp.DataTable.Commit()
+            note.DataTable.Commit()
+            feeSource.DataTable.Commit()
+            userSource.DataTable.Commit()
+            ;;delete the tab
+            call closeDownTab
+            exitloop
+        end
+        ("TS_"),
+            exitloop
+        endusing
+    end
+
+    xreturn
+
+cancelTables,
+
+    prj.DataTable.Cancel()
+    task.DataTable.Cancel()
+    activity.DataTable.Cancel()
+    attachment.DataTable.Cancel()
+    fee.DataTable.Cancel()
+    exp.DataTable.Cancel()
+    note.DataTable.Cancel()
+    feeSource.DataTable.Cancel()
+
+    return
+
+closeDownTab,
+    ;;clear down the tab and it's objects.
+    ts_tabset(DTS_REMOVE, tabID, index)
+    u_window(D_DELETE, pageID)
+    clear pageID
+    frmProject = ^null
+    prj = ^null
+    activity = ^null
+    attachment = ^null
+    fee = ^null
+    exp = ^null
+    note = ^null
+    feeSource = ^null
+
+    return
+
+endsubroutine
+
+subroutine prjLoad
+    a_listID    ,n
+    a_request   ,n
+    a_data      ,a
+    a_inpID     ,n
+    a_disabled  ,n
+    a_itemidx   ,n
+
+.include 'WND:tools.def'
+
+record
+    status  ,boolean
+endrecord
+
+proc
+    if (a_itemidx == 1) then
+        status = ProjectDataEntity.Instance.IO.ReadLast(Q_PRIMARY, false)
+    else
+        status = ProjectDataEntity.Instance.IO.ReadPrev(false)
+    if (status) then
+        i_display(a_inpID,, a_data = ProjectDataEntity.Instance.IO.DataArea)
+    else
+        a_request = D_LEOF
+
+    xreturn
+endsubroutine
+.else
+;;this is a stub routine when not building ALL version, which uses tab processing
+subroutine ProjectManager_tab
+    inout   req pageID      ,int
+    in      req tabID       ,int
+    in      req wm          ,@WindowManager
+    endparams
+proc
+    xreturn
+endsubroutine
+.endc;;variant .eq. 4

@@ -1,0 +1,161 @@
+;;**********************************************************************
+;;
+;; Title:       LoginForm.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: display and process user login
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrackApp.def"
+
+function LoginForm  ,boolean
+    in      req wm  ,@WindowManager
+    endparams
+
+.include "WND:tools.def"
+.include "DEF:ChronoTrackMacros.def"
+
+.include 'user' repository, record = "userRec" ,end
+
+literal
+    winTitle    ,a* ,"ChronoTrack - Login"
+endliteral
+
+record
+.ifdef UINameSpace
+    frmLogin    ,UIClassMacro(Login)
+.endc
+    user        ,@UserDataEntity
+    winID       ,int
+    result      ,boolean
+    errMsg      ,string
+    appSettings ,sAppUserOptions
+endrecord
+
+proc
+
+    wm.Environment(true)
+
+    try
+    begin
+        ;;load the window
+.ifdef UINameSpace
+        frmLogin = new UINameSpace.Login(wm.SynInteropInstance)
+.else
+        i_ldinp(winID,, "frmlogin",,, result)
+        if (result) throw new Exception("Unable to load login input window")
+.endc
+        ;;create an instance of the user class
+        user = new UserDataEntity(false, TableView.Full)
+
+        GetApplicationUserSettings(appSettings)
+
+.ifdef UINameSpace
+        winID = wm.tkWindow(frmLogin, 10, 48, winTitle, true)
+
+        if (appSettings.default_user_name != "  ")
+            frmLogin.UserName = appSettings.default_user_name
+.else
+        if (appSettings.default_user_name != "  ")
+        begin
+            userRec.user_id = appSettings.default_user_name
+            i_dspfld(winID, "user_id", userRec.user_id)
+        end
+.endc
+
+        wm.PlaceForm(winID)
+
+        repeat
+        begin
+.ifdef UINameSpace
+            frmLogin.SetFocus()
+            wm.processForm(winID)
+.else
+            i_input(winID, "all", userRec,,,,D_NOTERM)
+
+            if (!g_select)
+                m_signal("LOGIN")
+.endc
+            using g_entnam select
+            ("CANCEL"),
+            begin
+                result = false
+                exitloop
+            end
+            ("LOGIN"),
+            begin
+.ifdef UINameSpace
+                result = ValidateUser(frmLogin.UserName, frmLogin.Password, errMsg)
+.else
+                result = ValidateUser(userRec.user_id, userRec.password, errMsg)
+.endc
+                if (result)
+                then
+                begin
+.ifdef UINameSpace
+                    appSettings.default_user_name = frmLogin.UserName
+.else
+                    appSettings.default_user_name = userRec.user_id
+.endc
+                    SetApplicationUserSettings(appSettings)
+                    exitloop
+                end
+                else
+                begin
+                    u_msgbox(errMsg, D_MOK | D_MICONSTOP, winTitle)
+                end
+            end
+            ("CHEAT"),
+            begin
+                result = true
+                exitloop
+            end
+            endusing
+        end
+
+    end
+    catch (e, @Exception)
+    begin
+        u_message(e.Message)
+        result = false
+    end
+    endtry
+
+    wm.Environment(false)
+
+    freturn result
+
+endfunction
+

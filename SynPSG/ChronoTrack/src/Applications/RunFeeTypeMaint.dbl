@@ -1,0 +1,164 @@
+;;**********************************************************************
+;;
+;; Title:       RunFeeTypeMaint.dbl
+;;
+;; Type:        Application
+;;
+;; Description: run the fee type maintenance routine in Infragistics mode
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+main RunFeeTypeMaint
+
+.include "DEF:ChronoTrackMacros.def"
+
+literal
+    winTitle    ,a* ,"Fee type maintenance"
+endliteral
+
+.include "WND:tools.def"
+.include "DBLDIR:windows.def"
+
+record
+    ;;data elements
+    fee             ,@FeeTypeDataEntity
+    ;;window manager
+    wm              ,@WindowManager
+    ;fee type maintenance form
+    frmFeeType      ,@ChronoTrackNetUI.Forms.FeeTypeMaintenance
+    ;;window ID's
+    winID           ,int
+    ;;general
+    errFlag         ,boolean
+endrecord
+
+proc
+
+    call programInitialsation
+
+    if (!errFlag) call process
+
+    call programTerminate
+
+    ;;logical end of program
+    stop
+
+;;****************************************************************************
+programInitialsation,
+
+
+    ;;program initialisation
+    ;;create the window manager object
+    wm = new WindowManager("EXE:ChronoTrack.ism", "ChronoTrack")
+
+    ;;login
+    if (errFlag = !LoginForm(wm))
+        return
+
+    if (!errFlag)
+    begin
+        ;;create the required static data objects
+        try
+        begin
+            fee = new FeeTypeDataEntity(false, TableView.Full)
+        end
+        catch (e, @Exception)
+        begin
+            u_message(e.Message)
+            errFlag = true
+        end
+        endtry
+
+    end
+
+    return
+
+;;****************************************************************************
+process,
+
+    ;;load the window
+    frmFeeType = new ChronoTrackNetUI.Forms.FeeTypeMaintenance(wm.SynInteropInstance)
+
+    ;;assign data bindings
+    frmFeeType.SetDataSource(fee.ResultsTable())
+
+    winID = wm.tkWindow(frmFeeType, 11, 64, winTitle, true)
+    frmFeeType.Size = wm.FormGetSize(winID)
+
+    wm.PlaceForm(winID)
+
+    try
+    begin
+        repeat
+        begin
+            wm.processForm(winID)
+            using g_entnam select
+            ("MB_CANCEL"),
+            begin
+                exitloop
+            end
+            ("MB_COMMIT"),
+            begin
+                ;;commit data if required
+                fee.DataTable.Commit()
+                exitloop
+            end
+            ("MB_EXIT"),
+            begin
+                exitloop
+            end
+            endusing
+        end
+
+    end
+    catch (e, @Exception)
+    begin
+        u_message(e.Message)
+    end
+    endtry
+
+    fee.DataTable.Cancel()
+
+    return
+
+;;****************************************************************************
+programTerminate,
+
+    ;;this shuts down the toolit, etc
+    wm = ^null
+
+    return
+
+endmain

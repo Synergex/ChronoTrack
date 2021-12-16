@@ -1,0 +1,122 @@
+;;**********************************************************************
+;;
+;; Title:       OptionsMaintenance.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: Allow the user to modify their applicaiton options
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+subroutine OptionsMaintenance
+    in      req wm  ,@WindowManager
+    endparams
+
+.include "WND:tools.def"
+.include "DEF:ChronoTrackMacros.def"
+
+literal
+    winTitle    ,a* ,"Application Options"
+endliteral
+
+record
+.ifdef UINameSpace
+    frmOptions  ,UIClassMacro(Options)
+.endc
+    winID       ,int
+    appSettings ,sAppUserOptions
+endrecord
+
+proc
+
+    wm.Environment(true)
+
+.ifdef UINameSpace
+    try
+    begin
+        ;;load the window
+        frmOptions = new UINameSpace.Options(wm.SynInteropInstance)
+
+        winID = wm.tkWindow(frmOptions, 10, 70, winTitle, true)
+
+        GetApplicationUserSettings(appSettings)
+        frmOptions.UserName = appSettings.default_user_name
+        frmOptions.DisplayTransactionViewer = appSettings.display_transaction_viewer
+        frmOptions.DefaultViewState = appSettings.default_view_state
+        frmOptions.HistoryMonths = appSettings.history_months_to_load
+
+        wm.PlaceForm(winID)
+        frmOptions.SetFocus()
+
+        repeat
+        begin
+            wm.processForm(winID)
+            using g_entnam select
+            ("MB_CANCEL"),
+            begin
+                exitloop
+            end
+            ("MB_COMMIT"),
+            begin
+                ;;save the application settngs
+                appSettings.default_user_name = frmOptions.UserName
+                appSettings.display_transaction_viewer = frmOptions.DisplayTransactionViewer
+                TransactionViewer.IsVisible = frmOptions.DisplayTransactionViewer
+                appSettings.default_view_state = frmOptions.DefaultViewState
+                appSettings.history_months_to_load = frmOptions.HistoryMonths
+                SetApplicationUserSettings(appSettings)
+                exitloop
+            end
+            ("MB_EXIT"),
+            begin
+                exitloop
+            end
+            endusing
+        end
+
+    end
+    catch (e, @Exception)
+    begin
+        u_message(e.Message)
+    end
+    endtry
+
+    wm.Environment(false)
+
+.endc
+    xreturn
+
+endsubroutine
+
