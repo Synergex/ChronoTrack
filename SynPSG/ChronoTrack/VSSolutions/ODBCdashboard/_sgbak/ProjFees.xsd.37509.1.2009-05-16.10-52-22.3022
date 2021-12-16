@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ProjFees" targetNamespace="http://tempuri.org/ProjFees.xsd" xmlns:mstns="http://tempuri.org/ProjFees.xsd" xmlns="http://tempuri.org/ProjFees.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="Settings" AppSettingsPropertyName="ChronoTrackODBC" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="ChronoTrackODBC (Settings)" PropertyReference="ApplicationSettings.ODBCdashboard.Properties.Settings.GlobalReference.Default.ChronoTrackODBC" Provider="System.Data.Odbc" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="PROJFEESTableAdapter" GeneratorDataComponentClassName="PROJFEESTableAdapter" Name="PROJFEES" UserDataComponentName="PROJFEESTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="ChronoTrackODBC (Settings)" DbObjectName="DBA.PROJFEES" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT "COMPANY", "PROJECT_ID", "CUSTOMER_ID", "CONTRACT_ID", "CONTRACT_PROJECT_ID", "DESCRIPTION", "PROJECTSTARTDATE", "PROJECTENDDATE", "CURRENT_STATUS", "TASK_ID", "TASK_TYPE", "TASKDESC", "ASSIGNED_TO", "START_DATE", "START_TIME", "END_DATE", "END_TIME", "BILLABLE_HOURS", "TASKLOCATION", "TASK_TYPE_ID", "TASKTYPEDESC", "TASKLOCDESC", "BILLABLEAMT" FROM "DBA"."PROJFEES"</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="COMPANY" DataSetColumn="COMPANY" />
+              <Mapping SourceColumn="PROJECT_ID" DataSetColumn="PROJECT_ID" />
+              <Mapping SourceColumn="CUSTOMER_ID" DataSetColumn="CUSTOMER_ID" />
+              <Mapping SourceColumn="CONTRACT_ID" DataSetColumn="CONTRACT_ID" />
+              <Mapping SourceColumn="CONTRACT_PROJECT_ID" DataSetColumn="CONTRACT_PROJECT_ID" />
+              <Mapping SourceColumn="DESCRIPTION" DataSetColumn="DESCRIPTION" />
+              <Mapping SourceColumn="PROJECTSTARTDATE" DataSetColumn="PROJECTSTARTDATE" />
+              <Mapping SourceColumn="PROJECTENDDATE" DataSetColumn="PROJECTENDDATE" />
+              <Mapping SourceColumn="CURRENT_STATUS" DataSetColumn="CURRENT_STATUS" />
+              <Mapping SourceColumn="TASK_ID" DataSetColumn="TASK_ID" />
+              <Mapping SourceColumn="TASK_TYPE" DataSetColumn="TASK_TYPE" />
+              <Mapping SourceColumn="TASKDESC" DataSetColumn="TASKDESC" />
+              <Mapping SourceColumn="ASSIGNED_TO" DataSetColumn="ASSIGNED_TO" />
+              <Mapping SourceColumn="START_DATE" DataSetColumn="START_DATE" />
+              <Mapping SourceColumn="START_TIME" DataSetColumn="START_TIME" />
+              <Mapping SourceColumn="END_DATE" DataSetColumn="END_DATE" />
+              <Mapping SourceColumn="END_TIME" DataSetColumn="END_TIME" />
+              <Mapping SourceColumn="BILLABLE_HOURS" DataSetColumn="BILLABLE_HOURS" />
+              <Mapping SourceColumn="TASKLOCATION" DataSetColumn="TASKLOCATION" />
+              <Mapping SourceColumn="TASK_TYPE_ID" DataSetColumn="TASK_TYPE_ID" />
+              <Mapping SourceColumn="TASKTYPEDESC" DataSetColumn="TASKTYPEDESC" />
+              <Mapping SourceColumn="TASKLOCDESC" DataSetColumn="TASKLOCDESC" />
+              <Mapping SourceColumn="BILLABLEAMT" DataSetColumn="BILLABLEAMT" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="ProjFees" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="ProjFees" msprop:Generator_DataSetName="ProjFees" msprop:EnableTableAdapterManager="True">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="PROJFEES" msprop:Generator_UserTableName="PROJFEES" msprop:Generator_RowDeletedName="PROJFEESRowDeleted" msprop:Generator_RowChangedName="PROJFEESRowChanged" msprop:Generator_RowClassName="PROJFEESRow" msprop:Generator_RowChangingName="PROJFEESRowChanging" msprop:Generator_RowEvArgName="PROJFEESRowChangeEvent" msprop:Generator_RowEvHandlerName="PROJFEESRowChangeEventHandler" msprop:Generator_TableClassName="PROJFEESDataTable" msprop:Generator_TableVarName="tablePROJFEES" msprop:Generator_RowDeletingName="PROJFEESRowDeleting" msprop:Generator_TablePropName="PROJFEES">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="COMPANY" msprop:Generator_UserColumnName="COMPANY" msprop:Generator_ColumnVarNameInTable="columnCOMPANY" msprop:Generator_ColumnPropNameInRow="COMPANY" msprop:Generator_ColumnPropNameInTable="COMPANYColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="40" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="PROJECT_ID" msprop:Generator_UserColumnName="PROJECT_ID" msprop:Generator_ColumnVarNameInTable="columnPROJECT_ID" msprop:Generator_ColumnPropNameInRow="PROJECT_ID" msprop:Generator_ColumnPropNameInTable="PROJECT_IDColumn" type="xs:int" />
+              <xs:element name="CUSTOMER_ID" msprop:Generator_UserColumnName="CUSTOMER_ID" msprop:Generator_ColumnVarNameInTable="columnCUSTOMER_ID" msprop:Generator_ColumnPropNameInRow="CUSTOMER_ID" msprop:Generator_ColumnPropNameInTable="CUSTOMER_IDColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CONTRACT_ID" msprop:Generator_UserColumnName="CONTRACT_ID" msprop:Generator_ColumnVarNameInTable="columnCONTRACT_ID" msprop:Generator_ColumnPropNameInRow="CONTRACT_ID" msprop:Generator_ColumnPropNameInTable="CONTRACT_IDColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CONTRACT_PROJECT_ID" msprop:Generator_UserColumnName="CONTRACT_PROJECT_ID" msprop:Generator_ColumnVarNameInTable="columnCONTRACT_PROJECT_ID" msprop:Generator_ColumnPropNameInRow="CONTRACT_PROJECT_ID" msprop:Generator_ColumnPropNameInTable="CONTRACT_PROJECT_IDColumn" type="xs:short" minOccurs="0" />
+              <xs:element name="DESCRIPTION" msprop:Generator_UserColumnName="DESCRIPTION" msprop:Generator_ColumnVarNameInTable="columnDESCRIPTION" msprop:Generator_ColumnPropNameInRow="DESCRIPTION" msprop:Generator_ColumnPropNameInTable="DESCRIPTIONColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="PROJECTSTARTDATE" msprop:Generator_UserColumnName="PROJECTSTARTDATE" msprop:Generator_ColumnVarNameInTable="columnPROJECTSTARTDATE" msprop:Generator_ColumnPropNameInRow="PROJECTSTARTDATE" msprop:Generator_ColumnPropNameInTable="PROJECTSTARTDATEColumn" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="PROJECTENDDATE" msprop:Generator_UserColumnName="PROJECTENDDATE" msprop:Generator_ColumnVarNameInTable="columnPROJECTENDDATE" msprop:Generator_ColumnPropNameInRow="PROJECTENDDATE" msprop:Generator_ColumnPropNameInTable="PROJECTENDDATEColumn" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="CURRENT_STATUS" msprop:Generator_UserColumnName="CURRENT_STATUS" msprop:Generator_ColumnVarNameInTable="columnCURRENT_STATUS" msprop:Generator_ColumnPropNameInRow="CURRENT_STATUS" msprop:Generator_ColumnPropNameInTable="CURRENT_STATUSColumn" type="xs:short" minOccurs="0" />
+              <xs:element name="TASK_ID" msprop:Generator_UserColumnName="TASK_ID" msprop:Generator_ColumnVarNameInTable="columnTASK_ID" msprop:Generator_ColumnPropNameInRow="TASK_ID" msprop:Generator_ColumnPropNameInTable="TASK_IDColumn" type="xs:short" />
+              <xs:element name="TASK_TYPE" msprop:Generator_UserColumnName="TASK_TYPE" msprop:Generator_ColumnVarNameInTable="columnTASK_TYPE" msprop:Generator_ColumnPropNameInRow="TASK_TYPE" msprop:Generator_ColumnPropNameInTable="TASK_TYPEColumn" type="xs:short" minOccurs="0" />
+              <xs:element name="TASKDESC" msprop:Generator_UserColumnName="TASKDESC" msprop:Generator_ColumnVarNameInTable="columnTASKDESC" msprop:Generator_ColumnPropNameInRow="TASKDESC" msprop:Generator_ColumnPropNameInTable="TASKDESCColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ASSIGNED_TO" msprop:Generator_UserColumnName="ASSIGNED_TO" msprop:Generator_ColumnVarNameInTable="columnASSIGNED_TO" msprop:Generator_ColumnPropNameInRow="ASSIGNED_TO" msprop:Generator_ColumnPropNameInTable="ASSIGNED_TOColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="15" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="START_DATE" msprop:Generator_UserColumnName="START_DATE" msprop:Generator_ColumnVarNameInTable="columnSTART_DATE" msprop:Generator_ColumnPropNameInRow="START_DATE" msprop:Generator_ColumnPropNameInTable="START_DATEColumn" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="START_TIME" msprop:Generator_UserColumnName="START_TIME" msprop:Generator_ColumnVarNameInTable="columnSTART_TIME" msprop:Generator_ColumnPropNameInRow="START_TIME" msprop:Generator_ColumnPropNameInTable="START_TIMEColumn" type="xs:duration" minOccurs="0" />
+              <xs:element name="END_DATE" msprop:Generator_UserColumnName="END_DATE" msprop:Generator_ColumnVarNameInTable="columnEND_DATE" msprop:Generator_ColumnPropNameInRow="END_DATE" msprop:Generator_ColumnPropNameInTable="END_DATEColumn" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="END_TIME" msprop:Generator_UserColumnName="END_TIME" msprop:Generator_ColumnVarNameInTable="columnEND_TIME" msprop:Generator_ColumnPropNameInRow="END_TIME" msprop:Generator_ColumnPropNameInTable="END_TIMEColumn" type="xs:duration" minOccurs="0" />
+              <xs:element name="BILLABLE_HOURS" msprop:Generator_UserColumnName="BILLABLE_HOURS" msprop:Generator_ColumnVarNameInTable="columnBILLABLE_HOURS" msprop:Generator_ColumnPropNameInRow="BILLABLE_HOURS" msprop:Generator_ColumnPropNameInTable="BILLABLE_HOURSColumn" type="xs:decimal" minOccurs="0" />
+              <xs:element name="TASKLOCATION" msprop:Generator_UserColumnName="TASKLOCATION" msprop:Generator_ColumnVarNameInTable="columnTASKLOCATION" msprop:Generator_ColumnPropNameInRow="TASKLOCATION" msprop:Generator_ColumnPropNameInTable="TASKLOCATIONColumn" type="xs:short" minOccurs="0" />
+              <xs:element name="TASK_TYPE_ID" msprop:Generator_UserColumnName="TASK_TYPE_ID" msprop:Generator_ColumnVarNameInTable="columnTASK_TYPE_ID" msprop:Generator_ColumnPropNameInRow="TASK_TYPE_ID" msprop:Generator_ColumnPropNameInTable="TASK_TYPE_IDColumn" type="xs:short" />
+              <xs:element name="TASKTYPEDESC" msprop:Generator_UserColumnName="TASKTYPEDESC" msprop:Generator_ColumnVarNameInTable="columnTASKTYPEDESC" msprop:Generator_ColumnPropNameInRow="TASKTYPEDESC" msprop:Generator_ColumnPropNameInTable="TASKTYPEDESCColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="35" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="TASKLOCDESC" msprop:Generator_UserColumnName="TASKLOCDESC" msprop:Generator_ColumnVarNameInTable="columnTASKLOCDESC" msprop:Generator_ColumnPropNameInRow="TASKLOCDESC" msprop:Generator_ColumnPropNameInTable="TASKLOCDESCColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="BILLABLEAMT" msprop:Generator_UserColumnName="BILLABLEAMT" msprop:Generator_ColumnVarNameInTable="columnBILLABLEAMT" msprop:Generator_ColumnPropNameInRow="BILLABLEAMT" msprop:Generator_ColumnPropNameInTable="BILLABLEAMTColumn" type="xs:double" default="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

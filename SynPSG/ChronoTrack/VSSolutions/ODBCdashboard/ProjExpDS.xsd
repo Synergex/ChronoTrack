@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ProjExpDS" targetNamespace="http://tempuri.org/ProjExpDS.xsd" xmlns:mstns="http://tempuri.org/ProjExpDS.xsd" xmlns="http://tempuri.org/ProjExpDS.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="Settings" AppSettingsPropertyName="ChronoTrackODBC" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="ChronoTrackODBC (Settings)" PropertyReference="ApplicationSettings.ODBCdashboard.Properties.Settings.GlobalReference.Default.ChronoTrackODBC" Provider="System.Data.Odbc" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="PROJEXPENSESTableAdapter" GeneratorDataComponentClassName="PROJEXPENSESTableAdapter" Name="PROJEXPENSES" UserDataComponentName="PROJEXPENSESTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="ChronoTrackODBC (Settings)" DbObjectName="DBA.PROJEXPENSES" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT "COMPANY", "PROJECT_ID", "CUSTOMER_ID", "CONTRACT_ID", "CONTRACT_PROJECT_ID", "DESCRIPTION", "START_DATE", "END_DATE", "CURRENT_STATUS", "LEAD_CONSULTANT", "WORK_LOCATION_ID", "TEXT", "LOCDESC", "EXPENSE_TYPE", "EXPENSE_DATE", "EXPENSED_BY", "EXPAMT", "EXPDESC", "FRIENDLY_NAME" FROM "DBA"."PROJEXPENSES"</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="COMPANY" DataSetColumn="COMPANY" />
+              <Mapping SourceColumn="PROJECT_ID" DataSetColumn="PROJECT_ID" />
+              <Mapping SourceColumn="CUSTOMER_ID" DataSetColumn="CUSTOMER_ID" />
+              <Mapping SourceColumn="CONTRACT_ID" DataSetColumn="CONTRACT_ID" />
+              <Mapping SourceColumn="CONTRACT_PROJECT_ID" DataSetColumn="CONTRACT_PROJECT_ID" />
+              <Mapping SourceColumn="DESCRIPTION" DataSetColumn="DESCRIPTION" />
+              <Mapping SourceColumn="START_DATE" DataSetColumn="START_DATE" />
+              <Mapping SourceColumn="END_DATE" DataSetColumn="END_DATE" />
+              <Mapping SourceColumn="CURRENT_STATUS" DataSetColumn="CURRENT_STATUS" />
+              <Mapping SourceColumn="LEAD_CONSULTANT" DataSetColumn="LEAD_CONSULTANT" />
+              <Mapping SourceColumn="WORK_LOCATION_ID" DataSetColumn="WORK_LOCATION_ID" />
+              <Mapping SourceColumn="TEXT" DataSetColumn="TEXT" />
+              <Mapping SourceColumn="LOCDESC" DataSetColumn="LOCDESC" />
+              <Mapping SourceColumn="EXPENSE_TYPE" DataSetColumn="EXPENSE_TYPE" />
+              <Mapping SourceColumn="EXPENSE_DATE" DataSetColumn="EXPENSE_DATE" />
+              <Mapping SourceColumn="EXPENSED_BY" DataSetColumn="EXPENSED_BY" />
+              <Mapping SourceColumn="EXPAMT" DataSetColumn="EXPAMT" />
+              <Mapping SourceColumn="EXPDESC" DataSetColumn="EXPDESC" />
+              <Mapping SourceColumn="FRIENDLY_NAME" DataSetColumn="FRIENDLY_NAME" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="ProjExpDS" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_DataSetName="ProjExpDS" msprop:Generator_UserDSName="ProjExpDS" msprop:EnableTableAdapterManager="True">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="PROJEXPENSES" msprop:Generator_UserTableName="PROJEXPENSES" msprop:Generator_RowDeletedName="PROJEXPENSESRowDeleted" msprop:Generator_TableClassName="PROJEXPENSESDataTable" msprop:Generator_RowChangedName="PROJEXPENSESRowChanged" msprop:Generator_RowClassName="PROJEXPENSESRow" msprop:Generator_RowChangingName="PROJEXPENSESRowChanging" msprop:Generator_RowEvArgName="PROJEXPENSESRowChangeEvent" msprop:Generator_RowEvHandlerName="PROJEXPENSESRowChangeEventHandler" msprop:Generator_TablePropName="PROJEXPENSES" msprop:Generator_TableVarName="tablePROJEXPENSES" msprop:Generator_RowDeletingName="PROJEXPENSESRowDeleting">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="COMPANY" msprop:Generator_UserColumnName="COMPANY" msprop:Generator_ColumnPropNameInRow="COMPANY" msprop:Generator_ColumnVarNameInTable="columnCOMPANY" msprop:Generator_ColumnPropNameInTable="COMPANYColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="40" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="PROJECT_ID" msprop:Generator_UserColumnName="PROJECT_ID" msprop:Generator_ColumnPropNameInRow="PROJECT_ID" msprop:Generator_ColumnVarNameInTable="columnPROJECT_ID" msprop:Generator_ColumnPropNameInTable="PROJECT_IDColumn" type="xs:int" />
+              <xs:element name="CUSTOMER_ID" msprop:Generator_UserColumnName="CUSTOMER_ID" msprop:Generator_ColumnPropNameInRow="CUSTOMER_ID" msprop:Generator_ColumnVarNameInTable="columnCUSTOMER_ID" msprop:Generator_ColumnPropNameInTable="CUSTOMER_IDColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CONTRACT_ID" msprop:Generator_UserColumnName="CONTRACT_ID" msprop:Generator_ColumnPropNameInRow="CONTRACT_ID" msprop:Generator_ColumnVarNameInTable="columnCONTRACT_ID" msprop:Generator_ColumnPropNameInTable="CONTRACT_IDColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CONTRACT_PROJECT_ID" msprop:Generator_UserColumnName="CONTRACT_PROJECT_ID" msprop:Generator_ColumnPropNameInRow="CONTRACT_PROJECT_ID" msprop:Generator_ColumnVarNameInTable="columnCONTRACT_PROJECT_ID" msprop:Generator_ColumnPropNameInTable="CONTRACT_PROJECT_IDColumn" type="xs:short" minOccurs="0" />
+              <xs:element name="DESCRIPTION" msprop:Generator_UserColumnName="DESCRIPTION" msprop:Generator_ColumnPropNameInRow="DESCRIPTION" msprop:Generator_ColumnVarNameInTable="columnDESCRIPTION" msprop:Generator_ColumnPropNameInTable="DESCRIPTIONColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="START_DATE" msprop:Generator_UserColumnName="START_DATE" msprop:Generator_ColumnPropNameInRow="START_DATE" msprop:Generator_ColumnVarNameInTable="columnSTART_DATE" msprop:Generator_ColumnPropNameInTable="START_DATEColumn" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="END_DATE" msprop:Generator_UserColumnName="END_DATE" msprop:Generator_ColumnPropNameInRow="END_DATE" msprop:Generator_ColumnVarNameInTable="columnEND_DATE" msprop:Generator_ColumnPropNameInTable="END_DATEColumn" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="CURRENT_STATUS" msprop:Generator_UserColumnName="CURRENT_STATUS" msprop:Generator_ColumnPropNameInRow="CURRENT_STATUS" msprop:Generator_ColumnVarNameInTable="columnCURRENT_STATUS" msprop:Generator_ColumnPropNameInTable="CURRENT_STATUSColumn" type="xs:short" minOccurs="0" />
+              <xs:element name="LEAD_CONSULTANT" msprop:Generator_UserColumnName="LEAD_CONSULTANT" msprop:Generator_ColumnPropNameInRow="LEAD_CONSULTANT" msprop:Generator_ColumnVarNameInTable="columnLEAD_CONSULTANT" msprop:Generator_ColumnPropNameInTable="LEAD_CONSULTANTColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="15" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="WORK_LOCATION_ID" msprop:Generator_UserColumnName="WORK_LOCATION_ID" msprop:Generator_ColumnPropNameInRow="WORK_LOCATION_ID" msprop:Generator_ColumnVarNameInTable="columnWORK_LOCATION_ID" msprop:Generator_ColumnPropNameInTable="WORK_LOCATION_IDColumn" type="xs:short" minOccurs="0" />
+              <xs:element name="TEXT" msprop:Generator_UserColumnName="TEXT" msprop:Generator_ColumnPropNameInRow="TEXT" msprop:Generator_ColumnVarNameInTable="columnTEXT" msprop:Generator_ColumnPropNameInTable="TEXTColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="700" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="LOCDESC" msprop:Generator_UserColumnName="LOCDESC" msprop:Generator_ColumnPropNameInRow="LOCDESC" msprop:Generator_ColumnVarNameInTable="columnLOCDESC" msprop:Generator_ColumnPropNameInTable="LOCDESCColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="EXPENSE_TYPE" msprop:Generator_UserColumnName="EXPENSE_TYPE" msprop:Generator_ColumnPropNameInRow="EXPENSE_TYPE" msprop:Generator_ColumnVarNameInTable="columnEXPENSE_TYPE" msprop:Generator_ColumnPropNameInTable="EXPENSE_TYPEColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="EXPENSE_DATE" msprop:Generator_UserColumnName="EXPENSE_DATE" msprop:Generator_ColumnPropNameInRow="EXPENSE_DATE" msprop:Generator_ColumnVarNameInTable="columnEXPENSE_DATE" msprop:Generator_ColumnPropNameInTable="EXPENSE_DATEColumn" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="EXPENSED_BY" msprop:Generator_UserColumnName="EXPENSED_BY" msprop:Generator_ColumnPropNameInRow="EXPENSED_BY" msprop:Generator_ColumnVarNameInTable="columnEXPENSED_BY" msprop:Generator_ColumnPropNameInTable="EXPENSED_BYColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="15" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="EXPAMT" msprop:Generator_UserColumnName="EXPAMT" msprop:Generator_ColumnPropNameInRow="EXPAMT" msprop:Generator_ColumnVarNameInTable="columnEXPAMT" msprop:Generator_ColumnPropNameInTable="EXPAMTColumn" type="xs:double" />
+              <xs:element name="EXPDESC" msprop:Generator_UserColumnName="EXPDESC" msprop:Generator_ColumnPropNameInRow="EXPDESC" msprop:Generator_ColumnVarNameInTable="columnEXPDESC" msprop:Generator_ColumnPropNameInTable="EXPDESCColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="35" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="FRIENDLY_NAME" msprop:Generator_UserColumnName="FRIENDLY_NAME" msprop:Generator_ColumnPropNameInRow="FRIENDLY_NAME" msprop:Generator_ColumnVarNameInTable="columnFRIENDLY_NAME" msprop:Generator_ColumnPropNameInTable="FRIENDLY_NAMEColumn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
