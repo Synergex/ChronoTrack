@@ -1,0 +1,31 @@
+[Global]
+CurrentProject=prj\Utilities.vpj
+[ProjectDates]
+prj\DataEntities.vpj=20090828113529081
+prj\Utilities.vpj=20090828113532287
+[TreeExpansion2]
++ prj\DataEntities.vpj
+  + Source Files
+  + Header Files
+  + Toolkit Script Files
+  + Other Files
++ prj\Utilities.vpj
+  + Source Files
+  + Header Files
+  + Toolkit Script Files
+  + Other Files
+scroll:0
+[State]
+SCREEN: 1280 1024 -1282 53 1280 859 0 0 M 0 0 0 0 1001 500 0
+CWD: src\Utilities
+FILEHIST: 9
+src\DataEntities\makeit.bat
+src\Utilities\makeit.bat
+src\DataEntities\CollectionLoad.dbc
+src\DataEntities\DefineTable.dbc
+src\DataEntities\OnDelete.dbc
+src\DataEntities\SDMSBase.dbc
+src\DataEntities\SDMSio.dbc
+src\DataEntities\SDMSTable.dbc
+src\Utilities\Conversion.dbc
+TBCLASS: 0 0
