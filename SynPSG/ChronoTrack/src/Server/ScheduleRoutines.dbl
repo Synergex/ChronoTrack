@@ -1,0 +1,120 @@
+
+.include "CONSULTANT_SCHEDULE" repository, structure="strSchedule", end
+
+function GetConsultantSchedule  ,boolean
+    required in  userToken       ,a22
+    required out scheduleData    ,@System.Collections.ArrayList
+    endparams
+
+    .include "DEF:server.def"
+    .include "PROJECT" repository, stack record="project"
+    .include "CUSTOMER" repository, stack record="cust"
+    .include "COUNTRY" repository, stack record="ctry"
+    .include "CUSTOMER_LOCATION" repository, stack record="locn"
+
+    stack record locals
+        ch_project  ,int
+        ch_location ,int
+        ch_customer ,int
+        ch_country  ,int
+        ix          ,int
+        jdate       ,int
+        schedule    ,strSchedule
+    endrecord
+
+proc
+
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init locals
+    open(ch_project=%syn_freechn,i:i,"DATA:project.ism")
+    open(ch_location=%syn_freechn,i:i,"DATA:location.ism")
+    open(ch_customer=%syn_freechn,i:i,"DATA:customer.ism")
+    open(ch_country=%syn_freechn,i:i,"DATA:country.ism")
+
+    repeat
+    begin
+        reads(ch_project,project,eof)
+        clear schedule
+        schedule.consultant_id = project.lead_consultant
+        schedule.start_date = project.start_date
+        schedule.start_time = 0800
+        schedule.end_date = project.end_date
+        schedule.end_time = 1700
+        schedule.subject = project.description
+        schedule.description = project.text
+
+        ;;Get customer record
+        clear cust
+        begin
+            read(ch_customer,cust,project.customer_id) [ERR=nocust]
+            exit
+nocust,     clear cust
+            cust.company = "<not found>"
+        end
+
+        ;;Get customer location record
+        clear locn
+        locn.customer_id = project.customer_id
+        locn.location_id = project.work_location_id
+        begin
+            read(ch_location,locn,%keyval(ch_location,locn,0)) [ERR=noloc]
+            exit
+noloc,      clear locn
+            locn.description = "<not found>"
+        end
+
+        ;;Get country record for location
+        if (locn.location_id)
+        begin
+            read(ch_country,ctry,locn.country_id) [ERR=noctry]
+            exit
+noctry,     clear ctry
+            ctry.country_name = "<not found>"
+        end
+
+        if ((locn.location_id) && (locn.country_id=="US")) then
+            s_bld(schedule.location,,"%a; %a; %a, %a",company,locn.description,locn.addr3, locn.state)
+        else
+            s_bld(schedule.location,,"%a; %a; %a, %a, %a",company,locn.description,locn.addr3, locn.addr4, ctry.country_name )
+
+        schedule.status = 2 ;Busy
+        schedule.appointment_type = 2 ;Business
+
+        if (schedule.end_date > schedule.start_date) then
+            call add_multiple
+        else
+            call add_single
+
+    end
+eof,
+
+    close ch_project
+    close ch_location
+    close ch_customer
+    close ch_country
+
+    freturn true
+
+add_single,
+
+    schedule.id = (ix+=1)
+    scheduleData.Add((@strSchedule)schedule)
+
+    return
+
+add_multiple,
+
+    for jdate from %jperiod(schedule.start_date) thru %jperiod(schedule.end_date)
+    begin
+        schedule.start_date = %ndate(jdate)
+        schedule.end_date = schedule.start_date
+        call add_single
+    end
+
+    return
+
+endfunction
+

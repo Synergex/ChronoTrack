@@ -1,0 +1,572 @@
+;;**********************************************************************
+;;
+;; Title:       UserRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the user data
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+.include "USER" repository, structure = "sUser", end
+.include "USER_BREIF" repository, structure = "sUserBrief", end
+
+;;; <summary>
+;;; get_user
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required user record on the primary key
+;;; </remark>
+;;; <param name=userID>pass required user id</param>
+;;; <param name=userData>return located record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_user           ,boolean
+    required in  userToken  ,a22
+    required in  userID     ,a15
+    required out userData   ,sUser
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    userData.user_id = userID
+    upcase userData.user_id
+    result = UserDataEntity.Instance.IO.Locate(userData.user_id,Q_PRIMARY,false)
+
+    ;;set the data area
+    userData = UserDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = UserDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_user
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=userData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_user            ,boolean
+    required in    userToken    ,a22
+    required inout userData     ,sUser
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    UserDataEntity.Instance.IO.DataArea = userData
+
+    ;;create the record
+    result = UserDataEntity.Instance.IO.Create()
+    userData = UserDataEntity.Instance.IO.DataArea
+    lastErrorMsg = UserDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_user_table
+;;; return the user data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of te user file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=userTable>returned user table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_user_table     ,boolean
+    required in  userToken  ,a22
+    required out userTable  ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    userTable = UserDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; count_user_table
+;;; return the count of entries that would be loded into the Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the count o0f the recod that match from the user files
+;;; </remark>
+;;; <return type="Int">return the count of matchiung records</returns>
+function count_user_table   ,int
+    required in  userToken  ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    freturn UserDataEntity.Instance.DataCollection.Count()
+
+endfunction
+
+;;; <summary>
+;;; get_consultant_table
+;;; Returns a collection of user records for all consultants
+;;; </summary>
+;;; <remarks>
+;;; </remark>
+;;; <param name=userTable>returned user table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_consultant_table       ,boolean
+    required in  userToken          ,a22
+    required out consultantTable    ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        ix      ,int
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;Get all users
+    consultantTable = UserDataEntity.Instance.DataCollection.Collection()
+
+    ;;Filter for consultants only
+    for ix from consultantTable.Count-1 thru 0 by -1
+        if ((!((sUser)consultantTable[ix]).is_consultant)||(((sUser)consultantTable[ix]).inactive))
+            consultantTable.RemoveAt(ix)
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; get_manager_table
+;;; Returns a collection of user records for all managers
+;;; </summary>
+;;; <remarks>
+;;; </remark>
+;;; <param name=userTable>returned user table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_manager_table      ,boolean
+    required in  userToken      ,a22
+    required out managerTable   ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        ix      ,int
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;Get all users
+    managerTable = UserDataEntity.Instance.DataCollection.Collection()
+
+    ;;Filter for managers only
+    for ix from managerTable.Count-1 thru 0 by -1
+        if ((!((sUser)managerTable[ix]).is_manager)||(((sUser)managerTable[ix]).inactive))
+            managerTable.RemoveAt(ix)
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; get_employee_table
+;;; Returns a collection of user records for all employees
+;;; </summary>
+;;; <remarks>
+;;; </remark>
+;;; <param name=userTable>returned user table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_employee_table     ,boolean
+    required in  userToken      ,a22
+    required out employeeTable  ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        ix      ,int
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;Get all users
+    employeeTable = UserDataEntity.Instance.DataCollection.Collection()
+
+    ;;Filter for employees only
+    for ix from employeeTable.Count-1 thru 0 by -1
+        if ((!((sUser)employeeTable[ix]).is_employee)||(((sUser)employeeTable[ix]).inactive))
+            employeeTable.RemoveAt(ix)
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; get_contractor_table
+;;; Returns a collection of user records for all contractors (non employees)
+;;; </summary>
+;;; <remarks>
+;;; </remark>
+;;; <param name=userTable>returned user table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_contractor_table       ,boolean
+    required in  userToken          ,a22
+    required out contractorTable    ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        ix      ,int
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;Get all users
+    contractorTable = UserDataEntity.Instance.DataCollection.Collection()
+
+    ;;Filter for contractors only
+    for ix from contractorTable.Count-1 thru 0 by -1
+        if ((((sUser)contractorTable[ix]).is_employee)||(((sUser)contractorTable[ix]).inactive))
+            contractorTable.RemoveAt(ix)
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; get_project_consultants
+;;; Returns a collection of user records for all consultants associated with a project
+;;; </summary>
+;;; <remarks>
+;;; </remark>
+;;; <param name=userTable>returned user table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_project_consultants    ,boolean
+    required in  userToken          ,a22
+    required in  projectId          ,d8
+    required out consultantTable    ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+.include "PROJECT" repository, structure="sProject", end
+.include "PROJECT_TASK" repository, structure="sTask", end
+.include "PROJECT_CONSULTANT" repository, structure="sConsultant", end
+
+record
+    result              ,boolean
+    prjData             ,sProject
+    usrData             ,sUser
+    tmpUser             ,sUser
+    prjTaskTable        ,@ArrayList
+    prjConsultantTable  ,@ArrayList
+    tmpString           ,string
+    currentName         ,a15
+    prjTask             ,sTask
+    prjConsultant       ,sConsultant
+endrecord
+
+external function
+    locate_project_record       ,boolean
+    locate_User_Record          ,boolean
+    get_projectTask_table       ,boolean
+    get_projectConsultant_table ,boolean
+endexternal
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;Read the project record
+    result = %locate_Project_Record(userToken, projectID, prjData)
+    if (!result)
+        freturn false
+
+    ;;Add the project coordinators user record to the return collection
+    result = %locate_User_Record(userToken, prjData.coordinator, usrData)
+    if (result)
+        consultantTable.Add((string)usrData)
+
+    ;;Add the project lead consultants user record (if not the same as the coordinator)
+    if (prjData.lead_consultant != prjData.coordinator)
+    begin
+        result = %locate_User_Record(userToken, prjDatA.lead_consultant, usrData)
+        if (result)
+            consultantTable.Add((string)usrData)
+    end
+
+    ;;Iterate through all project tasks, and add the assigned consultant (if not already in the collection)
+    result = %get_projectTask_table(userToken, projectID, prjTaskTable)
+    if (result)
+    begin
+        foreach tmpString in prjTaskTable
+        begin
+                prjTask = (sTask) tmpString
+                currentName = prjTask.assigned_to
+                call check_not_there
+        end
+    end
+
+    ;;Iterate through all records in PROJECT_CONSULTANT for this project, and add
+    ;;those consultants (if not already in the collection)
+    result = %get_projectConsultant_table(userToken, projectID, "", prjConsultantTable)
+    if (result)
+    begin
+        foreach tmpString in prjConsultantTable
+        begin
+                prjConsultant = (sConsultant) tmpString
+                currentName = prjConsultant.consultant_id
+                call check_not_there
+        end
+    end
+
+    ;;Sort the results in ascending order by last name
+
+    freturn true
+
+check_not_there,
+
+    begin
+        data found  ,boolean    ,false
+
+        ;;check that the name does not already exist
+        foreach tmpString in consultantTable
+        begin
+            usrData = (sUser) tmpString
+            if (usrData.user_id == currentName)
+            begin
+                found=true
+                exitloop
+            end
+        end
+        if (!found)
+        begin
+            ;;not found, so add to the collection
+            result = %locate_User_Record(userToken, currentName, usrData)
+            if (result)
+                consultantTable.Add((string)usrData)
+        end
+    end
+
+endfunction
+
+;;; <summary>
+;;; get_user_table_brief
+;;; return the user data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of te user file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET.  The table
+;;; will contan a breif layout of te user record
+;;; </remark>
+;;; <param name=userTable>returned user table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_user_table_brief   ,boolean
+    required in  userToken      ,a22
+    required out userTable      ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+    record
+        bRec    ,sUserBrief
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    userTable = UserDataEntity.Instance.DataCollection.Collection(TableView.Breif, (@sUserBrief) bRec)
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; count_user_table_brief
+;;; return the count of the matching records
+;;; </summary>
+;;; <remarks>
+;;; Return the count o0f the recod that match from the user files
+;;; </remark>
+;;; <return type="Int">return the count of matchiung records</returns>
+function count_user_table_brief ,int
+    required in  userToken      ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    record
+        bRec    ,sUserBrief
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    freturn UserDataEntity.Instance.DataCollection.Count(TableView.Breif, (@sUserBrief) bRec)
+
+endfunction
+
+;;; <summary>
+;;; update_user
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=userData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_user ,boolean
+    required in  userToken  ,a22
+    required in  userData   ,sUser
+    required out newGrfa    ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    UserDataEntity.Instance.IO.DataArea = userData
+
+    ;;update the record
+    result = UserDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = UserDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = UserDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_user
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=userData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_user        ,boolean
+    required in  userToken  ,a22
+    required in  userData   ,sUser
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    UserDataEntity.Instance.IO.DataArea = userData
+
+    ;;delete the record
+    result = UserDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = UserDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

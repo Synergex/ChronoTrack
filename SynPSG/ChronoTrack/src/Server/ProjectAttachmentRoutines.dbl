@@ -1,0 +1,231 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectAttachmentRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the project_attachment data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "PROJECT_ATTACHMENT" repository, structure="sAttachment", end
+
+;;; <summary>
+;;; get_attachment
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required project activity record on the primary key
+;;; </remark>
+;;; <param name=projectID>passed project ID</param>
+;;; <param name=taskID>passed task ID</param>
+;;; <param name=attachmentID>passed attachment ID</param>
+;;; <param name=projectActivityData>returned record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_attachment                 ,boolean
+    required in  userToken              ,a22
+    required in  projectID              ,d8
+    required in  taskID                 ,d3
+    required in  attachmentID           ,d3
+    required out projectAttachmentData  ,sAttachment
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = ProjectAttachmentDataEntity.Instance.IO.Locate(%string(projectID,"XXXXXXXX")+%string(taskID,"XXX")+%string(attachmentID,"XXX"),Q_PRIMARY,false)
+
+    ;;set the data area
+    projectAttachmentData = ProjectAttachmentDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = ProjectAttachmentDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_attachment
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=projectActivityData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_attachment                  ,boolean
+    required in    userToken                ,a22
+    required inout projectAttachmentData    ,sAttachment
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectAttachmentDataEntity.Instance.IO.DataArea = projectAttachmentData
+
+    ;;create the record
+    result = ProjectAttachmentDataEntity.Instance.IO.Create()
+    projectAttachmentData = ProjectAttachmentDataEntity.Instance.IO.DataArea
+    lastErrorMsg = ProjectAttachmentDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_projectattachment_table
+;;; return the Project Attachment data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the Project Attachment file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=projectID>passed project ID</param>
+;;; <param name=taskID>passed task ID</param>
+;;; <param name=projectActivityTable>returned attachment table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_projectattachment_table    ,boolean
+    required in  userToken              ,a22
+    required in  projectID              ,d8
+    required in  taskID                 ,d3
+    required out projectAttachmentTable ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    if (projectID) then
+        projectAttachmentTable = ProjectAttachmentDataEntity.Instance.DataCollection.Collection(%string(projectID,"XXXXXXXX")+%string(taskID,"XXX"),Q_PRIMARY)
+    else
+        projectAttachmentTable = ProjectAttachmentDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_attachment
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=projectActivityData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_attachment, boolean
+    required in  userToken              ,a22
+    required in  projectAttachmentData  ,sAttachment
+    required out newGrfa                ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectAttachmentDataEntity.Instance.IO.DataArea = projectAttachmentData
+
+    ;;update the record
+    result = ProjectAttachmentDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = ProjectAttachmentDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = ProjectAttachmentDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_attachment
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=projectActivityData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_attachment              ,boolean
+    required in  userToken              ,a22
+    required in  projectAttachmentData  ,sAttachment
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectAttachmentDataEntity.Instance.IO.DataArea = projectAttachmentData
+
+    ;;delete the record
+    result = ProjectAttachmentDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = ProjectAttachmentDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

@@ -1,0 +1,231 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectActivityRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the project_activity data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "PROJECT_ACTIVITY" repository, structure="sActivity", end
+
+;;; <summary>
+;;; get_activity
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required project activity record on the primary key
+;;; </remark>
+;;; <param name=projectID>passed project ID</param>
+;;; <param name=taskID>passed task ID</param>
+;;; <param name=activityID>passed activity ID</param>
+;;; <param name=projectActivityData>returned record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_activity                   ,boolean
+    required in  userToken              ,a22
+    required in  projectID              ,d8
+    required in  taskID                 ,d3
+    required in  activityID             ,d4
+    required out projectActivityData    ,sActivity
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = ProjectActivityDataEntity.Instance.IO.Locate(%string(projectID,"XXXXXXXX")+%string(taskID,"XXX")+%string(activityID,"XXXX"),Q_PRIMARY,false)
+
+    ;;set the data area
+    projectActivityData = ProjectActivityDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = ProjectActivityDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_activity
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=projectActivityData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_activity                ,boolean
+    required in    userToken            ,a22
+    required inout projectActivityData  ,sActivity
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectActivityDataEntity.Instance.IO.DataArea = projectActivityData
+
+    ;;create the record
+    result = ProjectActivityDataEntity.Instance.IO.Create()
+    ProjectActivityDataEntity.Instance.IO.DataArea = projectActivityData
+    lastErrorMsg = ProjectActivityDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_projectactivity_table
+;;; return the ProjectActivity data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the project_activity file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=projectID>passed project ID</param>
+;;; <param name=taskID>passed task ID</param>
+;;; <param name=projectActivityTable>return a collection containing matching records</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_projectactivity_table  ,boolean
+    required in  userToken              ,a22
+    required in  projectID              ,d8
+    required in  taskID                 ,d3
+    required out projectActivityTable   ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    if (projectID) then
+        projectActivityTable = ProjectActivityDataEntity.Instance.DataCollection.Collection(%string(projectID,"XXXXXXXX")+%string(taskID,"XXX"),Q_PRIMARY)
+    else
+        projectActivityTable = ProjectActivityDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_activity
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=projectActivityData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_activity                ,boolean
+    required in  userToken              ,a22
+    required in  projectActivityData    ,sActivity
+    required out newGrfa                ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectActivityDataEntity.Instance.IO.DataArea = projectActivityData
+
+    ;;update the record
+    result = ProjectActivityDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = ProjectActivityDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = ProjectActivityDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_activity
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=projectActivityData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_activity                ,boolean
+    required in  userToken              ,a22
+    required in  projectActivityData    ,sActivity
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectActivityDataEntity.Instance.IO.DataArea = projectActivityData
+
+    ;;delete the record
+    result = ProjectActivityDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = ProjectActivityDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

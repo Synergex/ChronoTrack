@@ -1,0 +1,236 @@
+;;**********************************************************************
+;;
+;; Title:       RequestRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the request data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "REQUEST" repository, structure="sRequest", end
+
+;;; <summary>
+;;; get_request
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required request record on the primary key
+;;; </remark>
+;;; <param name=requestID>required request ID filter value</param>
+;;; <param name=requestData>return located record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_request            ,boolean
+    required in  userToken      ,a22
+    required in  requestID      ,d6
+    required out requestData    ,sRequest
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = RequestDataEntity.Instance.IO.Locate(%string(requestID,"XXXXXX"),Q_PRIMARY,false)
+
+    ;;set the data area
+    requestData = RequestDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = RequestDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_request
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=requestData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_request         ,boolean
+    required in    userToken    ,a22
+    required inout requestData  ,sRequest
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    RequestDataEntity.Instance.IO.DataArea = requestData
+
+    ;;create the record
+    result = RequestDataEntity.Instance.IO.Create()
+    requestData = RequestDataEntity.Instance.IO.DataArea
+    lastErrorMsg = RequestDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_request_table
+;;; return the Request data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the Request file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=requestTable>returned request table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_request_table          ,boolean
+    required in  userToken          ,a22
+    required out requestTable       ,@ArrayList
+    required in  startDateKeySearch ,d8
+    required in  createdBySearchKey ,a15
+    required in  resourceKeySearch  ,a15
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection based on the passed search key and filter
+    if (startDateKeySearch) then
+        requestTable = RequestDataEntity.Instance.DataCollection.Collection(%string(startDateKeySearch,"XXXXXXXX"),Q_ALT1)
+    else
+    begin
+        if (createdBySearchKey) then
+            requestTable = RequestDataEntity.Instance.DataCollection.Collection(createdBySearchKey,Q_ALT2)
+        else
+        begin
+            if (resourceKeySearch) then
+                requestTable = RequestDataEntity.Instance.DataCollection.Collection(resourceKeySearch,Q_ALT3)
+            else
+                requestTable = RequestDataEntity.Instance.DataCollection.Collection()
+        end
+    end
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_request
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=requestData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_request         ,boolean
+    required in  userToken      ,a22
+    required in  requestData    ,sRequest
+    required out newGrfa        ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    RequestDataEntity.Instance.IO.DataArea = requestData
+
+    ;;update the record
+    result = RequestDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = RequestDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = RequestDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_request
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=requestData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_request         ,boolean
+    required in  userToken      ,a22
+    required in  requestData    ,sRequest
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    RequestDataEntity.Instance.IO.DataArea = requestData
+
+    ;;delete the record
+    result = RequestDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = RequestDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

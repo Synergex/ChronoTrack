@@ -1,0 +1,155 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=ChronoTrack ; export WORKSPACE
+PROJECT=Server ; export PROJECT
+COMMONAREA=NetCommon ; export COMMONAREA
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/Core ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetSRC_CHRONOTRACK=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CHRONOTRACK
+
+SynPSGNetLIB=$SRCDEV/$DEVAREA/$COMMONAREA/lib ; export SynPSGNetLIB
+
+# *************************************************************
+# These setings are for the core library details
+# *************************************************************
+
+COREEXE=$SRCDEV/$DEVAREA/Core/exe ; export COREEXE
+CORELIB=$SRCDEV/$DEVAREA/Core/lib ; export CORELIB
+COREHDR=$SRCDEV/$DEVAREA/Core/hdr ; export COREHDR
+COREDEF=$SRCDEV/$DEVAREA/Core/src/Includes ; export COREDEF
+
+# *************************************************************
+# These setings are for the System library details
+# *************************************************************
+
+SYSTEMEXE=$SRCDEV/$DEVAREA/System/exe ; export SYSTEMEXE
+SYSTEMHDR=$SRCDEV/$DEVAREA/System/hdr ; export SYSTEMHDR
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+SRC=$DEVROOT/src/$PROJECT ; export SRC
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+
+NAMESPACE=synpsg-chronotrack-server ; export NAMESPACE
+SYNDEFNS=SynPSG.ChronoTrack.Server ; export SYNDEFNS
+
+OLIB=$DEVROOT/lib ; export OLIB
+OBJ=$DEVROOT/obj/$PROJECT ; export OBJ
+
+EXE=$DEVROOT/exe ; export EXE
+DEF=$DEVROOT/def ; export DEF
+
+SYNEXPDIR=$DEVROOT/hdr ; export SYNEXPDIR
+SYNIMPDIR=$SynPSGNetHDR,$COREHDR,$DEVROOT/hdr ; export SYNIMPDIR
+
+XFPL_SMCPATH=$DEVROOT/smc ; export XFPL_SMCPATH
+
+# *************************************************************
+# runtime settings
+# *************************************************************
+
+DATA=$DEVROOT/dat ; export DATA
+CHRONOTRACK_DEBUG_MODE=OFF ; export CHRONOTRACK_DEBUG_MODE
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then
+ COMPILEFLAGS=;export COMPILEFLAGS
+ LINKERFLAGS=;export LINKERFLAGS
+fi
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $OLIB/ChronoTrackServer.olb
+rm -f $OBJ/ChronoTrackServer.dbo
+rm -f $OBJ/CheckLogin.dbo
+rm -f $OBJ/RemoteLogin.dbo
+rm -f $OBJ/ReturnLastError.dbo
+rm -f $OBJ/ConsultantFeeRoutines.dbo
+rm -f $OBJ/UserRoutines.dbo
+rm -f $OBJ/StateRoutines.dbo
+rm -f $OBJ/CountryRoutines.dbo
+rm -f $OBJ/CustomerContactRoutines.dbo
+rm -f $OBJ/CustomerContractRoutines.dbo
+rm -f $OBJ/CustomerRoutines.dbo
+rm -f $OBJ/CustomerLocationRoutines.dbo
+rm -f $OBJ/ExpenseTypeRoutines.dbo
+rm -f $OBJ/FeeTypeRoutines.dbo
+rm -f $OBJ/ProjectActivityRoutines.dbo
+rm -f $OBJ/ProjectAttachmentRoutines.dbo
+rm -f $OBJ/ProjectConsultantRoutines.dbo
+rm -f $OBJ/ProjectRoutines.dbo
+rm -f $OBJ/ProjectExpenseRoutines.dbo
+rm -f $OBJ/ProjectNoteRoutines.dbo
+rm -f $OBJ/ProjectTaskRoutines.dbo
+rm -f $OBJ/RequestRoutines.dbo
+rm -f $OBJ/GanttViewRoutines.dbo
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:CheckLogin.dbo SRC:CheckLogin.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:RemoteLogin.dbo SRC:RemoteLogin.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ReturnLastError.dbo SRC:ReturnLastError.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ConsultantFeeRoutines.dbo SRC:ConsultantFeeRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:UserRoutines.dbo SRC:UserRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:StateRoutines.dbo SRC:StateRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:CountryRoutines.dbo SRC:CountryRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:CustomerContactRoutines.dbo SRC:CustomerContactRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:CustomerContractRoutines.dbo SRC:CustomerContractRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:CustomerRoutines.dbo SRC:CustomerRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:CustomerLocationRoutines.dbo SRC:CustomerLocationRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ExpenseTypeRoutines.dbo SRC:ExpenseTypeRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:FeeTypeRoutines.dbo SRC:FeeTypeRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ProjectActivityRoutines.dbo SRC:ProjectActivityRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ProjectAttachmentRoutines.dbo SRC:ProjectAttachmentRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ProjectConsultantRoutines.dbo SRC:ProjectConsultantRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ProjectRoutines.dbo SRC:ProjectRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ProjectExpenseRoutines.dbo SRC:ProjectExpenseRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ProjectNoteRoutines.dbo SRC:ProjectNoteRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ProjectTaskRoutines.dbo SRC:ProjectTaskRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:RequestRoutines.dbo SRC:RequestRoutines.dbl
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:GanttViewRoutines.dbo SRC:GanttViewRoutines.dbl
+dblibr -ca OLIB:ChronoTrackServer.olb
+dblibr -w -r OLIB:ChronoTrackServer.olb  OBJ:CheckLogin.dbo OBJ:RemoteLogin.dbo OBJ:ReturnLastError.dbo OBJ:ConsultantFeeRoutines.dbo OBJ:UserRoutines.dbo OBJ:StateRoutines.dbo OBJ:CountryRoutines.dbo OBJ:CustomerContactRoutines.dbo OBJ:CustomerContractRoutines.dbo OBJ:CustomerRoutines.dbo OBJ:CustomerLocationRoutines.dbo OBJ:ExpenseTypeRoutines.dbo OBJ:FeeTypeRoutines.dbo OBJ:ProjectActivityRoutines.dbo OBJ:ProjectAttachmentRoutines.dbo OBJ:ProjectConsultantRoutines.dbo OBJ:ProjectRoutines.dbo OBJ:ProjectExpenseRoutines.dbo OBJ:ProjectNoteRoutines.dbo OBJ:ProjectTaskRoutines.dbo OBJ:RequestRoutines.dbo OBJ:GanttViewRoutines.dbo
+dblink $LINKERFLAGS -l EXE:ChronoTrackServer.elb OLIB:ChronoTrackServer.olb

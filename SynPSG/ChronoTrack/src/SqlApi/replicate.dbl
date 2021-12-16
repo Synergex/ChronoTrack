@@ -1,0 +1,77 @@
+;*******************************************************************************
+;
+; Title:        replicate.dbl
+;
+; Description:  Adds a new transaction record to the replication servers
+;               transaction file
+;
+; Author:       Richard Morris
+;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+;;
+.subroutine replicate
+
+    a_transaction_type  ,n  ;Transaction type (1=create, 2=amend or 3=delete)
+    a_structure         ,a  ;Structure name
+    a_strkey,           a   ;Unique key of record affected
+    ;End of arguments
+
+.include "SQL_REPLICATION_ITEM" repository, local record = "transaction"
+
+static record
+    io_transaction_chn,      i4
+
+.proc
+
+    ;Do we need to open the replication transaction file?
+    if (!io_transaction_chn)
+        open(io_transaction_chn = %syn_freechn,"u:i","DAT:replication.ism")
+
+    ;Populate the new transaction record
+    transaction.sdms_action = a_transaction_type
+    transaction.structure_name = a_structure
+    transaction.structure_key = a_strkey
+
+    ;And add it to the transaction log
+    repeat
+    begin
+        ;Give the transaction a unique and time sequenced primary key
+        transaction.unique_key_value = %datetime
+        store(io_transaction_chn,transaction) [$ERR_NODUPS=duplicate_key]
+        exitloop
+duplicate_key,
+        sleep 0.25
+    end
+
+    xreturn
+
+.end
+

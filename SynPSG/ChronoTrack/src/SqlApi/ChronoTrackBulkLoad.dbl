@@ -1,0 +1,186 @@
+;;*****************************************************************************
+;;
+;; Program:     ChronoTrackBulkLoad
+;;
+;; Desctiption: This program bulk loads the Synergy data file contents
+;;              to the relational database.
+;;
+;; Author:      Steve Ives (stevei)
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+main ChronoTrackBulkLoad
+
+    ;; Specify how to connect to and log in to a SQL Server database here:
+    ;; Note, the SQL Server login that you use must have administrative
+    ;; rights to the database being used, because the replication server
+    ;; creates new tables as needed.
+
+    .define SQL_DSN         "ChronoTrack"        ;;DSN name name
+    .define SQL_USERNAME    "ChronoTrack"        ;;SQL Server username
+    .define SQL_PASSWORD    "ChronoTrack"        ;;SQL Server password
+
+    .include "CONNECTDIR:ssql.def"
+    .include "DBLDIR:namspc.def"
+    .include "SRC:structure_io.def"
+    .include "SQL_REPLICATION_ITEM" repository, record="transaction"
+
+    .define D_MAX_CUR       20
+    .define D_MAX_COL       200
+    .define D_MAX_BUFFER    2048
+
+    record ivars
+        tt                  ,int                ;;Terminal channel
+        db                  ,i4                  ;;Database channel
+        error               ,i4                  ;;Fatal error occured
+        length              ,i4                  ;;Length of buffer
+        status              ,i4                  ;;General working status return
+    endrecord
+
+    .define TABLE_COUNT 18
+
+    record avars
+        connect_string      ,a256                ;;Database connect string
+        dberrtxt            ,a1024
+        tables              ,[TABLE_COUNT]a30   ,"CONSULTANT_FEE"
+        &                                       ,"COUNTRY"
+        &                                       ,"CUSTOMER"
+        &                                       ,"CUSTOMER_CONTACT"
+        &                                       ,"CUSTOMER_CONTRACT"
+        &                                       ,"CUSTOMER_LOCATION"
+        &                                       ,"EXPENSE_TYPE"
+        &                                       ,"FEE_TYPE"
+        &                                       ,"PROJECT"
+        &                                       ,"PROJECT_ACTIVITY"
+        &                                       ,"PROJECT_ATTACHMENT"
+        &                                       ,"PROJECT_CONSULTANT"
+        &                                       ,"PROJECT_EXPENSE"
+        &                                       ,"PROJECT_NOTE"
+        &                                       ,"PROJECT_TASK"
+        &                                       ,"REQUEST"
+        &                                       ,"STATE"
+        &                                       ,"USER"
+        achar               ,a1
+    endrecord
+
+    external function
+        xsubr           ,^val
+    endexternal
+
+proc
+
+    clear ^i(ivars)
+    open(tt=syn_freechn(),i,"tt:")
+    flags(7004020,1)
+
+    ;;Enable and Initialize SQL Connection
+    .ifdef OS_VMS
+    xcall init_ssql
+    .else
+    status=%option(48,1)
+    .endc
+    if (%ssc_init(db=1,D_MAX_CUR,D_MAX_COL,D_MAX_BUFFER)==SSQL_FAILURE)
+    begin
+        writes(tt,"Failed to initialize SQL Connection")
+        error=1
+    end
+
+    ;;Connect to the database
+    if (!error)
+    begin
+        xcall s_bld(connect_string,,"VTX12_SQLNATIVE:%a/%a/%a",
+        &   SQL_USERNAME,SQL_PASSWORD,SQL_DSN)
+
+        if (%ssc_connect(db,atrim(connect_string))==SSQL_FAILURE)
+        begin
+            xcall ssc_getemsg(db,dberrtxt,length)
+            writes(tt,"Failed to connect to database. Connection string was " + atrim(connect_string) +". Error message was: " + dberrtxt(1,length))
+            call WaitForKey
+            error=1
+        end
+    end
+
+    ;;Main processing
+    if (!error)
+    begin
+        data ix, int
+        for ix from 1 thru TABLE_COUNT
+        begin
+            ;;Drop existing table
+            if (%xsubr(atrim(tables[ix])+"_EXISTS",db,dberrtxt)==1)
+            begin
+                writes(tt,"Dropping table " + atrim(tables[ix]))
+                if (!%xsubr(atrim(tables[ix])+"_DROP",db,dberrtxt))
+                    call ReportError
+            end
+            ;;Create new table
+            writes(tt,"Creating table "+atrim(tables[ix]))
+            if (!%xsubr(atrim(tables[ix])+"_CREATE",db,dberrtxt)) then
+                call ReportError
+            else
+            begin
+                writes(tt,"Loading table "+atrim(tables[ix]))
+                if (!%xsubr(atrim(tables[ix])+"_LOAD",db,dberrtxt,,tt))
+                    call ReportError
+            end
+            writes(tt,"-------------------------------------------------------------------------------")
+        end
+
+        call WaitForKey
+    end
+
+    ;;Close the database
+    if (db)
+        xcall ssc_release(db)
+
+    close tt
+
+    ;;We're done
+    stop
+
+ReportError,
+
+    display(tt,atrim(dberrtxt))
+    call WaitForKey
+
+    return
+
+WaitForKey,
+
+    display(tt,13,10,10,"Press a key: ")
+    accept(tt,achar)
+    while (%ttsts)
+        accept(tt,achar)
+    writes(tt,"")
+
+    return
+
+endmain
+

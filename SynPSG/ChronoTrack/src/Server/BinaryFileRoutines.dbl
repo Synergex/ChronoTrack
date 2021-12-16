@@ -1,0 +1,404 @@
+;;*****************************************************************************
+;;
+;; Title:       BinaryFileRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: A collection of routines used to pass binary files in
+;;              both directions between xfNetLink clients and
+;;              xfServerPlus servers
+;;
+;; Author:      Steve Ives, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+;;
+.include "DEF:ChronoTrack.def"
+;;
+;;*****************************************************************************
+;;
+;;; <summary>
+;;;     DownloadFile(fileName,memHandle), int
+;;; </summary>
+;;; <remarks>
+;;;     Downloads a named local file to the client.
+;;; </remark>
+;;; <param name="fileName">The name of the file whos content is to be retrieved.</param>
+;;; <param name="memHandle">Returned memory handle containing file content.</param>
+;;; <return type="int">0=success, other=error</returns>
+;;;
+function DownloadFile ,^val
+
+    required in  fileName   ,string              ;;File name to load
+    required out memHandle  ,int                 ;;Memory handle
+    endparams
+
+proc
+
+    freturn %FileToHandle(fileName,memHandle)
+
+endfunction
+
+;'*****************************************************************************
+;;
+;;; <summary>
+;;;     UploadFile(memHandle,fileName), int
+;;; </summary>
+;;; <remarks>
+;;;     Accepts a memory handle representing the binary content of a file and
+;;;     saves it to a local file.
+;;; </remark>
+;;; <param name="memHandle">Memory handle containing file content from the client.</param>
+;;; <param name="fileName">Name of local file to be created.</param>
+;;; <return type="int">0=success, other=error</returns>
+;;
+function UploadFile ,^val
+
+    required in memHandle   ,int                 ;;Memory handle
+    required in fileName    ,string              ;;File to create
+    endparams
+
+proc
+
+    freturn %HandleToFile(memHandle,fileName)
+
+endfunction
+
+;;*****************************************************************************
+;;
+;;; <summary>
+;;;     FileToHandle(fileName,memHandle) ,int
+;;; </summary>
+;;; <remarks>
+;;;     Load the binary data of a local file into a memory handle
+;;; </remark>
+;;; <param name="fileName">Name of file to be read</param>
+;;; <param name="memHandle">Memory handle to be loaded with file content</param>
+;;; <return type="int">0=success, other=error</returns>
+;;
+;;***********************************
+.ifndef OS_VMS ;Windows and UNIX code
+;;***********************************
+;;
+function FileToHandle ,^val
+
+    required in fileName    ,string              ;;File name to load
+    required out memHandle  ,int                 ;;Memory handle
+    endparams
+
+    stack record ivars
+        retval              ,int                 ;;Routine return value
+        ch                  ,int                 ;;Input file channel
+        blocks              ,int                 ;;Block counter
+        chars               ,int                 ;;Size of last block (bytes)
+    endrecord
+
+    .define D_BUFSZ 32768
+
+    structure block
+                            ,a D_BUFSZ           ;;Block size - how many bytes to read at once. Must be less than 64K.
+    endstructure
+
+    stack record avars
+        buf                 ,a D_BUFSZ           ;;IO Buffer
+    endrecord
+
+proc
+
+    init ivars, avars
+
+    ;;Open input file
+    open(ch=%syn_freechn,u,fileName) [$ERR_FNF=nf,$ERR_PROTEC=pf,ERR=err]
+
+    ;;Error checking for file open
+    if (0)
+    begin
+nf,     retval=1                                 ;;File not found
+        exit
+pf,     retval=2                                 ;;Protection violation
+        exit
+err,    retval=3                                 ;;Other error
+    end
+
+    if (!retval)
+    begin
+        clear ^i(^m(memHandle))
+
+        ;;Read data from file in "block size" chunks
+        repeat
+        begin
+            clear buf
+            gets(ch,buf,ef)
+            blocks+=1
+            memHandle = %mem_proc(DM_RESIZ,^size(block)*blocks,memHandle)
+            ^m(block[blocks],memHandle)=buf
+        end
+
+        ;;We hit EOF, save away the final buffer of data
+ef,     chars=%rsize
+        if (chars)
+        begin
+            blocks+=1
+            memHandle = %mem_proc(DM_RESIZ,^size(block)*blocks,memHandle)
+            ^m(block[blocks],memHandle)=buf
+
+            ;;Resize handle to exact size of file.
+            memHandle = %mem_proc(DM_RESIZ,((^size(block)*(blocks-1))+(chars)),memHandle)
+        end
+
+    end
+
+    if retval!=1
+        close ch
+
+    freturn retval
+
+endfunction
+;;
+;;*************
+.else ;VMS CODE
+;;*************
+;;
+;;VMS CODE - SEEMS TO WORK FOR BINARY FILES, BUT NOT FOR TEXT FILES???????
+;;
+function FileToHandle ,^val
+
+    required in fileName    ,string              ;;File name to load
+    required out memHandle  ,int                 ;;Memory handle
+    endparams
+
+    stack record ivars
+        retval              ,int                 ;;Routine return value
+        ch                  ,int                 ;;Input file channel
+        mc                  ,int                 ;;Characters read
+        ms                  ,int                 ;;Size of memory array
+        blocks              ,int                 ;;Number of blocks read
+        len                 ,int                 ;;Length of a string
+    endrecord
+
+    .define D_BUFSZ 512
+
+    structure chunk
+                            ,a D_BUFSZ
+    endstructure
+
+    stack record avars
+        buf                 ,a D_BUFSZ           ;;IO Buffer
+    endrecord
+
+.proc
+
+    init ivars, avars
+
+    ;;Open input file
+    begin
+        open(ch=%syn_freechn,i:b,fileName) [$ERR_FNF=nf,$ERR_PROTEC=pf,ERR=err]
+        exit
+nf,     retval=1                                 ;;File not found
+        exit
+pf,     retval=2                                 ;;Protection violation
+        exit
+err,    retval=3                                 ;;Other error
+    end
+
+    if (!retval)
+    begin
+        ;;Read data from file one chunk at a time!
+        repeat
+        begin
+            reads(ch,buf,ef)
+            memHandle = %mem_proc(DM_RESIZ,D_BUFSZ*(blocks+=1),memHandle)
+            ^m(chunk[blocks],memHandle) = buf
+        end
+ef,
+        if (len=%rdlen)
+        begin
+            memHandle = %mem_proc(DM_RESIZ,D_BUFSZ*blocks+len,memHandle)
+            ^m(chunk[blocks+1](1:len),memHandle) = buf(1:len)
+        end
+
+    end
+
+    if (!retval)
+        close ch
+
+    freturn retval
+
+endfunction
+;;
+;;********************
+.endc ;END OF VMS CODE
+;;********************
+;;
+;;*****************************************************************************
+;;
+;;; <summary>
+;;;     HandleToFile(memHandle,fileName) ,int
+;;; </summary>
+;;; <remarks>
+;;;     Saves binary data from a memory handle to a local file
+;;; </remark>
+;;; <param name="memHandle">Memory handle containing file content</param>
+;;; <param name="fileName">Name of file to be created</param>
+;;; <return type="int">0=success, other=error</returns>
+;;
+;;***********************************
+.ifndef OS_VMS ;WINDOWS AND UNIX CODE
+;;***********************************
+;;
+function HandleToFile ,^val
+
+    required in memHandle   ,int                 ;;Memory handle
+    required in fileName    ,string              ;;File name to load
+    endparams
+
+    stack record ivars
+        retval              ,int                 ;;Routine return value
+        ch                  ,int                 ;;Output file channel
+        chars               ,int                 ;;File size (bytes)
+        chunks              ,int                 ;;Number of chunks to write
+        count               ,int                 ;;Loop counter
+        remaining           ,int                 ;;Chars remaining after full chunks written
+    endrecord
+
+    .define D_BUFSZ 32768
+
+    structure chunk
+                            ,a D_BUFSZ
+    endstructure
+
+    stack record avars
+        buf                 ,a D_BUFSZ           ;;IO buffer
+    endrecord
+
+.proc
+
+    init ivars, avars
+
+    ;;Open the input file
+    open(ch=%syn_freechn,o,fileName) [ERR=nf]
+
+    if 0
+nf,     retval=1
+
+    if (!retval)
+    begin
+        ;;Find out how much data we're dealing with, and calculate how many
+        ;;puts will be required based on the current vlock size.
+        chars = %mem_proc(DM_GETSIZE,memHandle)
+        chunks = (chars/D_BUFSZ)
+
+        ;;Write full chunks to file
+        for count from 1 thru chunks
+            puts(ch,^m(chunk[count],memHandle))
+
+        ;;Write remaining data to file
+        remaining = (chars-(chunks*D_BUFSZ))
+        if (remaining)
+            puts(ch,^m(chunk[count](1:remaining),memHandle))
+    end
+
+    ;;Close file
+    if (retval!=1)
+        close ch
+
+    freturn retval
+
+endfunction
+;
+;**************
+.else ;VMS CODE
+;**************
+;
+;THIS CODE WILL NOT WORK YET!
+;
+function HandleToFile ,^val
+
+    required in memHandle   ,int                 ;;Memory handle
+    required in fileName    ,string              ;;File name to load
+    endparams
+
+    stack record ivars
+        retval              ,int                 ;;Routine return value
+        ch                  ,int                 ;;Output file channel
+        chars               ,int                 ;;File size (bytes)
+        chunks              ,int                 ;;Number of chunks to write
+        count               ,int                 ;;Loop counter
+        remaining           ,int                 ;;Chars remaining after full chunks written
+    endrecord
+
+    .define D_BUFSZ 512
+
+    structure chunk
+                            ,a D_BUFSZ
+    endstructure
+
+    stack record avars
+        buf                 ,a D_BUFSZ           ;;IO buffer
+    endrecord
+
+proc
+
+    init ivars, avars
+
+    ;;Open the input file
+    open(ch=%syn_freechn,o:b,fileName) [ERR=nf]
+
+    if 0
+nf,     retval=1
+
+    if (!retval)
+    begin
+        ;;Find out how much data we're dealing with, and calculate how many
+        ;;puts will be required based on the current vlock size.
+        chars = %mem_proc(DM_GETSIZE,memHandle)
+        chunks = chars / D_BUFSZ
+
+        ;;Write full chunks to file
+        for count from 1 thru chunks
+            puts(ch,^m(chunk[count],memHandle))
+
+        ;;Write remaining chunks to file
+        remaining = (chars-(chunks*D_BUFSZ))
+        if (remaining)
+            puts(ch,^m(chunk[count](1:remaining),memHandle))
+    end
+
+    ;;Close file
+    if (retval!=1)
+        close ch
+
+    freturn retval
+
+endfunction
+;;********************
+.endc ;END OF VMS CODE
+;;********************
+

@@ -1,0 +1,231 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectConsultantRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the project_consultant data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "PROJECT_CONSULTANT" repository, structure="sConsultant", end
+
+;;; <summary>
+;;; get_project_rate
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required project consultant record on the primary key
+;;; </remark>
+;;; <param name=projectID>passed project ID</param>
+;;; <param name=consultantID>passed consultant ID</param>
+;;; <param name=feeID>passed fee ID</param>
+;;; <param name=projectConsultantData>returned record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_project_rate               ,boolean
+    required in  userToken              ,a22
+    required in  projectID              ,d8
+    required in  consultantID           ,a15
+    required in  feeID                  ,d2
+    required out projectConsultantData  ,sConsultant
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = ProjectConsultantDataEntity.Instance.IO.Locate(%string(projectID,"XXXXXXXX")+consultantID+%string(feeID,"XX"),Q_PRIMARY,false)
+
+    ;;set the data area
+    projectConsultantData = ProjectConsultantDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = ProjectConsultantDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_project_rate
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=projectConsultantData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_project_rate                ,boolean
+    required in    userToken                ,a22
+    required inout projectConsultantData    ,sConsultant
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectConsultantDataEntity.Instance.IO.DataArea = projectConsultantData
+
+    ;;create the record
+    result = ProjectConsultantDataEntity.Instance.IO.Create()
+    projectConsultantData = ProjectConsultantDataEntity.Instance.IO.DataArea
+    lastErrorMsg = ProjectConsultantDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_projectConsultant_table
+;;; return the ProjectConsultant data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the project_consultant file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=projectID>passed project ID</param>
+;;; <param name=consultantID>passed consultant ID</param>
+;;; <param name=projectConsultantTable>returned table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_projectConsultant_table    ,boolean
+    required in  userToken              ,a22
+    required in  projectID              ,d8
+    required in  consultantID           ,a15
+    required out projectConsultantTable ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    if (consultantID) then
+        projectConsultantTable = ProjectConsultantDataEntity.Instance.DataCollection.Collection(%string(projectID,"XXXXXXXX")+consultantID,Q_PRIMARY)
+    else
+        projectConsultantTable = ProjectConsultantDataEntity.Instance.DataCollection.Collection(%string(projectID,"XXXXXXXX"),Q_PRIMARY)
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_project_rate
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=projectConsultantData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_project_rate, boolean
+    required in  userToken              ,a22
+    required in  projectConsultantData  ,sConsultant
+    required out newGrfa                ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectConsultantDataEntity.Instance.IO.DataArea = projectConsultantData
+
+    ;;update the record
+    result = ProjectConsultantDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = ProjectConsultantDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = ProjectConsultantDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_project_rate
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=projectConsultantData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_project_rate            ,boolean
+    required in  userToken              ,a22
+    required in  projectConsultantData  ,sConsultant
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectConsultantDataEntity.Instance.IO.DataArea = projectConsultantData
+
+    ;;delete the record
+    result = ProjectConsultantDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = ProjectConsultantDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

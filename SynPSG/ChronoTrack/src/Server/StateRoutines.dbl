@@ -1,0 +1,187 @@
+;;*****************************************************************************
+;;
+;; Title:       StateRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the state data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "STATE" repository, structure="sState", end
+
+;;*****************************************************************************
+
+function get_state              ,boolean
+    required in  userToken      ,a22
+    required in  stateID        ,a2
+    required out stateData      ,sState
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = StateDataEntity.Instance.IO.Locate(stateID,Q_PRIMARY,false)
+
+    ;;set the data area
+    stateData = StateDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = StateDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;*****************************************************************************
+
+function create_state           ,boolean
+    required in    userToken    ,a22
+    required inout stateData    ,sState
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    StateDataEntity.Instance.IO.DataArea = stateData
+
+    ;;create the record
+    result = StateDataEntity.Instance.IO.Create()
+    stateData = StateDataEntity.Instance.IO.DataArea
+    lastErrorMsg = StateDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;*****************************************************************************
+
+function get_state_table    ,boolean
+    required in  userToken  ,a22
+    required out stateTable ,@ArrayList
+    endparams
+
+.include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    stateTable = StateDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;*****************************************************************************
+
+function update_state    ,boolean
+    required in  userToken      ,a22
+    required in  stateData      ,sState
+    required out newGrfa        ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    StateDataEntity.Instance.IO.DataArea = stateData
+
+    ;;update the record
+    result = StateDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = StateDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = StateDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;*****************************************************************************
+
+function delete_state           ,boolean
+    required in  userToken      ,a22
+    required in  stateData      ,sState
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    StateDataEntity.Instance.IO.DataArea = stateData
+
+    ;;delete the record
+    result = StateDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = StateDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

@@ -1,0 +1,255 @@
+;;*******************************************************************************
+;;
+;; Title:        channel_cache_init.dbl
+;;
+;; Description:  Initializes and resizes a dynamic memory array which is used to
+;;               cache the last record read and locked on a channel.  The cache
+;;               can then be used on subsequent update operations to determine
+;;               if a record has been updated since it was read and locked.
+;;
+;; Author:       Steve Ives
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+.subroutine channel_cache_init
+
+    a_channel,      n   ;passed in channel number
+    ;End of arguments
+
+global common
+    cc$cache,       [1024]i4    ;Channel cache
+
+stack record
+    recsize     ,i4     ;Record size
+
+.proc
+
+    xcall getfa(a_channel,"RSZ",recsize)
+    if (cc$cache[a_channel]) then
+    begin
+        cc$cache[a_channel] = %mem_proc(DM_RESIZ,recsize,cc$cache[a_channel])
+        clear ^m(cc$cache[a_channel])
+    end
+    else
+        cc$cache[a_channel] = %mem_proc(DM_ALLOC|DM_STATIC|DM_BLANK,recsize)
+
+    xreturn
+
+.end
+
+;*******************************************************************************
+;
+; Title:        channel_cache_update.dbl
+;
+; Description:  Updates the current record stored in the channel cache
+;
+; Author:       Steve Ives
+;
+; Copyright:    ©Synergex International Inc.  All rights reserved.
+;
+; WARNING:      If you were given this code by a Synergex employee then you may
+;               use and modify it freely for use with your own applications.
+;               However, you may not under any circumstances distribute this
+;               code, or any modified version of this code, to any third party
+;               without first obtaining written permission to do so from
+;               Synergex.  In using this code you accept that it is provided
+;               as is, and without support or warranty.  Neither Synergex or the
+;               author accept any responsibility for any losses or damages of
+;               any nature which may arise from the use of this code.  This
+;               header information must remain, unaltered, in the code at all
+;               times.  Posession of this code, or any modified version of this
+;               code, indicates your acceptance of these terms.
+;
+; $Revision: 1 $
+;
+; $Date: 2009-03-20 12:07:30-07:00 $
+;
+;*******************************************************************************
+;
+.subroutine channel_cache_update
+
+    a_channel,      n   ;Channel number
+    a_data,         a   ;Data buffer
+    ;End of arguments
+
+external common
+    cc$cache,       [1024]i4    ;Channel cache
+
+.proc
+
+    ^m(cc$cache[a_channel]) = a_data
+
+    xreturn
+
+.end
+
+;*******************************************************************************
+;
+; Title:        channel_cache_compare.dbl
+;
+; Description:  Compares a record to the last record stored in the channel cache
+;               in order to determine if the record has changed.
+;
+; Author:       Steve Ives
+;
+; Copyright:    ©Synergex International Inc.  All rights reserved.
+;
+; WARNING:      If you were given this code by a Synergex employee then you may
+;               use and modify it freely for use with your own applications.
+;               However, you may not under any circumstances distribute this
+;               code, or any modified version of this code, to any third party
+;               without first obtaining written permission to do so from
+;               Synergex.  In using this code you accept that it is provided
+;               as is, and without support or warranty.  Neither Synergex or the
+;               author accept any responsibility for any losses or damages of
+;               any nature which may arise from the use of this code.  This
+;               header information must remain, unaltered, in the code at all
+;               times.  Posession of this code, or any modified version of this
+;               code, indicates your acceptance of these terms.
+;
+; $Revision: 1 $
+;
+; $Date: 2009-03-20 12:07:30-07:00 $
+;
+;*******************************************************************************
+;
+.function channel_cache_compare, ^val
+
+    a_channel,      n   ;passed in channel number
+    a_data,         a   ;passed data buffer
+    ;End of arguments
+
+external common
+    cc$cache,       [1024]i4    ;Channel cache
+
+.proc
+
+    if (^m(cc$cache[a_channel])==a_data) then
+        freturn 0
+    else
+        freturn 1
+
+.end
+
+;*******************************************************************************
+;
+; Title:        channel_cache_retrieve.dbl
+;
+; Description:  Retrieved the last record stored in the channel cache.
+;
+; Author:       Steve Ives
+;
+; Copyright:    ©Synergex International Inc.  All rights reserved.
+;
+; WARNING:      If you were given this code by a Synergex employee then you may
+;               use and modify it freely for use with your own applications.
+;               However, you may not under any circumstances distribute this
+;               code, or any modified version of this code, to any third party
+;               without first obtaining written permission to do so from
+;               Synergex.  In using this code you accept that it is provided
+;               as is, and without support or warranty.  Neither Synergex or the
+;               author accept any responsibility for any losses or damages of
+;               any nature which may arise from the use of this code.  This
+;               header information must remain, unaltered, in the code at all
+;               times.  Posession of this code, or any modified version of this
+;               code, indicates your acceptance of these terms.
+;
+; $Revision: 1 $
+;
+; $Date: 2009-03-20 12:07:30-07:00 $
+;
+;*******************************************************************************
+;
+.subroutine channel_cache_retrieve
+
+    a_channel,      n   ;passed in channel number
+    a_data,         a   ;returned data buffer
+    ;End of arguments
+
+external common
+    cc$cache,       [1024]i4    ;Channel cache
+
+.proc
+
+    a_data = ^m(cc$cache[a_channel])
+
+    xreturn
+
+.end
+
+;*******************************************************************************
+;
+; Title:        channel_cache_release.dbl
+;
+; Description:  Release the channel cache memory for a specific channel.
+;
+; Author:       Steve Ives
+;
+; Copyright:    ©Synergex International Inc.  All rights reserved.
+;
+; WARNING:      If you were given this code by a Synergex employee then you may
+;               use and modify it freely for use with your own applications.
+;               However, you may not under any circumstances distribute this
+;               code, or any modified version of this code, to any third party
+;               without first obtaining written permission to do so from
+;               Synergex.  In using this code you accept that it is provided
+;               as is, and without support or warranty.  Neither Synergex or the
+;               author accept any responsibility for any losses or damages of
+;               any nature which may arise from the use of this code.  This
+;               header information must remain, unaltered, in the code at all
+;               times.  Posession of this code, or any modified version of this
+;               code, indicates your acceptance of these terms.
+;
+; $Revision: 1 $
+;
+; $Date: 2009-03-20 12:07:30-07:00 $
+;
+;*******************************************************************************
+;
+.subroutine channel_cache_release
+
+    a_channel,      n   ;passed in channel number
+    ;End of arguments
+
+external common
+    cc$cache,       [1024]i4    ;Channel cache
+
+.proc
+
+    onerror continue
+    cc$cache[a_channel] = %mem_proc(DM_FREE,cc$cache[a_channel])
+
+continue,
+
+    xreturn
+
+.end
+
+

@@ -1,0 +1,202 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+NOVCS=yes ; export NOVCS
+
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=ChronoTrack ; export WORKSPACE
+PROJECT=SqlApi ; export PROJECT
+COMMONAREA=NetCommon ; export COMMONAREA
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+SynPSGNetLIB_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/lib ; export SynPSGNetLIB_CORE
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetSRC_CHRONOTRACK=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CHRONOTRACK
+
+# *************************************************************
+# These setings are for the core library details
+# *************************************************************
+
+COREEXE=$SRCDEV/$DEVAREA/Core/exe ; export COREEXE
+CORELIB=$SRCDEV/$DEVAREA/Core/lib ; export CORELIB
+COREHDR=$SRCDEV/$DEVAREA/Core/hdr ; export COREHDR
+COREDEF=$SRCDEV/$DEVAREA/Core/src/Includes ; export COREDEF
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+SRC=$DEVROOT/src/$PROJECT ; export SRC
+
+NAMESPACE=synpsg-chronotrack-sqlapi ; export NAMESPACE
+SYNDEFNS=SynPSG.ChronoTrack.SqlApi ; export SYNDEFNS
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+
+OLIB=$DEVROOT/lib ; export OLIB
+OBJ=$DEVROOT/obj/$PROJECT ; export OBJ
+
+EXE=$DEVROOT/exe ; export EXE
+DEF=$DEVROOT/def ; export DEF
+
+PRJEXPDIR=$DEVROOT/hdr ; export PRJEXPDIR
+SYNEXPDIR=$DEVROOT/hdr ; export SYNEXPDIR
+SYNIMPDIR=$SynPSGNetHDR,$COREHDR,$DEVROOT/hdr ; export SYNIMPDIR
+
+CODEGEN_EXE=$SRCDEV/Development/SynPSG/Builder/exe ; export CODEGEN_EXE
+PATH=$PATH;$CODEGEN_EXE ; export PATH
+CODEGEN_TPLDIR=$DEVROOT/templates ; export CODEGEN_TPLDIR
+CODEGEN_AUTHOR=CodeGen ; export CODEGEN_AUTHOR
+CODEGEN_COMPANY=Synergex ; export CODEGEN_COMPANY
+
+# *************************************************************
+# runtime settings
+# *************************************************************
+
+DAT=$DEVROOT/dat ; export DAT
+CHRONOTRACK_DEBUG_MODE=OFF ; export CHRONOTRACK_DEBUG_MODE
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then 
+ COMPILEFLAGS=;export COMPILEFLAGS 
+ LINKERFLAGS=;export LINKERFLAGS 
+fi 
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $OLIB/ChronoTrackSqlApi.olb 
+rm -f $OBJ/ChronoTrackSqlApi.dbo 
+rm -f $OBJ/ChronoTrackReplicator.dbo 
+rm -f $OBJ/ChronoTrackBulkLoad.dbo 
+rm -f $OBJ/channel_cache.dbo 
+rm -f $OBJ/replicate.dbo 
+rm -f $OBJ/consultant_fee_io.dbo 
+rm -f $OBJ/consultant_fee_sqlio.dbo 
+rm -f $OBJ/country_io.dbo 
+rm -f $OBJ/country_sqlio.dbo 
+rm -f $OBJ/customer_contact_io.dbo 
+rm -f $OBJ/customer_contact_sqlio.dbo 
+rm -f $OBJ/customer_contract_io.dbo 
+rm -f $OBJ/customer_contract_sqlio.dbo 
+rm -f $OBJ/customer_io.dbo 
+rm -f $OBJ/customer_sqlio.dbo 
+rm -f $OBJ/customer_location_io.dbo 
+rm -f $OBJ/customer_location_sqlio.dbo 
+rm -f $OBJ/expense_type_io.dbo 
+rm -f $OBJ/expense_type_sqlio.dbo 
+rm -f $OBJ/task_type_sqlio.dbo 
+rm -f $OBJ/fee_type_io.dbo 
+rm -f $OBJ/fee_type_sqlio.dbo 
+rm -f $OBJ/project_activity_io.dbo 
+rm -f $OBJ/project_activity_sqlio.dbo 
+rm -f $OBJ/project_attachment_io.dbo 
+rm -f $OBJ/project_attachment_sqlio.dbo 
+rm -f $OBJ/project_consultant_io.dbo 
+rm -f $OBJ/project_consultant_sqlio.dbo 
+rm -f $OBJ/project_expense_io.dbo 
+rm -f $OBJ/project_expense_sqlio.dbo 
+rm -f $OBJ/project_io.dbo 
+rm -f $OBJ/project_sqlio.dbo 
+rm -f $OBJ/project_note_io.dbo 
+rm -f $OBJ/project_note_sqlio.dbo 
+rm -f $OBJ/project_task_io.dbo 
+rm -f $OBJ/project_task_sqlio.dbo 
+rm -f $OBJ/request_io.dbo 
+rm -f $OBJ/request_sqlio.dbo 
+rm -f $OBJ/state_io.dbo 
+rm -f $OBJ/state_sqlio.dbo 
+rm -f $OBJ/user_io.dbo 
+rm -f $OBJ/user_sqlio.dbo 
+rm -f $OBJ/IsNumeric.dbo 
+rm -f $SYNEXPDIR/$NAMESPACE-channel_cache.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-replicate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-consultant_fee_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-consultant_fee_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-country_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-country_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_contact_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_contact_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_contract_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_contract_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_location_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customer_location_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-expense_type_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-expense_type_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-task_type_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-fee_type_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-fee_type_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_activity_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_activity_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_attachment_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_attachment_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_consultant_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_consultant_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_expense_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_expense_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_note_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_note_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_task_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-project_task_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-request_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-request_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-state_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-state_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-user_io.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-user_sqlio.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-isnumeric.dbh 
+if [ "$NAMESPACE" != "*" ] 
+then 
+  rm -f $SYNEXPDIR/$NAMESPACE-*.dbh 
+fi 
+dblproto  $VARIANT_FLAGS  SRC:channel_cache.dbl SRC:replicate.dbl SRC:consultant_fee_io.dbl SRC:consultant_fee_sqlio.dbl SRC:country_io.dbl SRC:country_sqlio.dbl SRC:customer_contact_io.dbl SRC:customer_contact_sqlio.dbl SRC:customer_contract_io.dbl SRC:customer_contract_sqlio.dbl SRC:customer_io.dbl SRC:customer_sqlio.dbl SRC:customer_location_io.dbl SRC:customer_location_sqlio.dbl SRC:expense_type_io.dbl SRC:expense_type_sqlio.dbl SRC:task_type_sqlio.dbl SRC:fee_type_io.dbl SRC:fee_type_sqlio.dbl SRC:project_activity_io.dbl SRC:project_activity_sqlio.dbl SRC:project_attachment_io.dbl SRC:project_attachment_sqlio.dbl SRC:project_consultant_io.dbl SRC:project_consultant_sqlio.dbl SRC:project_expense_io.dbl SRC:project_expense_sqlio.dbl SRC:project_io.dbl SRC:project_sqlio.dbl SRC:project_note_io.dbl SRC:project_note_sqlio.dbl SRC:project_task_io.dbl SRC:project_task_sqlio.dbl SRC:request_io.dbl SRC:request_sqlio.dbl SRC:state_io.dbl SRC:state_sqlio.dbl SRC:user_io.dbl SRC:user_sqlio.dbl SRC:IsNumeric.dbl 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS -o OBJ:ChronoTrackSqlApi.dbo  SRC:channel_cache.dbl SRC:replicate.dbl SRC:consultant_fee_io.dbl SRC:consultant_fee_sqlio.dbl SRC:country_io.dbl SRC:country_sqlio.dbl SRC:customer_contact_io.dbl SRC:customer_contact_sqlio.dbl SRC:customer_contract_io.dbl SRC:customer_contract_sqlio.dbl SRC:customer_io.dbl SRC:customer_sqlio.dbl SRC:customer_location_io.dbl SRC:customer_location_sqlio.dbl SRC:expense_type_io.dbl SRC:expense_type_sqlio.dbl SRC:task_type_sqlio.dbl SRC:fee_type_io.dbl SRC:fee_type_sqlio.dbl SRC:project_activity_io.dbl SRC:project_activity_sqlio.dbl SRC:project_attachment_io.dbl SRC:project_attachment_sqlio.dbl SRC:project_consultant_io.dbl SRC:project_consultant_sqlio.dbl SRC:project_expense_io.dbl SRC:project_expense_sqlio.dbl SRC:project_io.dbl SRC:project_sqlio.dbl SRC:project_note_io.dbl SRC:project_note_sqlio.dbl SRC:project_task_io.dbl SRC:project_task_sqlio.dbl SRC:request_io.dbl SRC:request_sqlio.dbl SRC:state_io.dbl SRC:state_sqlio.dbl SRC:user_io.dbl SRC:user_sqlio.dbl SRC:IsNumeric.dbl 
+dblibr -ca OLIB:ChronoTrackSqlApi.olb OBJ:ChronoTrackSqlApi.dbo 
+dblink $LINKERFLAGS -l EXE:ChronoTrackSqlApi.elb OLIB:ChronoTrackSqlApi.olb 
+dblproto $VARIANT_FLAGS SRC:ChronoTrackReplicator.dbl 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ChronoTrackReplicator.dbo SRC:ChronoTrackReplicator.dbl 
+dblink $LINKERFLAGS -o EXE:ChronoTrackReplicator.dbr C:\Development\SynPSG\ChronoTrack\obj\SqlApi\ChronoTrackReplicator.dbo  EXE:ChronoTrackSqlApi.elb    
+dblproto $VARIANT_FLAGS SRC:ChronoTrackBulkLoad.dbl 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ChronoTrackBulkLoad.dbo SRC:ChronoTrackBulkLoad.dbl 
+dblink $LINKERFLAGS -o EXE:ChronoTrackBulkLoad.dbr C:\Development\SynPSG\ChronoTrack\obj\SqlApi\ChronoTrackBulkLoad.dbo  EXE:ChronoTrackSqlApi.elb    

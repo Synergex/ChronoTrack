@@ -1,0 +1,226 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectTaskRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the project_task data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "PROJECT_TASK" repository, structure="sTask", end
+
+;;; <summary>
+;;; get_task
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate the required project task record on the primary key
+;;; </remark>
+;;; <param name=taskID>pass required task ID</param>
+;;; <param name=projectTaskData>return the located task record</pram>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_task                   ,boolean
+    required in  userToken          ,a22
+    required in  projectID          ,d8
+    required in  taskID             ,d3
+    required out projectTaskData    ,sTask
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = ProjectTaskDataEntity.Instance.IO.Locate(%string(projectID,"XXXXXXXX")+%string(taskID,"XXX"),Q_PRIMARY,false)
+
+    ;;set the data area
+    projectTaskData = ProjectTaskDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = ProjectTaskDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_task
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=projectTaskData>passed task record</pram>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_task                ,boolean
+    required in    userToken        ,a22
+    required inout projectTaskData  ,sTask
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectTaskDataEntity.Instance.IO.DataArea = projectTaskData
+
+    ;;create the record
+    result = ProjectTaskDataEntity.Instance.IO.Create()
+    projectTaskData = ProjectTaskDataEntity.Instance.IO.DataArea
+    lastErrorMsg = ProjectTaskDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_projectTask_table
+;;; return the projectTask data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the projectTask file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=projectID>project ID to filter on</pram>
+;;; <param name=projectTaskTable>returned table of project tasks</pram>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_projectTask_table      ,boolean
+    required in  userToken          ,a22
+    required in  projectID          ,d8
+    required out projectTaskTable   ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    if (projectID) then
+        projectTaskTable = ProjectTaskDataEntity.Instance.DataCollection.Collection(%string(projectID,"XXXXXXXX"),Q_PRIMARY)
+    else
+        projectTaskTable = ProjectTaskDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_task
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=projectTaskData>passed task record</pram>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_task                ,boolean
+    required in  userToken          ,a22
+    required in  projectTaskData    ,sTask
+    required out newGrfa            ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectTaskDataEntity.Instance.IO.DataArea = projectTaskData
+
+    ;;update the record
+    result = ProjectTaskDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = ProjectTaskDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = ProjectTaskDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_task
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=projectTaskData>passed task record</pram>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_task                ,boolean
+    required in  userToken          ,a22
+    required in  projectTaskData    ,sTask
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ProjectTaskDataEntity.Instance.IO.DataArea = projectTaskData
+
+    ;;update the record
+    result = ProjectTaskDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = ProjectTaskDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

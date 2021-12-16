@@ -1,0 +1,1951 @@
+import System.Collections
+
+.include "CONSULTANT_FEE"           repository, structure = "sFee", end
+.include "CONSULTANT_FEE_SUMMARY"   repository, structure = "sFeeSummary", end
+.include "CUSTOMER"                 repository, structure = "sCustomer", end
+.include "CUSTOMER_CONTACT"         repository, structure = "sContact", end
+.include "CUSTOMER_LOCATION"        repository, structure = "sLocation", end
+.include "FEE_TYPE"                 repository, structure = "sFeeType", end
+.include "PROJECT"                  repository, structure = "sProject", end
+.include "PROJECT_ACTIVITY"         repository, structure = "sActivity", end
+.include "PROJECT_ACTIVITY_SUMMARY" repository, structure = "sActivitySummary", end
+.include "PROJECT_CONSULTANT"       repository, structure = "sRate", end
+.include "PROJECT_EXPENSE"          repository, structure = "sExpense", end
+.include "PROJECT_EXPENSE_SUMMARY"  repository, structure = "sExpenseSummary", end
+.include "PROJECT_SUMMARY"          repository, structure = "sProjectSummary", end
+.include "PROJECT_TASK"             repository, structure = "sTask", end
+.include "PROJECT_TASK_SUMMARY"     repository, structure = "sTaskSummary", end
+.include "PROJECT_NOTE"             repository, structure = "sNote", end
+.include "PROJECT_NOTE_SUMMARY"     repository, structure = "sNoteSummary", end
+.include "USER"                     repository, structure = "sUser", end
+
+;;=============================================================================
+;; Retrieve a user record
+;;
+function GetUserMaster      ,boolean
+    required in  userToken  ,a22
+    required in  UserId     ,a15
+    required out User       ,sUser
+    required out ErrorText  ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chUser  ,int
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ErrorText = ""
+
+    try
+    begin
+        open(chUser=syn_freechn(),i:i,"DAT:user.ism")
+        read(chUser,User,UserId,KEYNUM:0,LOCK:Q_NO_LOCK)
+        ok = true
+    end
+    catch (ex, @Exception)
+    begin
+        clear User
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;;
+function GetConsultantProjects, boolean
+    required in  userToken      ,a22
+    required in  ConsultantId   ,a15
+    required out Projects       ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chProject   ,int
+        chCustomer  ,int
+        chLocation  ,int
+        chUser      ,int
+        done        ,boolean
+        Project     ,sProject
+        Summary     ,sProjectSummary
+    endrecord
+
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ErrorText = ""
+    ok = true
+
+    try
+    begin
+        ;;Open the files we need
+        open(chProject=syn_freechn(),i:i,"DAT:project.ism")
+        open(chCustomer=syn_freechn(),i:i,"DAT:customer.ism")
+        open(chLocation=syn_freechn(),i:i,"DAT:location.ism")
+        open(chUser=syn_freechn(),i:i,"DAT:user.ism")
+
+        ;;Position to first project for consultant
+        try
+            find(chProject,,ConsultantId,KEYNUM:3)
+        catch (ex, @Exception)
+            done = true
+        endtry
+
+        ;;Read projects
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chProject,Project,,LOCK:Q_NO_LOCK)
+                    if (Project.lead_consultant!=ConsultantId)
+                        exitloop
+
+                    Summary.project_id      = Project.project_id
+                    Summary.customer_id     = Project.customer_id
+                    Summary.start_date      = Project.start_date
+                    Summary.end_date        = Project.end_date
+                    Summary.subject         = Project.description
+
+                    using Project.current_status select
+                    (0),    Summary.status = "Created"
+                    (1),    Summary.status = "Quoted"
+                    (2),    Summary.status = "Signed"
+                    (3),    Summary.status = "Implementation"
+                    (4),    Summary.status = "Post-project"
+                    (5),    Summary.status = "Completed"
+                    (),     Summary.status = "* Invalid *"
+                    endusing
+
+                    ;;Get the customer name
+                    begin
+                        data Customer, sCustomer
+                        try
+                        begin
+                            read(chCustomer,Customer,Project.customer_id,KEYNUM:0,LOCK:Q_NO_LOCK)
+                            Summary.customer_name = Customer.Company
+                        end
+                        catch (ex)
+                            Summary.customer_name = "* Not found *"
+                        endtry
+                    end
+
+                    ;;Get the work location
+                    begin
+                        data Loc, sLocation
+                        try
+                        begin
+                            read(chLocation,Loc,Project.customer_id+%string(Project.work_location_id,"XX"),KEYNUM:0,LOCK:Q_NO_LOCK)
+                            Summary.work_location  = Loc.description
+                        end
+                        catch (ex)
+                            Summary.work_location = "* Not found *"
+                        endtry
+                    end
+
+                    ;;Get the lead consultant name
+                    begin
+                        data User, sUser
+                        try
+                        begin
+                            read(chUser,User,Project.lead_consultant,KEYNUM:0,LOCK:Q_NO_LOCK)
+                            Summary.lead_consultant  = User.friendly_name
+                        end
+                        catch (ex)
+                            Summary.lead_consultant = "* Not found *"
+                        endtry
+                    end
+
+                    Projects.Add((@sProjectSummary)Summary)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex, @Exception)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    exitloop
+                end
+                endtry
+            end
+        end
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chProject&&chopen(chProject))
+            close chProject
+        if (chCustomer&&chopen(chCustomer))
+            close chCustomer
+        if (chLocation&&chopen(chLocation))
+            close chLocation
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;;
+function GetProjectDetails, boolean
+    required in  userToken          ,a22
+    required in  ProjectId          ,d8
+    required out ProjectSummary     ,sProjectSummary
+    required out Consultants        ,@ArrayList
+    required out ConsultantRates    ,@ArrayList
+    required out Tasks              ,@ArrayList
+    required out Activities         ,@ArrayList
+    required out Expenses           ,@ArrayList
+    required out Notes              ,@ArrayList
+    required out ErrorText          ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        done        ,boolean
+    endrecord
+
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    ;;Get the project record
+    if (ok)
+        ok = GetProjectSummary(userToken,ProjectId,ProjectSummary,ErrorText)
+
+    ;;Get project consultants
+    if (ok)
+        ok = GetProjectConsultants(userToken,ProjectId,Consultants,ErrorText)
+
+    ;;Get consultant fees
+    if (ok)
+        ok = GetProjectRates(userToken,ProjectId,ConsultantRates,ErrorText)
+
+    ;;Get project tasks
+    if (ok)
+        ok = GetProjectTasksSummary(userToken,ProjectId,Tasks,ErrorText)
+
+    ;;Get project activities
+    if (ok)
+        ok = GetProjectActivitiesSummary(userToken,ProjectId,Activities,ErrorText)
+
+    ;;Get project expenses
+    if (ok)
+        ok = GetProjectExpensesSummary(userToken,ProjectId,Expenses,ErrorText)
+
+
+    ;;Get project notes
+    if (ok)
+        ok = GetProjectNotesSummary(userToken,ProjectId,Notes,ErrorText)
+
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve a project master record
+;;
+function GetProjectHeader, boolean
+    required in  userToken  ,a22
+    required in  ProjectId  ,d8
+    required out Project    ,sProject
+    required out ErrorText  ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chProject   ,int
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ErrorText = ""
+
+    try
+    begin
+        open(chProject=syn_freechn(),i:i,"DAT:project.ism")
+        read(chProject,Project,%string(ProjectId,"XXXXXXXX"),KEYNUM:0,LOCK:Q_NO_LOCK)
+        ok = true
+    end
+    catch (ex, @Exception)
+    begin
+        ErrorText = ex.Message
+        clear Project
+    end
+    finally
+    begin
+        if (chProject&&chopen(chProject))
+            close chProject
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve a project master summary record
+;;
+function GetProjectSummary, boolean
+    required in  userToken  ,a22
+    required in  ProjectId  ,d8
+    required out Summary    ,sProjectSummary
+    required out ErrorText  ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chProject   ,int
+        chCustomer  ,int
+        chLocation  ,int
+        chUser      ,int
+        Project ,sProject
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ErrorText = ""
+
+    try
+    begin
+        open(chProject=syn_freechn(),i:i,"DAT:project.ism")
+        open(chCustomer=syn_freechn(),i:i,"DAT:customer.ism")
+        open(chLocation=syn_freechn(),i:i,"DAT:location.ism")
+        open(chUser=syn_freechn(),i:i,"DAT:user.ism")
+
+        read(chProject,Project,%string(ProjectId,"XXXXXXXX"),KEYNUM:0,LOCK:Q_NO_LOCK)
+
+        Summary.project_id      = Project.project_id
+        Summary.customer_id     = Project.customer_id
+        Summary.start_date      = Project.start_date
+        Summary.end_date        = Project.end_date
+        Summary.subject         = Project.description
+
+        using Project.current_status select
+        (0),    Summary.status = "Created"
+        (1),    Summary.status = "Quoted"
+        (2),    Summary.status = "Signed"
+        (3),    Summary.status = "Implementation"
+        (4),    Summary.status = "Post-project"
+        (5),    Summary.status = "Completed"
+        (),     Summary.status = "* Invalid *"
+        endusing
+
+        ;;Get the customer name
+        begin
+            data Customer, sCustomer
+            try
+            begin
+                read(chCustomer,Customer,Project.customer_id,KEYNUM:0,LOCK:Q_NO_LOCK)
+                Summary.customer_name = Customer.Company
+            end
+            catch (ex)
+                Summary.customer_name = "* Not found *"
+            endtry
+        end
+
+        ;;Get the work location
+        begin
+            data Loc, sLocation
+            try
+            begin
+                read(chLocation,Loc,Project.customer_id+%string(Project.work_location_id,"XX"),KEYNUM:0,LOCK:Q_NO_LOCK)
+                Summary.work_location  = Loc.description
+            end
+            catch (ex)
+                Summary.work_location = "* Not found *"
+            endtry
+        end
+
+        ;;Get the lead consultant name
+        begin
+            data User, sUser
+            try
+            begin
+                read(chUser,User,Project.lead_consultant,KEYNUM:0,LOCK:Q_NO_LOCK)
+                Summary.lead_consultant  = User.friendly_name
+            end
+            catch (ex)
+                Summary.lead_consultant = "* Not found *"
+            endtry
+        end
+
+        ok = true
+
+    end
+    catch (ex, @Exception)
+    begin
+        clear Project
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chProject&&chopen(chProject))
+            close chProject
+        if (chCustomer&&chopen(chCustomer))
+            close chCustomer
+        if (chLocation&&chopen(chLocation))
+            close chLocation
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve the tasks associated with a project
+;;
+function GetProjectTasks, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Tasks          ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chTask  ,int
+        done    ,boolean
+        Task    ,sTask
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the file(s) we need
+        open(chTask=syn_freechn,i:i,"DAT:task.ism")
+
+        ;;Position to first task
+        try
+            find(chTask,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add tasks
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(ChTask,Task,,LOCK:Q_NO_LOCK)
+                    if (Task.project_id!=ProjectId)
+                        exitloop
+
+                    Tasks.Add((@sTask)Task)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Tasks
+                    exitloop
+                end
+                endtry
+            end
+        end
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+        clear Tasks
+    end
+    finally
+    begin
+        if (chTask&&chopen(chTask))
+            close chTask
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve the task aummaries associated with a project
+;;
+function GetProjectTasksSummary, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Tasks          ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chTask  ,int
+        chUser  ,int
+        done    ,boolean
+        Task    ,sTask
+        Summary ,sTaskSummary
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chTask=syn_freechn,i:i,"DAT:task.ism")
+        open(chUser=syn_freechn,i:i,"DAT:user.ism")
+
+        ;;Position to first task
+        try
+            find(chTask,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add tasks
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(ChTask,Task,,LOCK:Q_NO_LOCK)
+                    if (Task.project_id!=ProjectId)
+                        exitloop
+
+                    Summary.project_id = Task.project_id
+                    Summary.task_id = task.task_id
+
+                    using Task.task_type select
+                    (1),    Summary.task_type = "Pre-Project"
+                    (2),    Summary.task_type = "Implementation"
+                    (3),    Summary.task_type = "Post-Project"
+                    (4),    Summary.task_type = "PSG Time"
+                    (5),    Summary.task_type = "Beta Testing"
+                    (6),    Summary.task_type = "Development Doc Review"
+                    (7),    Summary.task_type = "Marketing Doc Review"
+                    (8),    Summary.task_type = "Vacation"
+                    (9),    Summary.task_type = "Illness"
+                    (10),    Summary.task_type = "Sales Trip"
+                    (11),   Summary.task_type = "Training & Education"
+                    endusing
+
+                    Summary.description = task.description
+
+                    ;;Get assigned to name
+                    begin
+                        data User, sUser
+                        try
+                        begin
+                            read(chUser,User,Task.assigned_to,KEYNUM:0,LOCK:Q_NO_LOCK)
+                            Summary.assigned_to = User.friendly_name
+                        end
+                        catch (ex)
+                            Summary.assigned_to = "* Not found *"
+                        endtry
+                    end
+
+                    Summary.start_date = task.start_date
+                    Summary.end_date = task.end_date
+
+                    if (task.completed) then
+                        Summary.completed = "Yes"
+                    else
+                        Summary.completed = "No"
+
+                    Tasks.Add((@sTaskSummary)Summary)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Tasks
+                    exitloop
+                end
+                endtry
+            end
+        end
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chTask&&chopen(chTask))
+            close chTask
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve the notes associated with a project
+;;
+function GetProjectNotes, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Notes          ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chNote  ,int
+        done    ,boolean
+        Note    ,sNote
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chNote=syn_freechn,i:i,"DAT:note.ism")
+
+        ;;Position to first task
+        try
+            find(chNote,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add notes
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(ChNote,Note,,LOCK:Q_NO_LOCK)
+                    if (Note.project_id!=ProjectId)
+                        exitloop
+                    Notes.Add((@sNote)Note)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Notes
+                    exitloop
+                end
+                endtry
+            end
+        end
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chNote&&chopen(chNote))
+            close chNote
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve the notes summaries associated with a project
+;;
+function GetProjectNotesSummary, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Notes          ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chNote  ,int
+        chUser  ,int
+        done    ,boolean
+        Note    ,sNote
+        Summary ,sNoteSummary
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chNote=syn_freechn,i:i,"DAT:note.ism")
+        open(chUser=syn_freechn,i:i,"DAT:user.ism")
+
+        ;;Position to first task
+        try
+            find(chNote,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add notes
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(ChNote,Note,,LOCK:Q_NO_LOCK)
+                    if (Note.project_id!=ProjectId)
+                        exitloop
+
+                    Summary.project_id = Note.project_id
+                    Summary.note_id = note.note_id
+                    Summary.description = note.description
+
+                    ;;Get created by name
+                    begin
+                        data User, sUser
+                        try
+                        begin
+                            read(chUser,User,Note.created_by,KEYNUM:0,LOCK:Q_NO_LOCK)
+                            Summary.created_by = User.friendly_name
+                        end
+                        catch (ex)
+                            Summary.created_by = "* Not found *"
+                        endtry
+                    end
+
+                    Summary.created_date = note.created_date
+
+                    Notes.Add((@sNoteSummary)Summary)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Notes
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chNote&&chopen(chNote))
+            close chNote
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve all of the activities associated with a project (for all tasks)
+;;
+function GetProjectActivities, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Activities     ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chActivity  ,int
+        done        ,boolean
+        Activity    ,sActivity
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chActivity=syn_freechn,i:i,"DAT:activity.ism")
+
+        ;;Position to first activity
+        try
+            find(chActivity,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add activities
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chActivity,Activity,,LOCK:Q_NO_LOCK)
+                    if (Activity.project_id!=ProjectId)
+                        exitloop
+                    Activities.Add((@sActivity)Activity)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Activities
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chActivity&&chopen(chActivity))
+            close chActivity
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve all of the activities associated with a project (for all tasks)
+;;
+function GetProjectActivitiesSummary, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Activities     ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chActivity  ,int
+        chUser      ,int
+        done        ,boolean
+        Activity    ,sActivity
+        Summary     ,sActivitySummary
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chActivity=syn_freechn,i:i,"DAT:activity.ism")
+        open(chUser=syn_freechn,i:i,"DAT:user.ism")
+
+        ;;Position to first activity
+        try
+            find(chActivity,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add activities
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chActivity,Activity,,LOCK:Q_NO_LOCK)
+                    if (Activity.project_id!=ProjectId)
+                        exitloop
+
+                    Summary.project_id = Activity.project_id
+                    Summary.task_id = Activity.task_id
+                    Summary.activity_id = Activity.activity_id
+
+                    ;;Get created by name
+                    begin
+                        data User, sUser
+                        try
+                        begin
+                            read(chUser,User,Activity.created_by,KEYNUM:0,LOCK:Q_NO_LOCK)
+                            Summary.created_by = User.friendly_name
+                        end
+                        catch (ex)
+                            Summary.created_by = "* Not found *"
+                        endtry
+                    end
+
+                    Summary.start_date = Activity.start_date
+                    Summary.description = Activity.description
+
+                    Activities.Add((@sActivitySummary)Summary)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Activities
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chActivity&&chopen(chActivity))
+            close chActivity
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve all of the activities associated with a project (for all tasks)
+;;
+function GetTaskActivities, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required in  TaskId         ,d3
+    required out Activities     ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chActivity  ,int
+        done        ,boolean
+        Activity    ,sActivity
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chActivity=syn_freechn,i:i,"DAT:activity.ism")
+
+        ;;Position to first activity
+        try
+            find(chActivity,,string(ProjectId,"XXXXXXXX")+string(TaskId,"XXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add activities
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chActivity,Activity,,LOCK:Q_NO_LOCK)
+                    if ((Activity.project_id!=ProjectId)||(Activity.task_id!=TaskId))
+                        exitloop
+                    Activities.Add((@sActivity)Activity)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Activities
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chActivity&&chopen(chActivity))
+            close chActivity
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve all of the expenses associated with a project (actual expense records)
+;;
+function GetProjectExpenses, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Expenses       ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chExpense   ,int
+        done        ,boolean
+        Expense     ,sExpense
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chExpense=syn_freechn,i:i,"DAT:expense.ism")
+
+        ;;Position to first expense
+        try
+            find(chExpense,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add expenses
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chExpense,Expense,,LOCK:Q_NO_LOCK)
+                    if (Expense.project_id!=ProjectId)
+                        exitloop
+                    Expenses.Add((@sExpense)Expense)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Expenses
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chExpense&&chopen(chExpense))
+            close chExpense
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve all of the expenses associated with a project (summary)
+;;
+function GetProjectExpensesSummary, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Expenses       ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chExpense   ,int
+        chUser      ,int
+        done        ,boolean
+        Expense     ,sExpense
+        Summary     ,sExpenseSummary
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chExpense=syn_freechn,i:i,"DAT:expense.ism")
+        open(chUser=syn_freechn,i:i,"DAT:user.ism")
+
+        ;;Position to first expense
+        try
+            find(chExpense,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add expenses
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chExpense,Expense,,LOCK:Q_NO_LOCK)
+                    if (Expense.project_id!=ProjectId)
+                        exitloop
+
+                    Summary.project_id = Expense.project_id
+                    Summary.expense_id = Expense.expense_id
+                    Summary.expense_date = Expense.expense_date
+
+                    ;;Get created by name
+                    begin
+                        data User, sUser
+                        try
+                        begin
+                            read(chUser,User,Expense.expensed_by,KEYNUM:0,LOCK:Q_NO_LOCK)
+                            Summary.expensed_by = User.friendly_name
+                        end
+                        catch (ex)
+                            Summary.expensed_by = "* Not found *"
+                        endtry
+                    end
+
+                    Summary.description = Expense.description
+                    Summary.currency_code = Expense.currency_code
+                    Summary.unit_price = Expense.unit_price
+                    Summary.quantity = Expense.quantity
+                    Summary.total_price = Expense.unit_price * Expense.quantity
+
+                    if (Expense.is_estimate) then
+                        Summary.is_estimate = "Yes"
+                    else
+                        Summary.is_estimate = "No"
+
+                    Expenses.Add((@sExpenseSummary)Summary)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Expenses
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chExpense&&chopen(chExpense))
+            close chExpense
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve the consultant rates associated with a project
+;;
+function GetProjectRates, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Rates          ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chRate  ,int
+        done    ,boolean
+        Rate    ,sRate
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chRate=syn_freechn,i:i,"DAT:consultant.ism")
+
+        ;;Position to first task
+        try
+            find(chRate,,string(ProjectId,"XXXXXXXX"),KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add tasks
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chRate,Rate,,LOCK:Q_NO_LOCK)
+                    if (Rate.project_id!=ProjectId)
+                        exitloop
+                    Rates.Add((@sRate)Rate)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Rates
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chRate&&chopen(chRate))
+            close chRate
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+;;=============================================================================
+;; Retrieve the consultant rates associated with a project for a specific consultant
+;;
+function GetProjectConsultantRates, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required in  ConsultantId   ,a15
+    required out Fees           ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chRate      ,int
+        chFeeType   ,int
+        done        ,boolean
+        Rate        ,sRate
+        Summary     ,sFeeSummary
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chRate=syn_freechn,i:i,"DAT:consultant.ism")
+        open(chFeeType=syn_freechn,i:i,"DAT:feetype.ism")
+
+        ;;Position to first fee for the consultant
+        try
+            find(chRate,,string(ProjectId,"XXXXXXXX")+ConsultantId,KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chRate,Rate)
+                    if ((Rate.project_id!=ProjectId)||(Rate.consultant_id!=ConsultantId))
+                        exitloop
+
+                    Summary.user_id = Rate.consultant_id
+                    Summary.fee_type_id = rate.fee_type_id
+                    Summary.cost = Rate.fee
+
+                    ;;Get the description for this fee type
+                    try
+                    begin
+                        data FeeType ,sFeeType
+                        read(chFeeType,FeeType,rate.fee_type_id,KEYNUM:0)
+                        Summary.description = FeeType.description
+                    end
+                    catch (ex)
+                        Summary.description = "* Not Found *"
+                    endtry
+
+                    Fees.Add((@sFeeSummary)Summary)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Fees
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (ChRate&&chopen(chRate))
+            close chRate
+        if (chFeeType&&chopen(chFeeType))
+            close chFeeType
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve all consultants
+;;
+function GetAllConsultants      ,boolean
+    required in  userToken      ,a22
+    required out Consultants    ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chUser  ,int
+        done    ,boolean
+        User    ,sUser
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chUser=syn_freechn,i:i,"DAT:user.ism")
+        repeat
+        begin
+            reads(chUser,user)
+            if (!User.is_consultant||User.inactive)
+                nextloop
+            Consultants.Add((@sUser)User)
+        end
+    end
+    catch (ex, @EndOfFileException)
+    begin
+        nop
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        clear Consultants
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chUser&&chopen(chUser))
+            close chUser
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+
+;;=============================================================================
+;; Retrieve the consultants associated with a project
+;;
+function GetProjectConsultants, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required out Consultants    ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        done    ,boolean
+        Project ,sProject
+        User    ,sUser
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    ok = GetProjectHeader(userToken,ProjectId,Project,ErrorText)
+
+    ;;Add the lead consultants user record
+    if (ok&&(ok = GetUserMaster(userToken,Project.Lead_consultant,User,ErrorText)))
+        Consultants.Add((@sUser)User)
+
+    ;;Add any consultants assigned a task in the project
+    if (ok)
+    begin
+        data Tasks, @ArrayList, new ArrayList()
+        data TmpError, string
+        data ix1, int
+        data ix2, int
+        data gotit, boolean
+        if (GetProjectTasks(userToken,ProjectId,Tasks,TmpError))
+        begin
+            for ix1 from 0 thru Tasks.Count-1
+            begin
+                gotit = false
+                for ix2 from 0 thru Consultants.Count-1
+                begin
+                    if (((sUser)Consultants[ix2]).user_id==((sTask)Tasks[ix1]).assigned_to)
+                    begin
+                        gotit = true
+                        exitloop
+                    end
+                end
+                if (!gotit)
+                begin
+                    if (GetUserMaster(userToken,((sTask)Tasks[ix1]).assigned_to,User,TmpError))
+                        Consultants.Add((@sUser)User)
+                end
+            end
+        end
+    end
+
+    ;;Any consultant with a fee structure for the project
+    if (ok)
+    begin
+        data Rates, @ArrayList, new ArrayList()
+        data TmpError, string
+        data ix1, int
+        data ix2, int
+        data gotit, boolean
+        if (GetProjectRates(userToken,ProjectId,Rates,TmpError))
+        begin
+            for ix1 from 0 thru Rates.Count-1
+            begin
+                gotit = false
+                for ix2 from 0 thru Consultants.Count-1
+                begin
+                    if (((sUser)Consultants[ix2]).user_id==((sRate)Rates[ix1]).consultant_id)
+                    begin
+                        gotit = true
+                        exitloop
+                    end
+                end
+                if (!gotit)
+                begin
+                    if (GetUserMaster(userToken,((sRate)Rates[ix1]).consultant_id,User,TmpError))
+                        Consultants.Add((@sUser)User)
+                end
+            end
+        end
+    end
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Retrieve the consultant fees summaries associated with a consultant
+;;
+function GetConsultantFeesSummary, boolean
+    required in  userToken      ,a22
+    required in  ConsultantId   ,a15
+    required out Fees           ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chFee       ,int
+        chFeeType   ,int
+        done        ,boolean
+        Fee         ,sFee
+        Summary     ,sFeeSummary
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chFee=syn_freechn,i:i,"DAT:fee.ism")
+        open(chFeeType=syn_freechn,i:i,"DAT:feetype.ism")
+
+        ;;Position to first fee for the consultant
+        try
+            find(chFee,,ConsultantId,KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Add notes
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chFee,Fee,,LOCK:Q_NO_LOCK)
+                    if (Fee.user_id!=ConsultantId)
+                        exitloop
+
+                    Summary.user_id = Fee.User_id
+                    Summary.fee_type_id = Fee.fee_type_id
+                    Summary.cost = fee.cost
+
+                    ;;Get the description for this fee type
+                    try
+                    begin
+                        data FeeType ,sFeeType
+                        read(chFeeType,FeeType,Fee.fee_type_id,KEYNUM:0,LOCK:Q_NO_LOCK)
+                        Summary.description = FeeType.description
+                    end
+                    catch (ex)
+                        Summary.description = "* Not Found *"
+                    endtry
+
+                    Fees.Add((@sFeeSummary)Summary)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    clear Fees
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chFee&&chopen(chFee))
+            close chFee
+        if (chFeeType&&chopen(chFeeType))
+            close chFeeType
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; Add a collection of consultant fees to a projet
+;;
+function ProjectAddConsultant, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required in  Fees           ,@ArrayList
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chRate  ,int
+        Summary ,sFeeSummary
+        Rate    ,sRate
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        data ix, int, -1
+        data retries, int
+
+        ;;Open the files we need
+        open(chRate=syn_freechn,u:i,"DAT:consultant.ism")
+
+        ;;Add project consultant fees
+        while ((ix+=1)<Fees.Count)
+        begin
+            clear retries
+            Summary = (sFeeSummary)Fees[ix]
+
+            init Rate
+            Rate.project_id = ProjectId
+            Rate.consultant_id = Summary.user_id
+            Rate.fee_type_id = Summary.fee_type_id
+            Rate.fee = Summary.cost
+            Rate.cost = 0
+            rate.replication_key = %datetime
+
+            try
+            begin
+                store(chRate,Rate)
+            end
+            catch (ex, @Synergex.SynergyDE.DuplicateException)
+            begin
+                sleep 0.1
+                if ((retries+=1)<4) then
+                    ix-=1
+                else
+                begin
+                    ok = false
+                    errorText = ex.message
+                    exitloop
+                end
+            end
+            catch (ex)
+            begin
+                ok = false
+                errorText = ex.message
+            end
+            endtry
+
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chRate&&chopen(chRate))
+            close chRate
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; remove a collection of consultant fees from a projet
+;;
+function ProjectRemoveConsultant, boolean
+    required in  userToken      ,a22
+    required in  ProjectId      ,d8
+    required in  ConsultantId   ,a15
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok      ,boolean
+        chRate  ,int
+        done    ,boolean
+        Rate     ,sRate
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chRate=syn_freechn,u:i,"DAT:consultant.ism")
+
+        ;;Position to first record
+        clear Rate
+        Rate.project_id = ProjectId
+        Rate.consultant_id = ConsultantId
+        try
+            find(chRate,,string(ProjectId,"XXXXXXXX")+ConsultantId,KEYNUM:0)
+        catch (ex)
+            done = true
+        endtry
+
+        ;;Remove matching records
+        if (!done)
+        begin
+            repeat
+            begin
+                try
+                begin
+                    reads(chRate,Rate)
+                    if ((Rate.project_id!=ProjectId)||(Rate.consultant_id!=ConsultantId))
+                        exitloop
+                    delete(chRate)
+                end
+                catch (ex, @EndOfFileException)
+                    exitloop
+                catch (ex)
+                begin
+                    ok = false
+                    ErrorText = ex.Message
+                    exitloop
+                end
+                endtry
+            end
+        end
+
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chRate&&chopen(chRate))
+            close chRate
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+
+;;=============================================================================
+;; remove a collection of consultant fees from a projet
+;;
+function DeleteContact, boolean
+    required in  userToken      ,a22
+    required in  CustomerId     ,a10
+    required in  ContactId      ,d3
+    required out ErrorText      ,string
+    endparams
+
+    stack record localData
+        ok          ,boolean
+        chContact   ,int
+        Contact     ,sContact
+    endrecord
+proc
+
+    ;;Check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    init localData
+    ok = true
+    ErrorText = ""
+
+    try
+    begin
+        ;;Open the files we need
+        open(chContact=syn_freechn,u:i,"DAT:contact.ism")
+
+        ;;Read the contact record
+        Contact.customer_id = CustomerId
+        Contact.contact_id = ContactId
+        read(chContact,Contact,%atrim(%keyval(chContact,Contact,0)),KEYNUM:0)
+
+        ;;And delete it
+        delete(chContact)
+    end
+    catch (ex, @Exception)
+    begin
+        ok = false
+        ErrorText = ex.Message
+    end
+    finally
+    begin
+        if (chContact&&chopen(chContact))
+            close chContact
+    end
+    endtry
+
+    freturn ok
+
+endfunction
+

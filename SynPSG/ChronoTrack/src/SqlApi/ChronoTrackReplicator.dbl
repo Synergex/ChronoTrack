@@ -1,0 +1,567 @@
+;;*****************************************************************************
+;;
+;; Program:     ChronoTrackReplicator
+;;
+;; Desctiption: This program replicates Synergy data file changes (which have
+;;              been recorded in the replucation log file) to the relational
+;;              database.
+;;
+;; Author:      Steve Ives (stevei)
+;;
+;; Company:     Synergex
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+main ChronoTrackReplicator
+
+    ;; Specify how to connect to and log in to a SQL Server database here:
+    ;; Note, the SQL Server login that you use must have administrative
+    ;; rights to the database being used, because the replication server
+    ;; creates new tables as needed.
+
+    .define SQL_DSN         "ChronoTrack"        ;;DSN name name
+    .define SQL_USERNAME    "ChronoTrack"        ;;SQL Server username
+    .define SQL_PASSWORD    "ChronoTrack"        ;;SQL Server password
+
+    .include "CONNECTDIR:ssql.def"
+    .include "DBLDIR:namspc.def"
+    .include "SRC:structure_io.def"
+    .include "SQL_REPLICATION_ITEM" repository, record="transaction"
+
+    .define D_MAX_CUR       20
+    .define D_MAX_COL       200
+    .define D_MAX_BUFFER    2048
+
+    .define D_SLEEP_TIME    5                    ;;Time to hibernate if nothing to do
+    .define D_ERROR_TIME    1                    ;;Time to hibernate after an error
+
+    global common
+        db                  ,i4                  ;;Database channel
+        nsid                ,i4                  ;;Name space id
+        tch                 ,i4                  ;;Transaction file channel
+        creates             ,i4                  ;;Number of create operations completed
+        updates             ,i4                  ;;Number of update operations completed
+        deletes             ,i4                  ;;Number of delete operations completed
+    endcommon
+
+    record ivars
+        error               ,i4                  ;;Fatal error occured
+        nsptr               ,i4                  ;;Name space pointer
+        dberr               ,i4                  ;;Database error
+        length              ,i4                  ;;Length of buffer
+        status              ,i4                  ;;General working status return
+        eof                 ,i4                  ;;End of file
+        rows                ,i4                  ;;Number of rows affected
+    endrecord
+
+    record avars
+        connect_string      ,a256                ;;Database connect string
+        function_name       ,a40                 ;;External function to call
+        databuffer          ,a(D_MAX_BUFFER)
+        dberrtxt            ,a1024
+    endrecord
+
+    record structure_data
+        structure_name      ,a30                 ;;Name of structure
+        structure_chan      ,i4                  ;;ISAM channel being used
+        structure_size      ,i4                  ;;Record length
+    endrecord
+
+proc
+
+    clear ^i(ivars), avars
+
+    ;;Register our shutdown event handler
+    xcall syn_atexit(%xaddr("ReplicatorShutdown"))
+
+    ;;Open the transaction file
+    begin
+        open(tch=%syn_freechn,"U:I","DAT:replication.ism") [ERR=tferr]
+        exit
+tferr,  xcall syn_reportevent(D_EVENTLOG_ERROR_TYPE,"Failed to open DAT:replication.ism")
+        error=1
+    end
+
+    ;;Enable and Initialize SQL Connection
+    if (!error)
+    begin
+        .ifdef OS_VMS
+        xcall init_ssql
+        .else
+        status=%option(48,1)
+        .endc
+        if (%ssc_init(db=1,D_MAX_CUR,D_MAX_COL,D_MAX_BUFFER)==SSQL_FAILURE)
+        begin
+            xcall syn_reportevent(D_EVENTLOG_ERROR_TYPE,"Failed to initialize SQL Connection")
+            error=1
+        end
+    end
+
+    ;;Connect to the database
+    if (!error)
+    begin
+
+        xcall s_bld(connect_string,,"VTX12_SQLNATIVE:%a/%a/%a",
+        &   SQL_USERNAME,SQL_PASSWORD,SQL_DSN)
+
+        if (%ssc_connect(db,connect_string)==SSQL_FAILURE)
+        begin
+            xcall ssc_getemsg(db,dberrtxt,length)
+            xcall syn_reportevent(D_EVENTLOG_ERROR_TYPE,
+            &   "Failed to connect to database. "
+            &   + "Connection string was " + connect_string +". "
+            &   + "Error message was: " + dberrtxt(1,length))
+            error=1
+        end
+    end
+
+    ;;Create a namespace to record information about Synergy data files that we have opened.
+    if (!error)
+        nsid = %nspc_open(,%size(structure_data))
+
+    ;;Main processing loop
+    if (!error)
+    begin
+        xcall syn_reportevent(D_EVENTLOG_INFORMATION_TYPE,"Processing transactions")
+
+        repeat
+        begin
+
+            ;;Check for outstanding transactions
+            call GetTransaction
+
+            if (eof) then
+                sleep D_SLEEP_TIME
+            else
+            begin
+
+                ;;Check if we already have the file open
+                call CheckFileTable
+
+                ;;If we don't have the file open by now then we probably have a
+                ;;configuration problem, so abort processing
+                if (!structure_data.structure_chan)
+                begin
+                    xcall syn_reportevent(D_EVENTLOG_ERROR_TYPE,
+                    &   "Abnormal replication server shutdown")
+                    exitloop
+                end
+
+                ;;Execute the transaction
+                using (transaction.sdms_action) select
+                (D_ACTION_STORE),
+                    call DoInsert
+                (D_ACTION_UPDATE),
+                    call DoUpdate
+                (D_ACTION_DELETE),
+                    call DoDelete
+                endusing
+
+                ;;Delete the transaction file record
+                delete(tch)
+
+            end
+
+            ;;Go back to first record in transaction file and start over
+            xcall begfl(tch)
+
+        end
+
+    end
+
+    ;;Close the database
+    if (db)
+        xcall ssc_release(db)
+
+    ;;Release the name space.
+    if (nsid)
+        xcall nspc_close(nsid)
+
+    ;;Close the transaction file
+    if (tch)
+        close tch
+
+    ;;We're done
+    stop
+
+;;-----------------------------------------------------------------------------
+;; Look for a pending transaction record in the transaction file
+;;
+GetTransaction,
+
+    clear eof
+
+    repeat
+    begin
+        reads(tch,transaction,eof,LOCK:1) [$err_locked=TrLocked]
+        if (!transaction)
+            nextloop
+        if (0)
+        begin
+eof,        eof=1
+            exitloop
+TrLocked,   sleep D_ERROR_TIME
+        end
+        exitloop
+    end
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; Does this file already have an entry in the namespace?
+;;
+CheckFileTable,
+
+    if (!nsptr=%nspc_find(nsid,transaction.structure_name,structure_data))
+    begin
+        ;;No, open the file and make sure it worked
+        call OpenFile
+        if (!structure_data.structure_chan)
+            exit
+
+        ;;Get the record size of the file
+        xcall getfa(structure_data.structure_chan,'RSZ',structure_data.structure_size)
+
+        ;;And save the structure name
+        structure_data.structure_name = transaction.structure_name
+
+        ;;Record the new open file in the namespace
+        nsptr=%nspc_add(nsid,transaction.structure_name,structure_data)
+    end
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; Open a Synergy data file
+;;
+OpenFile,
+
+    function_name = %atrim(transaction.structure_name)+"_IO"
+    onerror FunctionFail
+    status= %xsubr(function_name,IO_OPEN_INP,structure_data.structure_chan,,,,,,dberrtxt)
+    offerror
+    if (status!=IO_OK) then
+    begin
+        clear structure_data.structure_chan
+        call FunctionError
+    end
+    else
+        call CheckTable
+    return
+
+;;-----------------------------------------------------------------------------
+;; Find out if the corresponding table exists in the SQL database
+;;
+CheckTable,
+
+    function_name = %atrim(transaction.structure_name)+"_EXISTS"
+    onerror FunctionFail
+    status= %xsubr(function_name,db,dberrtxt)
+    offerror
+    using status select
+    (1),                                         ;;Table exists
+        nop
+    (0),                                         ;;Table does not exist
+    begin
+        xcall syn_reportevent(D_EVENTLOG_WARNING_TYPE,"Database table "
+        &   + %atrim(transaction.structure_name)+" not found.")
+        call CreateTable
+    end
+    (<0),                                        ;;Error
+        call FunctionError
+    endusing
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; Create a new table in the SQL database
+;;
+CreateTable,
+
+    function_name = %atrim(transaction.structure_name)+"_CREATE"
+    xcall syn_reportevent(D_EVENTLOG_INFORMATION_TYPE,
+    &   "Attempting to create table "+%atrim(transaction.structure_name))
+    onerror FunctionFail
+    status= %xsubr(function_name,db,dberrtxt)
+    offerror
+    if (!status) then
+        call FunctionError
+    else
+    begin
+        xcall syn_reportevent(D_EVENTLOG_INFORMATION_TYPE,
+        &   "Database table "+%atrim(transaction.structure_name)+" was created.")
+        call LoadTable
+    end
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; Perform an initial load of a new table in the SQL database
+;;
+LoadTable,
+
+    function_name = %atrim(transaction.structure_name)+"_LOAD"
+    xcall syn_reportevent(D_EVENTLOG_INFORMATION_TYPE,
+    &   "Attempting to load table "+%atrim(transaction.structure_name))
+    onerror FunctionFail
+    status= %xsubr(function_name,db,dberrtxt)
+    offerror
+    if (!status) then
+        call FunctionError
+    else
+    begin
+        xcall syn_reportevent(D_EVENTLOG_INFORMATION_TYPE,
+        &   "Database table "+%atrim(transaction.structure_name)+" was loaded.")
+    end
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; Add a new row
+;;
+DoInsert,
+
+    call ReadSynergyRecord
+
+    if ((status==IO_OK)&&(databuffer))
+    begin
+        function_name = %atrim(transaction.structure_name) + '_INSERT_ROW'
+        onerror FunctionFail
+        status = %xsubr(function_name,db,databuffer(1,structure_data.structure_size),dberrtxt)
+        offerror
+        if (!status) then
+            call FunctionError
+        else
+            creates+=1
+    end
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; Update an existing row
+;;
+DoUpdate,
+
+    call ReadSynergyRecord
+
+    ;; Check that a record was returned before calling update because the record
+    ;; may have been deleted since. If so just ignore the transaction.
+
+    if ((status==IO_OK)&&(databuffer))
+    begin
+        function_name = %atrim(transaction.structure_name) + '_UPDATE_ROW'
+        onerror FunctionFail
+        status = %xsubr(function_name,db,databuffer(1,structure_data.structure_size),rows,dberrtxt)
+        offerror
+        if (!status) then
+            call FunctionError
+        else
+        begin
+            if (rows) then
+                updates+=1
+            else
+            begin
+                xcall syn_reportevent(D_EVENTLOG_WARNING_TYPE,
+                &   "During an UPDATE of table " + %atrim(transaction.structure_name)
+                &   + " return status was " + %string(status) + " and rows affected was " + %string(rows)
+                &   + " the row with unique identifier " + transaction.structure_key
+                &   + " was not found. Performing an INSERT instead.")
+                call DoInsert
+            end
+
+        end
+    end
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; Delete a row
+;;
+DoDelete,
+
+    function_name = %atrim(transaction.structure_name) + '_DELETE_ROW'
+    onerror FunctionFail
+    status= %xsubr(function_name,db,transaction.structure_key,,dberrtxt)
+    offerror
+    if (!status) then
+        call FunctionError
+    else
+        deletes+=1
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; This routine reads the full record associated with the unique key retrieved
+;; from the transaction file.  It uses the special IO_READ_SQL mode, which knows
+;; which key is the REPLICATION_KEY key for that file.
+;;
+ReadSynergyRecord,
+
+    ;;Find the master record details
+    function_name = %atrim(transaction.structure_name)+"_IO"
+    onerror FunctionFail
+    status= %xsubr(function_name,IO_READ_SQL,structure_data.structure_chan,
+    &   transaction.structure_key,,databuffer(1,structure_data.structure_size),,,dberrtxt)
+    if (status!=IO_OK)
+        call FunctionError
+    offerror
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; If we get here then some routine that we tried to XSUBR encountered a
+;; an unexpected / fatal error.
+;;
+FunctionFail,
+
+    offerror
+    xcall ertxt(error=%error,dberrtxt)
+    xcall syn_reportevent(D_EVENTLOG_ERROR_TYPE,
+    &   "Error calling %"+%atrim(function_name)+". Error "+%string(error)+" "+%atrim(dberrtxt))
+
+    return
+
+;;-----------------------------------------------------------------------------
+;; If we get here then some routine that we tried to XSUBR trapped an error
+;; and returned a fail status.
+;;
+FunctionError,
+
+    xcall syn_reportevent(D_EVENTLOG_ERROR_TYPE,
+    &   "%"+%atrim(function_name)+" failed with status "+%string(status)
+    &   +" "+%atrim(dberrtxt))
+
+    return
+
+endmain
+
+;;*****************************************************************************
+;;
+;; Routine:     ReplicatorShutdown
+;;
+;; Description: This routine is an event handler which is called when the
+;;              replicator service is being stopped by the Windows operating
+;;              system.
+;;
+;; Author:      Steve Ives
+;;
+;; Company:     Synergex
+;;
+;; Created:     04/10/2008 at 22:17
+;;
+;;*****************************************************************************
+;;
+;; This code is supplied as seen and without warranty or support, and is used
+;; at your own risk. Neither the author or Synergex accept any responsability
+;; for any loss or damage which may result from the use of this code. This text
+;; must remain unaltered in this file at all times. Possession or use of this
+;; code, or any modified version of this code, indicates your acceptance of
+;; these conditions.
+;;
+;;*****************************************************************************
+;;
+subroutine ReplicatorShutdown
+
+    endparams
+
+    .include "CONNECTDIR:ssql.def"
+    .include "DBLDIR:namspc.def"
+    .include "SRC:structure_io.def"
+
+    external common
+        db              ,i4                      ;;Database channel
+        nsid            ,i4                      ;;Name space id
+        tch             ,i4                      ;;Transaction file channel
+        creates         ,i4                      ;;Number of create operations completed
+        updates         ,i4                      ;;Number of update operations completed
+        deletes         ,i4                      ;;Number of delete operations completed
+
+    stack record
+        idx             ,i4                      ;;Loop counter
+        access_code     ,i4                      ;;Namespace access code
+        status          ,i4                      ;;Function return status
+        function_name   ,a40                     ;;External function name to call
+
+    record structure_data
+        structure_name  ,a30                     ;;Name of structure
+        structure_chan  ,i4                      ;;ISAM channel being used
+        structure_size  ,i4                      ;;Record length
+
+proc
+
+    xcall syn_reportevent(D_EVENTLOG_INFORMATION_TYPE,
+    &   "Service shutdown has been requested.")
+
+    xcall syn_reportevent(D_EVENTLOG_INFORMATION_TYPE,
+    &   "Replication session summary: "
+    &   + %string(creates) + " row(s) created, "
+    &   + %string(updates) + " row(s) updated, and "
+    &   + %string(deletes) + " row(s) deleted.")
+
+    ;;Close the database
+    if (db)
+    begin
+        xcall ssc_release(db)
+        clear db
+    end
+
+    ;;Close the files that we have open
+    if (nsid)
+    begin
+        for idx from 1 thru %nspc_stoa(nsid,9999)
+        begin
+            ;;Get the item data from the namespace
+            access_code = %nspc_stoa(nsid,idx)
+            xcall nspc_getdata(nsid,access_code,structure_data)
+            ;;Close the channel
+            if ((structure_data.structure_chan)&&%chopen(structure_data.structure_chan))
+            begin
+                function_name = %atrim(structure_data.structure_name)+"_IO"
+                onerror ignore
+                status= %xsubr(function_name,IO_CLOSE,structure_data.structure_chan)
+    ignore,     offerror
+            end
+        end
+
+        xcall nspc_close(nsid)
+        clear nsid
+
+    end
+
+    ;;Close the transaction file
+    if (tch)
+    begin
+        close tch
+        clear tch
+    end
+
+    xreturn
+
+endsubroutine

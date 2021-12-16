@@ -1,0 +1,220 @@
+;;**********************************************************************
+;;
+;; Title:       taskTypeRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the taskType data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "TASK_TYPE" repository, structure="sTaskType", end
+
+;;; <summary>
+;;; get_task_type
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required taskType record on the primary key
+;;; </remark>
+;;; <param name=taskID>pass the required task ID to locate</param>
+;;; <param name=taskTypeData>return the located task type record data</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_task_type          ,boolean
+    required in  userToken      ,a22
+    required in  taskID         ,d3
+    required out taskTypeData   ,staskType
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = taskTypeDataEntity.Instance.IO.Locate(%string(taskID, "XXX"),Q_PRIMARY,false)
+
+    ;;set the data area
+    taskTypeData = taskTypeDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = taskTypeDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_task_type
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=taskTypeData>pass task type record data</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_task_type       , boolean
+    required in  userToken      ,a22
+    required inout taskTypeData ,staskType
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    taskTypeDataEntity.Instance.IO.DataArea = taskTypeData
+
+    ;;create the record
+    result = taskTypeDataEntity.Instance.IO.Create()
+    taskTypeData = taskTypeDataEntity.Instance.IO.DataArea
+    lastErrorMsg = taskTypeDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_taskType_table
+;;; return the taskType data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the taskType file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=taskTypeTable>return the task type table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_taskType_table  ,boolean
+    required in  userToken          ,a22
+    required out taskTypeTable   ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    taskTypeTable = taskTypeDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_task_type
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=taskTypeData>pass task type record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_task_type, boolean
+    required in  userToken          ,a22
+    required in  taskTypeData       ,staskType
+    required out newGrfa            ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    taskTypeDataEntity.Instance.IO.DataArea = taskTypeData
+
+    ;;update the record
+    result = taskTypeDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = taskTypeDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = taskTypeDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_task_type
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=taskTypeData>pass task type record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_task_type       ,boolean
+    required in  userToken      ,a22
+    required in  taskTypeData   ,staskType
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    taskTypeDataEntity.Instance.IO.DataArea = taskTypeData
+
+    ;;delete the record
+    result = taskTypeDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = taskTypeDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

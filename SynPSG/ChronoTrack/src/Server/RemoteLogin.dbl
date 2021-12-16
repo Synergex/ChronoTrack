@@ -1,0 +1,169 @@
+;;**********************************************************************
+;;
+;; Title:       RemoteLogin.dbl
+;;
+;; Type:        Subroutine
+;;
+;; Description: allow the authentication of users within ChronoTrack
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrackSvr.def"
+
+;;; <summary>
+;;; Allow user authentication
+;;; </summary>
+;;; <return type="Boolean">
+;;; True if successful, false if login failed.
+;;; Error returned in errorDetails parameter
+;;; </returns
+;;; <param name="userName">pass in the user name to authenticate</param>
+;;; <param name="password">password enty</param>
+;;; <param name="errorDetails">return error reason if login failed</param>
+
+.include "LOGIN_AUDIT" repository, structure="sLoginAudit", end
+
+function RemoteLogin                ,boolean
+    required in  userName           ,a15
+    required in  password           ,a15
+    required in  currentUserCount   ,d6
+    required out userToken          ,a22
+    required out errorDetails       ,a
+    endparams
+
+    .define D_DEFINE_COMMON_DATA
+    .include "DEF:Server.def"
+
+    record
+        errMsg  ,string
+    endrecord
+
+proc
+
+    if (!elbsOpen)
+    begin
+        openelb("EXE:ChronoTrackSubs.elb")
+        openelb("EXE:DataEntities.elb")
+        openelb("COREEXE:CoreUtilities.elb")
+        openelb("COREEXE:CoreDataEntities.elb")
+    end
+
+    validLogin = RemoteValidateUser(userName,password,errMsg,true)
+    errorDetails = errMsg
+
+    ;;Are we tracking concurrent user count?
+    if (currentUserCount>-1)
+    begin
+        data logChn ,int
+        data logRecord, sLoginAudit
+        try
+        begin
+            logRecord.login_time = %datetime
+            logRecord.Producer = "92    "
+            logRecord.Application = "CTRACK"
+            logRecord.user_id = userName
+            logRecord.concurrent_users = currentUserCount + 1
+            open(logChn=%syn_freechn,u:i,"DAT:login_audit.ism")
+            store(logChn,logRecord)
+        end
+        catch (ex)
+        begin
+            nop
+        end
+        finally
+        begin
+            if (logChn&&chopen(logChn))
+                close logChn
+        end
+        endtry
+    end
+
+    freturn validLogin
+
+endfunction
+
+function TestLogin              ,^val
+    required in  userName       ,a15
+    required in  password       ,a15
+    required out userToken      ,a22
+    required out errorDetails   ,a
+    endparams
+
+    .include "DEF:Server.def"
+
+    record
+        errMsg  ,string
+    endrecord
+
+proc
+
+    if (!elbsOpen)
+    begin
+        openelb("EXE:ChronoTrackSubs.elb")
+        openelb("EXE:DataEntities.elb")
+        openelb("COREEXE:CoreUtilities.elb")
+        openelb("COREEXE:CoreDataEntities.elb")
+    end
+
+    validLogin = RemoteValidateUser(userName,password,errMsg,true)
+    errorDetails = errMsg
+
+    if (validLogin) then
+        freturn 1
+    else
+        freturn 0
+
+endfunction
+
+;;; <summary>
+;;; Allow user authentication
+;;; </summary>
+;;; <return type="Boolean">
+;;; True if successful, false if login failed.
+;;; Error returned in errorDetails parameter
+;;; </returns
+;;; <param name="userName">pass in the user name to authenticate</param>
+;;; <param name="password">password enty</param>
+;;; <param name="errorDetails">return error reason if login failed</param>
+function RemoteValidateUser     ,boolean
+    required in  userName       ,string
+    required in  password       ,string
+    required out errorDetails   ,string
+    optional in  noDotNet       ,boolean
+    endparams
+
+proc
+
+    freturn ValidateUser(userName,password,errorDetails,noDotNet)
+
+endfunction

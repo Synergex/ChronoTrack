@@ -1,0 +1,220 @@
+;;**********************************************************************
+;;
+;; Title:       ExpenseTypeRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the ExpenseType data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "EXPENSE_TYPE" repository, structure="sExpenseType", end
+
+;;; <summary>
+;;; get_expense_type
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required expenseType record on the primary key
+;;; </remark>
+;;; <param name=expenseID>pass the required expense ID to locate</param>
+;;; <param name=expenseTypeData>return the located expense type record data</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_expense_type           ,boolean
+    required in  userToken          ,a22
+    required in  expenseID          ,a10
+    required out expenseTypeData    ,sExpenseType
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = ExpenseTypeDataEntity.Instance.IO.Locate(expenseID,Q_PRIMARY,false)
+
+    ;;set the data area
+    expenseTypeData = ExpenseTypeDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = ExpenseTypeDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_expense_type
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=expenseTypeData>pass expense type record data</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_expense_type        ,boolean
+    required in  userToken          ,a22
+    required inout expenseTypeData  ,sExpenseType
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ExpenseTypeDataEntity.Instance.IO.DataArea = expenseTypeData
+
+    ;;create the record
+    result = ExpenseTypeDataEntity.Instance.IO.Create()
+    expenseTypeData = ExpenseTypeDataEntity.Instance.IO.DataArea
+    lastErrorMsg = ExpenseTypeDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_expenseType_table
+;;; return the ExpenseType data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the ExpenseType file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=expenseTypeTable>return the expense type table</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_expenseType_table  ,boolean
+    required in  userToken          ,a22
+    required out expenseTypeTable   ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    expenseTypeTable = ExpenseTypeDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_expense_type
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=expenseTypeData>pass expense type record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_expense_type        ,boolean
+    required in  userToken          ,a22
+    required in  expenseTypeData    ,sExpenseType
+    required out newGrfa            ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ExpenseTypeDataEntity.Instance.IO.DataArea = expenseTypeData
+
+    ;;update the record
+    result = ExpenseTypeDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = ExpenseTypeDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = ExpenseTypeDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_expense_type
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=expenseTypeData>pass expense type record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_expense_type        ,boolean
+    required in  userToken          ,a22
+    required in  expenseTypeData    ,sExpenseType
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    ExpenseTypeDataEntity.Instance.IO.DataArea = expenseTypeData
+
+    ;;delete the record
+    result = ExpenseTypeDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = ExpenseTypeDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+

@@ -1,0 +1,227 @@
+;;**********************************************************************
+;;
+;; Title:       CustomerLocationRoutines.dbl
+;;
+;; Type:        Subroutine (collection)
+;;
+;; Description: routines to allow remote access to the CustomerLocation data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+.include "CUSTOMER_LOCATION" repository, structure="sLocation", end
+
+;;; <summary>
+;;; get_customer_location
+;;; </summary>
+;;; <remarks>
+;;; using the passed key locate te required customer location record on the primary key
+;;; </remark>
+;;; <param name=customerID>required customer ID</param>
+;;; <param name=locationID>required contact ID</param>
+;;; <param name=customerLocationData>returned record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_customer_location          ,boolean
+    required in  userToken              ,a22
+    required in  customerID             ,a10
+    required in  locationID             ,d2
+    required out customerLocationData   ,sLocation
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;attempt to locate given key value
+    result = CustomerLocationDataEntity.Instance.IO.Locate(customerID+%string(locationID,"XX"),Q_PRIMARY,false)
+
+    ;;set the data area
+    customerLocationData = CustomerLocationDataEntity.Instance.IO.DataArea
+
+    ;;record any possible error message
+    lastErrorMsg = CustomerLocationDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; create_customer_location
+;;; </summary>
+;;; <remarks>
+;;; pass in the record data and attempt to create it
+;;; </remark>
+;;; <param name=customerLocationData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function create_customer_location       ,boolean
+    required in    userToken            ,a22
+    required inout customerLocationData ,sLocation
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    CustomerLocationDataEntity.Instance.IO.DataArea = CustomerLocationData
+
+    ;;create the record
+    result = CustomerLocationDataEntity.Instance.IO.Create()
+    customerLocationData = CustomerLocationDataEntity.Instance.IO.DataArea
+    lastErrorMsg = CustomerLocationDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; get_CustomerLocation_table
+;;; return the CustomerLocation data as a Array List
+;;; </summary>
+;;; <remarks>
+;;; Return the contents of the CustomerLocation file as an array list which is
+;;; then converted to a DataTable by xfNetLink.NET
+;;; </remark>
+;;; <param name=customerID>required customer ID</param>
+;;; <param name=customerLocationData>returned record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function get_CustomerLocation_table ,boolean
+    required in  userToken              ,a22
+    required in  customerID             ,a
+    required out customerLocationTable  ,@ArrayList
+    endparams
+
+    .include "DEF:Server.def"
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;create the collection
+    if (customerID) then
+        customerLocationTable = CustomerLocationDataEntity.Instance.DataCollection.Collection(customerID,Q_PRIMARY)
+    else
+        customerLocationTable = CustomerLocationDataEntity.Instance.DataCollection.Collection()
+
+    freturn true
+
+endfunction
+
+;;; <summary>
+;;; update_customer_location
+;;; </summary>
+;;; <remarks>
+;;; pass in the modified record and attempt an update
+;;; </remark>
+;;; <param name=customerLocationData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function update_customer_location       ,boolean
+    required in  userToken              ,a22
+    required in  customerLocationData   ,sLocation
+    required out newGrfa                ,a22
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    CustomerLocationDataEntity.Instance.IO.DataArea = customerLocationData
+
+    ;;update the record
+    result = CustomerLocationDataEntity.Instance.IO.CompareAndSave()
+    lastErrorMsg = CustomerLocationDataEntity.Instance.IO.LastErrorMessage
+
+    newGrfa = CustomerLocationDataEntity.Instance.IO.GRFA
+
+    freturn result
+
+endfunction
+
+;;; <summary>
+;;; delete_customer_location
+;;; </summary>
+;;; <remarks>
+;;; pass in the record to delete
+;;; </remark>
+;;; <param name=customerLocationData>passed record area</param>
+;;; <return type="Boolean">true = success, false = error</returns>
+function delete_customer_location       ,boolean
+    required in  userToken              ,a22
+    required in  customerLocationData   ,sLocation
+    endparams
+
+    .include "DEF:Server.def"
+
+    stack record
+        result  ,boolean
+    endrecord
+
+proc
+    ;;check we have a valid logged in user
+    if (!%CheckLogin(userToken))
+        freturn false
+
+    ;;set the data area
+    CustomerLocationDataEntity.Instance.IO.DataArea = customerLocationData
+
+    ;;delete the record
+    result = CustomerLocationDataEntity.Instance.IO.FindAndDelete()
+    lastErrorMsg = CustomerLocationDataEntity.Instance.IO.LastErrorMessage
+
+    freturn result
+
+endfunction
+
