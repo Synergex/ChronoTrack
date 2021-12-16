@@ -1,0 +1,500 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A603E3B6-AA7F-44FC-A2C1-98231FB83921}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ChronoTrackNetUI</RootNamespace>
+    <AssemblyName>ChronoTrackNetUI</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>ChronoTrackNetUI.snk</AssemblyOriginatorKeyFile>
+    <SccProjectName></SccProjectName>
+    <SccLocalPath></SccLocalPath>
+    <SccAuxPath></SccAuxPath>
+    <SccProvider></SccProvider>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ChronoTrack, Version=1.0.0.4, Culture=neutral, PublicKeyToken=8a36eff8da7347e5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\src\Assembly\ChronoTrack\ChronoTrack.dll</HintPath>
+    </Reference>
+    <Reference Include="ChronoTrackNetUICommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=01fddbd79062ff0a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ChronoTrackNetUICommon\bin\Debug\ChronoTrackNetUICommon.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="SynPSGNetCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=da9a1733f5c8a905, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Core\VSSolutions\SynPSGNetCore\bin\Debug\SynPSGNetCore.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="xfnlnet, Version=1.0.11.0, Culture=neutral, PublicKeyToken=114c5dbb1312a8bc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files\Synergex\xfNLNet\xfnlnet.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics2.Documents.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Documents.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinDataSource.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinDataSource.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinGrid.DocumentExport.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinGrid.DocumentExport.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinSchedule.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinSchedule.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinTabControl.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinTabControl.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinToolbars.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinToolbars.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics3.Excel.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics3.Excel.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics3.Win.UltraWinGrid.ExcelExport.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics3.Win.UltraWinGrid.ExcelExport.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Shared.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Shared.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.Misc.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.Misc.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinEditors.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinEditors.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinGrid.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinGrid.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinListView.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinListView.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinMaskedEdit.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinMaskedEdit.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.UltraWinSpellChecker.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.UltraWinSpellChecker.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Infragistics2.Win.v9.1, Version=9.1.20091.2023, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files\Infragistics\NetAdvantage for .NET 2009.1\Windows Forms\Bin\Infragistics2.Win.v9.1.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Forms\About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\CountryMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CountryMaintenance.Designer.cs">
+      <DependentUpon>CountryMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\CustomerContactMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CustomerContactMaintenance.Designer.cs">
+      <DependentUpon>CustomerContactMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\CustomerLocationMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CustomerLocationMaintenance.Designer.cs">
+      <DependentUpon>CustomerLocationMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\CustomerMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CustomerMaintenance.Designer.cs">
+      <DependentUpon>CustomerMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FeeTypeMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FeeTypeMaintenance.Designer.cs">
+      <DependentUpon>FeeTypeMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Login.Designer.cs">
+      <DependentUpon>Login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MainMenu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainMenu.Designer.cs">
+      <DependentUpon>MainMenu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Options.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Options.Designer.cs">
+      <DependentUpon>Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\PasswordMaint.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PasswordMaint.Designer.cs">
+      <DependentUpon>PasswordMaint.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ProjectCreate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProjectCreate.Designer.cs">
+      <DependentUpon>ProjectCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ProjectCentre.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProjectCentre.designer.cs">
+      <DependentUpon>ProjectCentre.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ProjectManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProjectManager.Designer.cs">
+      <DependentUpon>ProjectManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ProjectView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProjectView.Designer.cs">
+      <DependentUpon>ProjectView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\RequestCreate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\RequestCreate.Designer.cs">
+      <DependentUpon>RequestCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\StateMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\StateMaintenance.Designer.cs">
+      <DependentUpon>StateMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\UserMaintenance.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UserMaintenance.Designer.cs">
+      <DependentUpon>UserMaintenance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\UserView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UserView.Designer.cs">
+      <DependentUpon>UserView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Forms\About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CountryMaintenance.resx">
+      <DependentUpon>CountryMaintenance.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CustomerContactMaintenance.resx">
+      <DependentUpon>CustomerContactMaintenance.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CustomerLocationMaintenance.resx">
+      <DependentUpon>CustomerLocationMaintenance.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CustomerMaintenance.resx">
+      <DependentUpon>CustomerMaintenance.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FeeTypeMaintenance.resx">
+      <DependentUpon>FeeTypeMaintenance.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Login.resx">
+      <DependentUpon>Login.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MainMenu.resx">
+      <DependentUpon>MainMenu.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\PasswordMaint.resx">
+      <DependentUpon>PasswordMaint.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ProjectCreate.resx">
+      <DependentUpon>ProjectCreate.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ProjectCentre.resx">
+      <DependentUpon>ProjectCentre.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ProjectView.resx">
+      <DependentUpon>ProjectView.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\RequestCreate.resx">
+      <DependentUpon>RequestCreate.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\StateMaintenance.resx">
+      <DependentUpon>StateMaintenance.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\UserMaintenance.resx">
+      <DependentUpon>UserMaintenance.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\UserView.resx">
+      <DependentUpon>UserView.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ChronoTrackNetUI.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\DataSources\ChronoTrack.Consultant_fee.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Country.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Customer.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Customer_contact.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Customer_contract.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Customer_location.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Expense_type.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Fee_type.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Project.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Project_activity.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Project_attachment.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Project_consultant.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Project_expense.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Project_note.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Project_task.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.Request.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.State.datasource" />
+    <None Include="Properties\DataSources\ChronoTrack.User.datasource" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Spell Check.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ChronoTrack.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.SQL.Server.Compact.3.5">
+      <Visible>False</Visible>
+      <ProductName>SQL Server Compact 3.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\synergyde_logo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\DataSources\ChronoTrack.User_breif.datasource" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\User-Password.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Support.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Users.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Control-Edit Box.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Currency.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Currency-Notes.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Exit.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Flag.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Folder.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Internet.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Project.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Project-Centre.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Research.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Spell Check.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\DataSources\ChronoTrack.Gantt_view.datasource" />
+    <None Include="Resources\Contact-Edit.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\DataSources\ChronoTrack.Task_type.datasource" />
+    <None Include="Resources\Delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Design.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Calendar-Select Day.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Calendar-Select Month.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Calendar-Select Week.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chart-Bar.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Calendar-Select Week_large.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chart-Bar_large.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Calendar-Select Day_large.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Calendar-Select Month_large.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\DataSources\ChronoTrack.Customer_breif.datasource" />
+    <None Include="Resources\Project_large.bmp" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
