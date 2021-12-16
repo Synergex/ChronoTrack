@@ -1,0 +1,10 @@
+<%@ Register TagPrefix="dx" Namespace="DevExpress.Data" Assembly="DevExpress.Data.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<%@ Register TagPrefix="dxpc" Namespace="DevExpress.Web.ASPxPopupControl" Assembly="DevExpress.Web.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<dxpc:ASPxPopupControl runat="server" CssFilePath="{0}/styles.css" CssPostfix="Youthful" ImageFolder="{0}/">
+<HeaderStyle>
+    <BackgroundImage ImageUrl="Web/pcHeaderBack.gif" Repeat="RepeatX" />
+</HeaderStyle>
+<CloseButtonImage Height="13px" Width="13px" />
+<SizeGripImage Height="16px" Width="16px" Url="Web/pcSizeGrip.gif" />
+</dxpc:ASPxPopupControl>
+

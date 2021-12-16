@@ -1,0 +1,13 @@
+<%@ Register TagPrefix="dx" Namespace="DevExpress.Data" Assembly="DevExpress.Data.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<%@ Register TagPrefix="dxm" Namespace="DevExpress.Web.ASPxMenu" Assembly="DevExpress.Web.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<dxm:ASPxMenu runat="server" CssFilePath="{0}/styles.css" ItemSpacing="0px" CssPostfix="Youthful" SeparatorHeight="100%" ImageFolder="{0}/" AutoSeparators="RootOnly" SeparatorWidth="1px" ShowSubMenuShadow="False">
+    <SubMenuStyle GutterWidth="0px" />
+    <ItemStyle DropDownButtonSpacing="10px" />
+    <RootItemSubMenuOffset FirstItemX="-1" LastItemX="-1" X="-1" />
+    <VerticalPopOutImage Height="7px" Width="5px" />
+    <HorizontalPopOutImage Height="7px" Width="10px" />
+    <SeparatorBackgroundImage ImageUrl="Web/mSeparator.gif" />
+    <ItemSubMenuOffset FirstItemX="1" FirstItemY="-1" LastItemX="1" LastItemY="-1" X="1" Y="-1" />
+    <SubMenuItemStyle ImageSpacing="5px" />
+    <ItemStyle ImageSpacing="5px" />
+</dxm:ASPxMenu>
