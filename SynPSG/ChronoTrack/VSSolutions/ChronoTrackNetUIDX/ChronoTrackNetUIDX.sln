@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChronoTrackNetUIDX", "ChronoTrackNetUIDX.csproj", "{A18BDDD5-4756-4644-B66D-FD5DB268F45B}"
+EndProject
+Global
+	GlobalSection(VaultVsipSolution-v2) = preSolution
+		VaultHost = http://psgapps.synergex.com/VaultService
+		VaultRepositoryID = 2
+		VaultRepositoryGUID = 18f99bd4-f648-4414-86c9-84c55be2da5d
+		ProjectCount = 1
+		ProjectRelativeDiskPath1 = ChronoTrackNetUIDX.csproj
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A18BDDD5-4756-4644-B66D-FD5DB268F45B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A18BDDD5-4756-4644-B66D-FD5DB268F45B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A18BDDD5-4756-4644-B66D-FD5DB268F45B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A18BDDD5-4756-4644-B66D-FD5DB268F45B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
