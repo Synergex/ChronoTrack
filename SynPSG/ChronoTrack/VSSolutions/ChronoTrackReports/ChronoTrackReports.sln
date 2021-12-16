@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "ChronoTrackReports", "ChronoTrackReports.rptproj", "{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}"
+EndProject
+Global
+	GlobalSection(VaultVsipSolution-v2) = preSolution
+		VaultHost = http://psgapps.synergex.com/VaultService
+		VaultRepositoryID = 2
+		VaultRepositoryGUID = 18f99bd4-f648-4414-86c9-84c55be2da5d
+		ProjectCount = 1
+		ProjectRelativeDiskPath1 = ChronoTrackReports.rptproj
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		DebugLocal|Default = DebugLocal|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.Debug|Default.ActiveCfg = Debug
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.Debug|Default.Build.0 = Debug
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.Debug|Default.Deploy.0 = Debug
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.DebugLocal|Default.ActiveCfg = DebugLocal
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.DebugLocal|Default.Build.0 = DebugLocal
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.Release|Default.ActiveCfg = Release
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.Release|Default.Build.0 = Release
+		{1B5712C6-146C-4E3F-A1CC-D6A18E4E739A}.Release|Default.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

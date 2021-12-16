@@ -1,0 +1,14 @@
+<publishData>
+  <publishTarget publishUrl="http://localhost/ChronoTrackWS/">
+    <file relUrl="bin/ChronoTrackWS.dll" publishTime="05/13/2009 12:24:33" />
+    <file relUrl="bin/ChronoTrackWS.pdb" publishTime="05/13/2009 12:24:33" />
+    <file relUrl="RemoteService.asmx" publishTime="04/29/2009 09:24:05" />
+    <file relUrl="Web.config" publishTime="04/29/2009 09:24:05" />
+  </publishTarget>
+  <publishTarget publishUrl="http://localhost/">
+    <file relUrl="bin/ChronoTrackWS.dll" publishTime="05/07/2009 11:03:01" />
+    <file relUrl="bin/ChronoTrackWS.pdb" publishTime="05/07/2009 11:03:01" />
+    <file relUrl="RemoteService.asmx" publishTime="04/29/2009 09:24:05" />
+    <file relUrl="Web.config" publishTime="04/29/2009 09:24:05" />
+  </publishTarget>
+</publishData>

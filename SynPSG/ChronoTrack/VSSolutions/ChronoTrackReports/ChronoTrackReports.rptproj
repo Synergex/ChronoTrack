@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <State>$base64$PFNvdXJjZUNvbnRyb2xJbmZvIHhtbG5zOnhzZD0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEiIHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiIHhtbG5zOmRkbDI9Imh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vYW5hbHlzaXNzZXJ2aWNlcy8yMDAzL2VuZ2luZS8yIiB4bWxuczpkZGwyXzI9Imh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vYW5hbHlzaXNzZXJ2aWNlcy8yMDAzL2VuZ2luZS8yLzIiIHhtbG5zOmRkbDEwMF8xMDA9Imh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vYW5hbHlzaXNzZXJ2aWNlcy8yMDA4L2VuZ2luZS8xMDAvMTAwIiB4bWxuczpkd2Q9Imh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vRGF0YVdhcmVob3VzZS9EZXNpZ25lci8xLjAiPg0KICA8RW5hYmxlZD50cnVlPC9FbmFibGVkPg0KICA8UHJvamVjdE5hbWU+Q2hyb25vVHJhY2tSZXBvcnRzPC9Qcm9qZWN0TmFtZT4NCiAgPEF1eFBhdGg+aHR0cDovL3BzZ2FwcHMuc3luZXJnZXguY29tL1ZhdWx0U2VydmljZTwvQXV4UGF0aD4NCiAgPExvY2FsUGF0aD4yfjE4Zjk5YmQ0LWY2NDgtNDQxNC04NmM5LTg0YzU1YmUyZGE1ZDwvTG9jYWxQYXRoPg0KICA8UHJvdmlkZXI+U291cmNlR2VhciBWYXVsdCBWaXN1YWwgU3R1ZGlvIDIwMDUgQ2xpZW50OnsxRUE0Nzk1NC04NTE1LTQwMmQtODJEOS1CNUMzMzIxMjBBOER9PC9Qcm92aWRlcj4NCjwvU291cmNlQ29udHJvbEluZm8+</State>
+  <DataSources>
+    <ProjectItem>
+      <Name>ChronoTrackSqlData.rds</Name>
+      <FullPath>ChronoTrackSqlData.rds</FullPath>
+    </ProjectItem>
+  </DataSources>
+  <Reports>
+    <ProjectItem>
+      <Name>All Customer Contacts.rdl</Name>
+      <FullPath>All Customer Contacts.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>Consultant Fees.rdl</Name>
+      <FullPath>Consultant Fees.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>Country Listing.rdl</Name>
+      <FullPath>Country Listing.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>Customer Location Summary.rdl</Name>
+      <FullPath>Customer Location Summary.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>Project Report.rdl</Name>
+      <FullPath>Project Report.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>State Listing.rdl</Name>
+      <FullPath>State Listing.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>User Contact List.rdl</Name>
+      <FullPath>User Contact List.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>User Report Test.rdl</Name>
+      <FullPath>User Report Test.rdl</FullPath>
+    </ProjectItem>
+    <ProjectItem>
+      <Name>CustomerstoTasks.rdl</Name>
+      <FullPath>CustomerstoTasks.rdl</FullPath>
+    </ProjectItem>
+  </Reports>
+  <Configurations>
+    <Configuration>
+      <Name>Debug</Name>
+      <Platform>Win32</Platform>
+      <Options>
+        <TargetServerURL>http://localhost/reportserver</TargetServerURL>
+        <TargetFolder>ChronoTrackReports</TargetFolder>
+        <TargetDataSourceFolder>Data Sources</TargetDataSourceFolder>
+        <OverwriteDataSources>true</OverwriteDataSources>
+      </Options>
+    </Configuration>
+    <Configuration>
+      <Name>DebugLocal</Name>
+      <Platform>Win32</Platform>
+      <Options>
+        <TargetFolder>ChronoTrackReports</TargetFolder>
+        <TargetDataSourceFolder>Data Sources</TargetDataSourceFolder>
+      </Options>
+    </Configuration>
+    <Configuration>
+      <Name>Release</Name>
+      <Platform>Win32</Platform>
+      <Options>
+        <TargetFolder>ChronoTrackReports</TargetFolder>
+        <TargetDataSourceFolder>Data Sources</TargetDataSourceFolder>
+      </Options>
+    </Configuration>
+  </Configurations>
+</Project>

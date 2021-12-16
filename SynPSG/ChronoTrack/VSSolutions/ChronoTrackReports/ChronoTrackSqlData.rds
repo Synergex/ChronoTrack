@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Name>ChronoTrackSqlData</Name>
+  <ConnectionProperties>
+    <Extension>SQL</Extension>
+    <ConnectString>Data Source=.;Initial Catalog=ChronoTrack</ConnectString>
+  </ConnectionProperties>
+  <DataSourceID>8962284e-b310-47c7-b6c8-432ded6cf6a3</DataSourceID>
+</RptDataSource>
