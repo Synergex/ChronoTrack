@@ -1,0 +1,15 @@
+﻿.CtContentPanel
+{
+	width: 850px;
+	min-height: 650px;
+	position:absolute;
+}
+.Hidden
+{
+	visibility: hidden;
+}
+.ErrorText
+{
+    color: #FF0000;
+    font-weight: bold;
+}
