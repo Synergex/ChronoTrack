@@ -1,0 +1,109 @@
+;;**********************************************************************
+;;
+;; Title:       UserEventHandlers.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to define User Data Entity event handlers
+;;              Implements the requirements defined in the core
+;;              event handler classes
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class UserDefineTable extends SynPSG.Core.DataEntities.DefineTable
+
+        ;;;<summary>
+        ;;;Method that is called when the DataEntity class required the definition
+        ;;;of the data table to be created.  This method calls the AddColumn
+        ;;;method to add the requried columns
+        ;;;</summary>
+        ;;;<param name=sender>DataBase object</param>
+        public override method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSTable
+            in      req e                   ,@SynPSG.Core.DataEntities.DefineTableEventArgs
+            endparams
+        proc
+.ifdef OS_WINDOWSNT
+            debugInfo("Creating the user table")
+
+            ;;add the required columns to build te table
+            using e.TableViewType select
+            (TableView.full),
+            begin
+                sender.AddColumn("User_id", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "User ID",  true,  false)
+                sender.AddColumn("Password", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Password", false , false)
+                sender.AddColumn("Inactive", SynPSG.Core.DataEntities.DataEntityTypes.BooleanType, "Inactive?", false , true)
+                sender.AddColumn("First_name", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "First name", false , false)
+                sender.AddColumn("Last_name", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Last name", false , false)
+                sender.AddColumn("Title", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Title", false , true)
+                sender.AddColumn("Addr1", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Address", false , false)
+                sender.AddColumn("Addr2", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "", false , true)
+                sender.AddColumn("Addr3", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "", false , true)
+                sender.AddColumn("Addr4", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "", false , true)
+                sender.AddColumn("State", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "State", false , true)
+                sender.AddColumn("Zip", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Zip", false , false)
+                sender.AddColumn("Country_id", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Country", false , false)
+                sender.AddColumn("Office_phone", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Office phone", false , true)
+                sender.AddColumn("Mobile_phone", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Mobile", false , true)
+                sender.AddColumn("Email", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Email", false , true)
+                sender.AddColumn("Is_employee", SynPSG.Core.DataEntities.DataEntityTypes.BooleanType, "Employee?", false , true)
+                sender.AddColumn("Is_manager", SynPSG.Core.DataEntities.DataEntityTypes.BooleanType, "Manager?", false , true)
+                sender.AddColumn("Is_consultant", SynPSG.Core.DataEntities.DataEntityTypes.BooleanType, "Consultant?", false , true)
+                sender.AddColumn("Picture_file", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Picture file specification", false , true)
+                sender.AddColumn("Friendly_name", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Name", false , false)
+                sender.AddColumn("Replication_key", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Replication key", true, true)
+            end
+            (TableView.Breif),
+            begin
+                sender.AddColumn("User_id", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "User ID",  true,  false)
+                sender.AddColumn("Full_name", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Full name", false , false)
+                sender.AddColumn("Picture_file", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Picture file specification", false , true)
+                sender.AddColumn("Visible", SynPSG.Core.DataEntities.DataEntityTypes.BooleanType, "Visible", false , true)
+                sender.AddColumn("Is_consultant", SynPSG.Core.DataEntities.DataEntityTypes.BooleanType, "Consultant", false , true)
+            end
+            endusing
+
+            debugInfo("User table created")
+.endc
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace

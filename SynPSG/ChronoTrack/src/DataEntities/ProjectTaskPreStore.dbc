@@ -1,0 +1,123 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectTaskPreStore.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the PreStore for the project task
+;;              contanct data entity event handler
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    ;;;<summary>
+    ;;;Event handling class.  Used to allow DataEntity classes to define
+    ;;;an event handling class which will be executed prior to a store operation.
+    ;;;This allows for additional processing proir to the record being stored in the file
+    ;;;</summary>
+    public class ProjectTaskPreStore extends SynPSG.Core.DataEntities.PreStore
+
+        ;;;<summary>
+        ;;;Method that must be implemented by the DataEntity class when PreStoreProcessing
+        ;;;events are required to be handled.
+        ;;;</summary>
+        ;;;<param name=sender>DataEntiry object</param>
+        ;;;<param name=e>PreStoreEventArgs</param>
+        public override method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSio
+            inout   req e                   ,@SynPSG.Core.DataEntities.PreStoreEventArgs
+            endparams
+
+            .include "project_task" repository, record = "task" ,end
+
+            record localRecord
+                status      ,boolean
+                index       ,int
+                now         ,a20
+            endrecord
+
+        proc
+
+            init localRecord
+
+            task = e.NewData
+
+            now = %datetime()
+
+            ;;only do this logic if the task ID is 0 or 999(new) and
+            ;;thus not set by the appliation
+
+            if (!task.task_id)
+            begin
+                ;;read through all project notes to find the last one
+                status = e.IOObject.Locate(%string(task.project_id, 'XXXXXXXX'), Q_PRIMARY, false)
+                while (status && e.IOObject.PrimaryKeyValue .eq. %string(task.project_id, 'XXXXXXXX'))
+                begin
+                    ;;get the data read
+                    task = e.IOObject.DataArea
+                    ;;store the index
+                    index = task.task_id
+
+                    ;;see if there are any further matching records
+                    status = e.IOObject.ReadNext(false)
+                end
+
+                task = e.NewData
+                task.task_id= (index + 1)
+            end
+
+            ;;change tracking
+            task.created_by = UserDataEntity.LoggedInUser
+            task.created_date = now(1:8)
+            task.Modified_by = UserDataEntity.LoggedInUser
+            task.Modified_date = now(1:8)
+
+            ;;data integrity validations
+            upcase task.assigned_to
+            upcase task.created_by
+            upcase task.modified_by
+
+            ;set unique key for SQL replication
+            task.replication_key = now
+
+            e.NewData = task
+
+            mreturn
+
+        endmethod
+    endclass
+
+endnamespace

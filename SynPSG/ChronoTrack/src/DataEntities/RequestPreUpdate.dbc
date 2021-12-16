@@ -1,0 +1,82 @@
+;;**********************************************************************
+;;
+;; Title:       RequestPreUpdate.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the PreUpdate for the Request
+;;              data entity event handler
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    ;;;<summary>
+    ;;;Event handling class.  Used to allow DataEntity classes to define
+    ;;;an event handling class which will be executed prior to an update operation.
+    ;;;This allows for additional processing proir to the record being updated in the file
+    ;;;</summary>
+    public class RequestPreUpdate extends SynPSG.Core.DataEntities.PreUpdate
+
+        ;;;<summary>
+        ;;;Method that must be implemented by the DataEntity class when PreUpdate Processing
+        ;;;events are required to be handled.
+        ;;;</summary>
+        ;;;<param name=sender>DataEntiry object</param>
+        ;;;<param name=e>PreUpdateEventArgs</param>
+        public override method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSio
+            inout   req e                   ,@SynPSG.Core.DataEntities.PreUpdateEventArgs
+            endparams
+
+            .include "request" repository, record = "request" ,end
+
+        proc
+
+            request = e.NewData
+
+            ;;data integrity validations
+            upcase request.Customer_id
+            upcase request.Resource
+            upcase request.Created_by
+
+            e.NewData = request
+
+            mreturn
+
+        endmethod
+    endclass
+
+endnamespace

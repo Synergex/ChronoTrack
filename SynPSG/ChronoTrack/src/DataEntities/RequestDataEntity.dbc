@@ -1,0 +1,280 @@
+;;**********************************************************************
+;;
+;; Title:       RequestDataEntity.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to allow access to the Request data file.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class RequestDataEntity extends SynPSG.Core.DataEntities.SDMSBase
+
+        ;;-------------------------------------------------------------------------
+        ;;allow the class to be referenced as a singleton
+        private static mInternalData    ,@RequestDataEntity
+
+        public static property Instance ,@RequestDataEntity
+        method get
+        proc
+            if (mInternalData == ^null)
+                mInternalData = new RequestDataEntity(true, TableView.Full)
+            mreturn mInternalData
+        endmethod
+        endproperty
+
+        ;;private fields
+        ;;-------------------------------------------------------------------------
+
+        ;;;<summary> private user record area </summary>
+        .include 'request' repository, private record = "mRequest", prefix="m"  ,end
+        .include 'request' repository, private structure = "sRequest", prefix="s"  ,end
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Constructor defines the file name and opens the file.  Creates the
+        ;;; required event handler classes
+        ;;; </remarks>
+        ;;; <param name=viewType>type of table/collection view to provide</param>
+        ;;; <param name=noDotNet>Pass TRUE to prevent the .NET framework being loaded</param>
+        public method RequestDataEntity
+            in  req noDotNet            ,boolean
+            in  req viewType            ,SynPSG.Core.DataEntities.TableView
+            endparams
+            parent("DAT:request.ism",            ;;file name
+            &   new RequestPreStore(),            ;;pre store event handler
+            &   ^null,                            ;;post store event handler
+            &   new RequestPreUpdate(),           ;;pre update event handler
+            &   ^null,                            ;;update conflict event handler
+            &   ^null,                            ;;format transaction view event handler
+            &   ^null,                            ;;on delete event handler
+            &   viewType,                         ;;table/collection view type
+            &   "Request",                        ;;tableName
+            &   new RequestDefineTable(),         ;;define DataTable columns event handler
+            &   new RequestUpdateFields(),        ;;field update event handler
+            &   "RequestCollection",              ;;collection name
+            &   (@sRequest) str,                  ;;collection object
+            &   ^null,                            ;;load collection event handler
+            &   noDotNet)                         ;;do we load the framework?
+
+            record
+                str ,sRequest
+            endrecord
+        proc
+
+            this.IO.SetReplicationDetails("REQUEST", mRequest, mRequest.mreplication_key)
+
+            mreturn
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Routine to set default values
+        ;;; </summary>
+        ;;; <param name="currentUser">pass in the current user</param>
+        public method SetDefaultValues  ,void
+            in  req currentUser     ,string
+            endparams
+
+            record
+                sysDateTime ,a20
+                sysDate     ,d8@sysDateTime
+                sysYear     ,d4@sysDateTime + 4
+                sysMonth    ,d2@sysDateTime + 6
+                sysDay      ,d2@sysDateTime + 8
+                sysTime     ,d4@sysDateTime + 10
+                sysHour     ,d2@sysDateTime + 10
+                sysMinute   ,d2@sysDateTime + 12
+            endrecord
+
+        proc
+            ;;set default values
+            sysDateTime = datetime()
+
+            mRequest.mRequest_ID = 999999
+            mRequest.mStart_Date = sysDate
+            mRequest.mEnd_Date = sysDate
+            mRequest.mStart_Time = 0900
+            mRequest.mEnd_Time = 0500
+            mRequest.mCreated_By = currentUser
+            mRequest.mCreated_Date = sysDate
+            this.IO.DataArea = mRequest
+
+            mreturn
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; create a new default request
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; create a new default request
+        ;;; </remarks>
+        ;;; <param name="currentUser">pass in the current user</param>
+        ;;; <returns>DataTable</returns>
+.ifdef OS_WINDOWSNT
+        public method NewRequest    ,@System.Data.DataTable
+.else
+        public method NewRequest    ,@String
+.endc
+            in  req currentUser     ,string
+            endparams
+
+.ifdef OS_WINDOWSNT
+            record
+                row     ,@DataRow
+            endrecord
+.endc
+        proc
+.ifdef OS_WINDOWSNT
+            this.DataTable.Clear()
+            row = this.DataTable.Table.NewRow()
+
+            SetDefaultValues(currentUser)
+
+            moveToRow(row)
+
+            mreturn this.DataTable.Table
+.else
+            SetDefaultValues(currentUser)
+            mreturn mRequest
+.endc
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the data as a DataTable object
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Expose the data as a DataTable object.  This method returns
+        ;;; all data in the file as a DataTable unless the filter argument is passed.
+        ;;; </remarks>
+        ;;; <param name=primaryKey>optionally pass a filter on the primary key</param>
+        ;;; <returns>Populated DataTable</returns>
+.ifdef OS_WINDOWSNT
+        public method ResultsTable  ,@System.Data.DataTable
+            in  opt primaryKey      ,a
+            endparams
+
+            record locrec
+                row     ,@DataRow
+                status  ,boolean
+                gotKey  ,boolean
+                tmpID   ,a^size(mRequest.mRequest_ID)
+            endrecord
+        proc
+            init locrec
+            this.DataTable.Clear()
+
+            ;;now add the actual data
+            if (^passed(primaryKey))
+            then
+            begin
+                gotKey = true
+                tmpID = primaryKey
+                status = this.IO.Locate(tmpID, Q_PRIMARY, false)
+            end
+            else
+            begin
+                gotKey = false
+                status = this.IO.ReadFirst(Q_PRIMARY, false)
+            end
+
+            while ((status && !gotKey) || (status && gotKey && this.IO.PrimaryKeyValue .eq. tmpID))
+            begin
+                debugInfo("RequestDataEntity::DataTable : Creating a new row")
+
+                row = this.DataTable.Table.NewRow()
+
+                mRequest = this.IO.DataArea
+
+                moveToRow(row)
+
+                debugInfo("RequestDataEntity::DataTable : Row added to table, key : " + %string(mRequest.mRequest_ID))
+
+                status = this.IO.ReadNext(false)
+            end
+
+            ;;commit the added rows to the table
+            this.DataTable.Table.AcceptChanges()
+
+            mreturn this.DataTable.Table
+
+        endmethod
+.endc
+        ;;*************************************************************************
+        ;; Private method to move the current record to the passed row
+        ;;*************************************************************************
+.ifdef OS_WINDOWSNT
+        private method moveToRow    ,void
+            inout   req row         ,@System.Data.DataRow
+        proc
+
+            row[0] = Conversion.ToNetGRFA(this.IO.GRFA)
+            row[1] = Conversion.ToNetInteger(mRequest.mRequest_ID)
+            row[2] = Conversion.ToNetString(mRequest.mCustomer_ID)
+            row[3] = Conversion.ToNetInteger(mRequest.mContact_ID)
+            row[4] = Conversion.ToNetInteger(mRequest.mProject_ID)
+            row[5] = Conversion.ToNetInteger(mRequest.mWork_Location_ID)
+            row[6] = Conversion.ToNetString(mRequest.mDescription)
+            row[7] = Conversion.ToNetString(mRequest.mResource)
+            row[8] = Conversion.ToNetDateTime(mRequest.mStart_Date, mRequest.mStart_Time)
+            row[9] = Conversion.ToNetDateTime(mRequest.mEnd_Date, mRequest.mEnd_Time)
+            row[10] = Conversion.ToNetString(mRequest.mCreated_By)
+            row[11] = Conversion.ToNetDateTime(mRequest.mCreated_Date)
+            row[12] = Conversion.ToNetString(mRequest.mText)
+            row[13] = Conversion.ToNetString(mRequest.mReplication_Key)
+
+            this.DataTable.Table.Rows.Add(row)
+
+            mreturn
+
+        endmethod
+.endc
+    endclass
+
+endnamespace
+

@@ -1,0 +1,129 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectPostStore.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the PostStore for the Project
+;;              data entity event handler
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+import SynPSG.System
+import SynPSG.System.IO
+import SynPSG.System.Net
+import SynPSG.System.Net.Mail
+import SynPSG.System.Net.Sockets
+import SynPSG.System.Net.Mime
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    ;;;<summary>
+    ;;;Event handling class.  Used to allow DataEntity classes to define
+    ;;;an event handling class which will be executed after a store operation.
+    ;;;</summary>
+    public class ProjectPostStore extends SynPSG.Core.DataEntities.PostStore
+
+        ;;;<summary>
+        ;;;after a project has been created, send email details, etc.
+        ;;;</summary>
+        ;;;<param name=sender>DataEntiry object</param>
+        ;;;<param name=e>PostStoreEventArgs</param>
+        public override method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSio
+            inout   req e                   ,@SynPSG.Core.DataEntities.PostStoreEventArgs
+            endparams
+
+            .include 'project' repository, record = "project" ,end
+            .include 'user' repository, record = "user" ,end
+
+            record
+                fromAddress     ,@MailAddress
+                toAddress       ,@MailAddress
+                ccAddress       ,@MailAddress
+                message         ,@MailMessage
+                client          ,@SmtpClient
+                ;;
+                userIO          ,@SDMSio
+            endrecord
+        proc
+            debugInfo("ProjectPostStore::EventMethod() : ")
+
+            project = e.DataArea
+
+            userIO = new SDMSio("DAT:user.ism", false)
+
+            ;;who created the project
+            if (userIO.locate(project.created_by, Q_PRIMARY, false))
+            begin
+                user = userIO.DataArea
+                fromAddress = new MailAddress(user.email, user.friendly_name)
+
+                ;;lead consultant
+                if (userIO.locate(project.lead_consultant, Q_PRIMARY, false))
+                begin
+                    user = userIO.DataArea
+                    toAddress = new Mailaddress(user.email, user.friendly_name)
+
+                    ;;create the message object
+                    message = new MailMessage(fromAddress, toAddress)
+
+                    ;;add message subject
+                    message.Subject="ChronoTrack - Project creation notification"
+
+                    message.Body=project.description
+
+                    ;;create the SMTP sending objectv
+                    client = new SmtpClient("set this to your SMTP service provider")
+
+                    try
+                    begin
+                        ;;send the email
+                        client.Send(message)
+                    end
+                    catch (e, @Exception)
+                    begin
+                        u_message(e.Message)
+                    end
+                    endtry
+                end
+            end
+
+            mreturn
+
+        endmethod
+    endclass
+
+endnamespace

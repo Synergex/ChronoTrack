@@ -1,0 +1,298 @@
+;;**********************************************************************
+;;
+;; Title:       UserDataEntity.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to allow access to the User data file.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class UserDataEntity extends SynPSG.Core.DataEntities.SDMSBase
+
+        public static CurrentUser       ,string
+        ;;allow the class to be referenced as a singleton
+        private static mInternalData    ,@UserDataEntity
+
+        public static property Instance ,@UserDataEntity
+        method get
+        proc
+            if (mInternalData == ^null)
+                mInternalData = new UserDataEntity(true, TableView.Full)
+            mreturn mInternalData
+        endmethod
+        endproperty
+
+        public static LoggedInUser      ,string
+
+        ;;-------------------------------------------------------------------------
+        ;;private fields
+        ;;-------------------------------------------------------------------------
+
+        ;;;<summary> private user record area </summary>
+        .include 'user' repository, private record = "mUser", prefix="m"  ,end
+        .include 'user' repository, private structure = "sUser", prefix="s", end
+        .include 'user_breif' repository, private record = "mUserRecBreif", prefix="m", end
+        .include 'user_breif' repository, private structure = "sUserRecBreif", prefix="s", end
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Constructor defines the file name and opens the file.  Creates the
+        ;;; required event handler classes
+        ;;; </remarks>
+        ;;; <param name=noDotNet>Pass TRUE to prevent the .NET framework being loaded</param>
+        ;;; <param name=viewType>type of table/collection view to provide</param>
+        public method UserDataEntity
+            in  req noDotNet            ,boolean
+            in  req viewType            ,SynPSG.Core.DataEntities.TableView
+            endparams
+            parent("DAT:user.ism",                 ;;file name
+            &   new UserPreStore(),                 ;;pre store event handler
+            &   ^null,                              ;;post store event handler
+            &   new UserPreUpdate(),                ;;pre update event handler
+            &   ^null,                              ;;update conflict event handler
+            &   ^null,                              ;;format transaction view event handler
+            &   ^null,                              ;;on delete event handler
+            &   viewType,                           ;;table/collection view type
+            &   "User",                             ;;tableName
+            &   new UserDefineTable(),              ;;define DataTable columns event handler
+            &   new UserUpdateFields(),             ;;field update event handler
+            &   "UserCollection",                   ;;collection name
+            &   (@sUser) str,                       ;;collection object
+            &   new UserCollectionLoad(),           ;;load collection event handler
+            &   noDotNet)                           ;;do we load the framework?
+
+            record
+                str        ,sUser
+            endrecord
+        proc
+
+            if (viewType == TableView.Breif)
+                this.DataTable.IncludeGRFA = false
+
+            this.IO.SetReplicationDetails("USER", mUser, mUser.mreplication_key)
+
+            mreturn
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the data as a DataTable object
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Expose the data as a DataTable object.  This method returns
+        ;;; all data in the file as a DataTable unless the filter argument is passed.
+        ;;; </remarks>
+        ;;; <param name=viewType>Pass the table view type</param>
+        ;;; <param name=primaryKey>Optionally pass a filter on the primary key</param>
+        ;;; <returns>Populated DataTable</returns>
+.ifdef OS_WINDOWSNT
+        public method ResultsTable  ,@System.Data.DataTable
+            in  req viewType        ,SynPSG.Core.DataEntities.TableView
+            in  opt primaryKey      ,a
+            endparams
+
+            record locrec
+                row         ,@DataRow
+                status      ,boolean
+                gotKey      ,boolean
+                tmpID       ,a^size(mUser.mUser_ID)
+                tmpViewType ,SynPSG.Core.DataEntities.TableView
+            endrecord
+        proc
+            init locrec
+            this.DataTable.Clear()
+
+            ;;now add the actual data
+            if (^passed(primaryKey))
+            then
+            begin
+                gotKey = true
+                tmpID = primaryKey
+                status = this.IO.Locate(tmpID, Q_PRIMARY, false)
+            end
+            else
+            begin
+                gotKey = false
+                status = this.IO.ReadFirst(Q_PRIMARY, false)
+            end
+
+            while ((status && !gotKey) || (status && gotKey && this.IO.PrimaryKeyValue .eq. tmpID))
+            begin
+                debugInfo("UserDataEntity::DataTable : Creating a new row")
+
+                row = this.DataTable.Table.NewRow()
+
+                mUser = this.IO.DataArea
+
+                using viewType select
+                (TableView.Full),
+                begin
+                    row[0] = Conversion.ToNetGRFA(this.IO.GRFA)
+                    row[1] = Conversion.ToNetString(mUser.mUser_ID)
+                    row[2] = Conversion.ToNetString(mUser.mPassword)
+                    row[3] = Conversion.ToNetBoolean(mUser.mInactive)
+                    row[4] = Conversion.ToNetString(mUser.mFirst_Name)
+                    row[5] = Conversion.ToNetString(mUser.mLast_Name)
+                    row[6] = Conversion.ToNetString(mUser.mTitle)
+                    row[7] = Conversion.ToNetString(mUser.mAddr1)
+                    row[8] = Conversion.ToNetString(mUser.mAddr2)
+                    row[9] = Conversion.ToNetString(mUser.mAddr3)
+                    row[10] = Conversion.ToNetString(mUser.mAddr4)
+                    row[11] = Conversion.ToNetString(mUser.mState)
+                    row[12] = Conversion.ToNetString(mUser.mZip)
+                    row[13] = Conversion.ToNetString(mUser.mCountry_ID)
+                    row[14] = Conversion.ToNetString(mUser.mOffice_Phone)
+                    row[15] = Conversion.ToNetString(mUser.mMobile_Phone)
+                    row[16] = Conversion.ToNetString(mUser.mEmail)
+                    row[17] = Conversion.ToNetBoolean(mUser.mIs_Employee)
+                    row[18] = Conversion.ToNetBoolean(mUser.mIs_Manager)
+                    row[19] = Conversion.ToNetBoolean(mUser.mIs_Consultant)
+                    row[20] = Conversion.ToNetString(mUser.mPicture_File)
+                    row[21] = Conversion.ToNetString(mUser.mFriendly_name)
+                    row[22] = Conversion.ToNetString(mUser.mReplication_Key)
+                end
+                (TableView.Breif),
+                begin
+                    row[0] = Conversion.ToNetString(mUser.mUser_ID)
+                    row[1] = Conversion.ToNetString(mUser.mFriendly_name)
+                    row[2] = Conversion.ToNetString(mUser.mPicture_File)
+                    if (mUser.mUser_ID == CurrentUser) then
+                        row[3] = Conversion.ToNetBoolean(true) ;;always make them visible
+                    else
+                        row[3] = Conversion.ToNetBoolean(false) ;;always make them visible
+
+                    row[4] = Conversion.ToNetBoolean(mUser.mIs_Consultant)
+                end
+                endusing
+
+                this.DataTable.Table.Rows.Add(row)
+
+                debugInfo("UserDataEntity::DataTable : Row added to table, key : " + mUser.mUser_ID)
+
+                status = this.IO.ReadNext(false)
+            end
+
+            ;;commit the added rows to the table
+            this.DataTable.Table.AcceptChanges()
+
+            mreturn this.DataTable.Table
+
+        endmethod
+.endc
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; expose the user_id field
+        ;;; </summary>
+        public property UserName    ,string
+            method get
+            proc
+                mUser = this.IO.DataArea
+                mreturn mUser.mUser_ID
+            endmethod
+            method set
+            proc
+                mUser = this.IO.DataArea
+                mUser.mUser_ID = value
+                this.IO.DataArea = mUser
+            endmethod
+        endproperty
+
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; expose the password
+        ;;; </summary>
+        public property Password    ,string
+            method get
+            proc
+                mUser = this.IO.DataArea
+                mreturn mUser.mPassword
+            endmethod
+            method set
+            proc
+                mUser = this.IO.DataArea
+                mUser.mPassword = value
+                this.IO.DataArea = mUser
+            endmethod
+        endproperty
+
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; expose the inactive flag
+        ;;; </summary>
+        public property Inactive    ,boolean
+            method get
+            proc
+                mUser = this.IO.DataArea
+                mreturn mUser.mInactive
+            endmethod
+            method set
+            proc
+                mUser = this.IO.DataArea
+                mUser.mInactive = value
+                this.IO.DataArea = mUser
+            endmethod
+        endproperty
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; expose the IsManager flag
+        ;;; </summary>
+        public property IsManager   ,boolean
+            method get
+            proc
+                mUser = this.IO.DataArea
+                mreturn mUser.mIs_Manager
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace
+
