@@ -1,0 +1,93 @@
+;;**********************************************************************
+;;
+;; Title:       ChronoTrack.def
+;;
+;; Type:        include file
+;;
+;; Description: Include file containing standard macros.  These
+;;              allow for comilations against different UI vendors
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+;; here we define at compile time which namespace the routines will use.  This allows us at compile
+;; time to identify if we are using;
+;; variant = 0 Toolkit version
+;; variant = 1 (or not set) then we use the Infragistics verison of the controls
+;; variant = 2 we are using the DevExpress controls
+;; variant = 3 we are using the Microsoft controls
+;; variant = 4 we are using EVERYTHING!!!!
+
+
+;;standard versions
+.ifdef UINameSpace
+.undefine UINameSpace
+.endc;UINameSpace
+
+.define UINameSpace   ChronoTrackNetUI.Forms
+
+;;Toolkit
+.if ^variant .eq. 0
+.undefine UINameSpace
+.define TOOLKIT_VERSION
+.endc;^variant .eq. 0
+
+;;Infragistics
+.if ^variant .eq. 1
+.undefine UINameSpace
+.define UINameSpace   ChronoTrackNetUI.Forms
+.define INFRAGISTICS_VERSION
+.endc;^variant .eq. 1
+
+;;DevExpress
+.if ^variant .eq. 2
+.undefine UINameSpace
+.define UINameSpace   ChronoTrackNetUIDX.Forms
+.define DEVEXPRESS_VERSION
+.endc;^variant .eq. 2
+
+;;DevExpress
+.if ^variant .eq. 3
+.undefine UINameSpace
+.define UINameSpace   ChronoTrackNetUIMS.Forms
+.define MICROSOFT_VERSION
+.endc;^variant .eq. 3
+
+.if ^variant .eq. 4
+.undefine UINameSpace
+.define UINameSpace   ChronoTrackNetUIDX.Forms
+.define DEVEXPRESS_VERSION
+.endc;^variant .eq. 4
+
+.define UIClassMacro(className)   @UINameSpace.`className
+
+
