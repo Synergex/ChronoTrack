@@ -1,0 +1,45 @@
+<%@ Register TagPrefix="dx" Namespace="DevExpress.Data" Assembly="DevExpress.Data.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<%@ Register TagPrefix="dxnc" Namespace="DevExpress.Web.ASPxNewsControl" Assembly="DevExpress.Web.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+
+<dxnc:ASPxNewsControl runat="server" ImageFolder="{0}/"
+    CssFilePath="{0}/styles.css" PagerPanelSpacing="15px" ItemSpacing="30px"
+    CssPostfix="BlackGlass">
+
+    <ItemDateStyle Spacing="0px"></ItemDateStyle>
+    <PagerCurrentPageNumberStyle Font-Bold="False"></PagerCurrentPageNumberStyle>
+    <Border BorderStyle="None"></Border>
+    <PagerPanelStyle>
+        <Paddings PaddingLeft="0px"></Paddings>
+    </PagerPanelStyle>
+
+    <PagerSummaryStyle>
+        <Paddings PaddingLeft="0px"></Paddings>
+    </PagerSummaryStyle>
+
+    <ItemSettings TailText="More"></ItemSettings>
+
+    <PagerSettings CurrentPageNumberFormat="{0}">
+        <AllButton Text="">
+            <Image Url="Web/pAll.png" UrlDisabled="Web/pAllDisabled.png"></Image>
+        </AllButton>
+
+        <FirstPageButton Text="">
+            <Image Url="Web/pFirst.png" UrlDisabled="Web/pFirstDisabled.png"></Image>
+        </FirstPageButton>
+
+        <Summary AllPagesText="" Text=""></Summary>
+
+        <LastPageButton Text="">
+            <Image Url="Web/pLast.png" UrlDisabled="Web/pLastDisabled.png"></Image>
+        </LastPageButton>
+
+        <NextPageButton Text="">
+            <Image Url="Web/pNext.png" UrlDisabled="Web/pNextDisabled.png"></Image>
+        </NextPageButton>
+
+        <PrevPageButton Text="">
+            <Image Url="Web/pPrev.png" UrlDisabled="Web/pPrevDisabled.png"></Image>
+        </PrevPageButton>
+    </PagerSettings>
+</dxnc:ASPxNewsControl>
+

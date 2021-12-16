@@ -1,0 +1,11 @@
+<%@ Register TagPrefix="dx" Namespace="DevExpress.Data" Assembly="DevExpress.Data.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<%@ Register TagPrefix="dxnb" Namespace="DevExpress.Web.ASPxNavBar" Assembly="DevExpress.Web.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+
+<dxnb:ASPxNavBar runat="server" GroupSpacing="0px" ImageFolder="{0}/"
+    CssFilePath="{0}/styles.css"
+    CssPostfix="BlackGlass">
+    <GroupContentStyle ItemSpacing="1px"></GroupContentStyle>
+    <CollapseImage Height="17px" Width="18px" Url="Web/nbCollapse.gif"></CollapseImage>
+    <ExpandImage Height="17px" Width="18px" Url="Web/nbExpand.gif"></ExpandImage>
+</dxnb:ASPxNavBar>
+

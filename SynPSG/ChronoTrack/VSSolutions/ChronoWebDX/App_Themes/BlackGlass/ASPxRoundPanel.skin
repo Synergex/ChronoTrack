@@ -1,0 +1,47 @@
+<%@ Register TagPrefix="dx" Namespace="DevExpress.Data" Assembly="DevExpress.Data.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<%@ Register TagPrefix="dxrp" Namespace="DevExpress.Web.ASPxRoundPanel" Assembly="DevExpress.Web.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" %>
+<dxrp:ASPxRoundPanel runat="server" CssPostfix="BlackGlass" ImageFolder="{0}/" CssFilePath="{0}/styles.css">
+    <Border BorderStyle="None" />
+    <BorderTop BorderStyle="Solid" BorderColor="Black" BorderWidth="1px" />
+    <ContentPaddings PaddingTop="5px" PaddingLeft="2px" PaddingBottom="5px" />
+    <HeaderStyle BackColor="White" Height="23px" HorizontalAlign="Left">
+        <Paddings PaddingTop="0px" PaddingBottom="0px" PaddingLeft="3px" />
+        <BackgroundImage Repeat="RepeatX" VerticalPosition="bottom" ImageUrl="Web/rpHeaderBack.gif" />
+        <Border BorderStyle="None" />
+    </HeaderStyle>
+    <%-- Corner parts --%>
+    <TopLeftCorner Height="7px" Width="10px" Url="Web/rpTopLeftCorner.png" />
+    <NoHeaderTopLeftCorner Height="10px" Width="10px" Url="Web/rpNoHeaderTopLeftCorner.png" />
+    <TopRightCorner Height="7px" Width="10px" Url="Web/rpTopRightCorner.png" />
+    <NoHeaderTopRightCorner Height="10px" Width="10px" Url="Web/rpNoHeaderTopRightCorner.png" />
+    <BottomLeftCorner Height="10px" Width="10px" Url="Web/rpBottomLeftCorner.png" />
+    <BottomRightCorner Height="10px" Width="10px" Url="Web/rpBottomRightCorner.png" />
+    <%-- Header parts --%>
+    <HeaderLeftEdge BackColor="#444545">
+        <BackgroundImage Repeat="RepeatX" VerticalPosition="top" HorizontalPosition="left" ImageUrl="Web/rpHeaderLeftEdge.png" />
+    </HeaderLeftEdge>
+    <HeaderContent BackColor="#444545">
+        <BackgroundImage Repeat="RepeatX" VerticalPosition="top" HorizontalPosition="left" ImageUrl="Web/rpHeaderBack.gif" />
+    </HeaderContent>
+    <HeaderRightEdge BackColor="#444545">
+        <BackgroundImage Repeat="NoRepeat" VerticalPosition="top" HorizontalPosition="right" ImageUrl="Web/rpHeaderRightEdge.png" />
+    </HeaderRightEdge>
+    <%-- Middle parts --%>
+    <Content BackColor="#C9D7DC">
+        <BackgroundImage VerticalPosition="top" ImageUrl="Web/rpContentBack.gif" />
+    </Content>
+    <TopEdge BackColor="#444545">
+        <BackgroundImage Repeat="RepeatX" VerticalPosition="top" HorizontalPosition="left" ImageUrl="Web/rpTopEdge.gif" />
+    </TopEdge>
+    <NoHeaderTopEdge BackColor="#C9D7DC" />
+    <RightEdge BackColor="#C9D7DC">
+        <BackgroundImage Repeat="RepeatY" VerticalPosition="top" HorizontalPosition="right" ImageUrl="Web/rpContentRightEdge.gif" />
+    </RightEdge>
+    <BottomEdge BackColor="#C9D7DC">
+        <BackgroundImage Repeat="RepeatX" VerticalPosition="bottom" ImageUrl="Web/rpContentBottomEdge.gif" />
+    </BottomEdge>
+    <LeftEdge BackColor="#C9D7DC">
+        <BackgroundImage Repeat="RepeatY" VerticalPosition="top" HorizontalPosition="left" ImageUrl="Web/rpContentLeftEdge.gif" />
+    </LeftEdge>
+</dxrp:ASPxRoundPanel>
+
