@@ -1,0 +1,237 @@
+;;**********************************************************************
+;;
+;; Title:       debugger.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to to allow debug output message control.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.ifdef OS_WINDOWSNT
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+.else
+;;this enumeration is required when building on none windows to allow access to the types of
+;;debug message to write to the log file
+
+namespace SynPSGNetCore.Logging.DebugOutput
+    enum MessageTypes
+        Error
+        Info
+    endenum
+endnamespace
+
+.endc
+
+namespace SynPSG.Core.Utilities
+
+
+    public class Debugger
+
+        ;;; <summary>public field used to test if we are in debug mode</summary>
+        public static InDebugMode           ,boolean
+
+        private static logToXFPL            ,boolean
+
+.ifdef OS_WINDOWSNT
+        ;;; <summary>private field holding the debug form objecthandle</summary>
+        private static frmDebugWindow       ,@SynPSGNetCore.Logging.DebugOutput
+
+.else
+        ;;;<summary>on none windows this is a log file channel number</summary>
+        private static frmDebugWindow       ,int
+.endc
+        ;;; <summary>
+        ;;; routine required to initialise the debugger class
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; routine required to initialise the debugger class
+        ;;; </remark>
+        public static method Init   ,void
+            in  opt logXFPL         ,boolean
+            endparams
+
+            record
+                tmpValue    ,a100
+                tmpLength   ,i1
+            endrecord
+        proc
+
+            logToXFPL = false
+
+            if (%passed(logXFPL) && logXFPL)
+                logToXFPL = true
+
+            if (!InDebugMode)
+            begin
+                getlog("CHRONOTRACK_DEBUG_MODE", tmpValue, tmpLength)
+                if (tmpValue == "ON")
+                    InDebugMode = true
+            end
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; method to display information to the debug window
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; accept the message and display to the debug window
+        ;;; </remark>
+        ;;; <param>Information message to display</param>
+        public static method InfoMessage    ,void
+            in  req message                 ,string
+            endparams
+        proc
+            if (logToXFPL)
+            then
+                logMessage(message)
+            else
+                displayMessage(SynPSGNetCore.Logging.DebugOutput.MessageTypes.Info, 0, message)
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; method to display error details to the debug window
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; accept the message and display to the debug window
+        ;;; </remark>
+        ;;; <param>Information message to display</param>
+        public static method ErrorMessage   ,void
+            in  req message                 ,string
+            in  req exp                     ,@Synergex.SynergyDE.SynException
+            endparams
+        proc
+            if (logToXFPL)
+            then
+            begin
+                logMessage(exp.Message)
+                logMessage(message)
+            end
+            else
+            begin
+                displayMessage(SynPSGNetCore.Logging.DebugOutput.MessageTypes.Error, exp.ErrNo, exp.Message)
+                displayMessage(SynPSGNetCore.Logging.DebugOutput.MessageTypes.Error, exp.ErrNo, message)
+            end
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; event handler to allow .NET UI code to display messages to the debug window
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; accept the message and display to the debug window
+        ;;; </remark>
+        ;;; <param>Information message to display</param>
+        public static method UIMessage  ,void
+            in  req message             ,string
+            endparams
+        proc
+            if (InDebugMode) displayMessage(SynPSGNetCore.Logging.DebugOutput.MessageTypes.Info, 0, message)
+
+            mreturn
+
+        endmethod
+
+        ;;*******************************************************************
+        ;;*******************************************************************
+        ;;
+        ;;private methods
+        ;;
+        ;;*******************************************************************
+        ;;*******************************************************************
+
+.ifdef OS_WINDOWSNT
+        private static method displayMessage    ,void
+            in  req type                        ,SynPSGNetCore.Logging.DebugOutput.MessageTypes
+            in  req errorNumber                 ,int
+            in  req message                     ,string
+            endparams
+
+            record
+                moduleName  ,a1000
+                lineNumber  ,int
+                ii          ,int
+            endrecord
+        proc
+            if (frmDebugWindow == ^null)
+            begin
+                ;;need to create and display the debug window
+                frmDebugWindow = new SynPSGNetCore.Logging.DebugOutput()
+                frmDebugWindow.Show()
+                InDebugMode = true
+            end
+
+            modname(2, moduleName, lineNumber)
+
+            ;;display the message
+            frmDebugWindow.Output(type, %atrim(moduleName), lineNumber, errorNumber, message)
+
+            mreturn
+
+        endmethod
+.else
+        private static method displayMessage    ,void
+            in  req type                        ,SynPSGNetCore.Logging.DebugOutput.MessageTypes
+            in  req errorNumber                 ,int
+            in  req message                     ,string
+            endparams
+
+            record
+                moduleName  ,a1000
+                lineNumber  ,int
+                ii          ,int
+            endrecord
+        proc
+
+            modname(2, moduleName, lineNumber)
+
+            ;;display the message
+            writes(frmDebugWindow, "");type, %atrim(moduleName), lineNumber, errorNumber, message)
+
+            mreturn
+
+        endmethod
+
+.endc
+        private static method logMessage    ,void
+            in  req message                 ,string
+            endparams
+        proc
+            xfpl_log(message)
+        endmethod
+    endclass
+
+endnamespace

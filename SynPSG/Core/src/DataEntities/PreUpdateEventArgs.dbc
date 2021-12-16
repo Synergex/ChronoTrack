@@ -1,0 +1,103 @@
+;;**********************************************************************
+;;
+;; Title:       PreUpdateEventArgs.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the PreUpdate event handling argument
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+namespace SynPSG.Core.DataEntities
+
+    ;;;<summary>
+    ;;;This class defines the event arguments for the PreUpdate event handler
+    ;;;</summary>
+    ;;;<remarks>
+    ;;;using the PreUpdateProcessing event you can perform data manipulation to a record
+    ;;;area prior to it being update in the file
+    ;;;</remarks>
+    public sealed class PreUpdateEventArgs
+
+        ;;private members
+        private mNewData        ,string
+        private mIOObject       ,@SynPSG.Core.DataEntities.SDMSio
+
+        ;;;<summary>
+        ;;;Defalt constructor.
+        ;;;</summary>
+        ;;;<remarks>
+        ;;;Sets the PerformUpdate flag to FALSE
+        ;;;</remarks>
+        ;;;<param name=newRecord>Pass the new record prior to updating within the file</param>
+        public method PreUpdateEventArgs
+            in  req newRecord           ,string
+            in  req ioObject            ,@SynPSG.Core.DataEntities.SDMSio
+            endparams
+        proc
+            ;;store the new record area
+            mNewData = newRecord
+            mIOObject = ioObject
+            mreturn
+        endmethod
+
+        ;;;<summary>
+        ;;;New data property.  Read/write access to the new data area
+        ;;;</summary>
+        ;;;<remark>
+        ;;;The event handl;er should populate this property with any additional data changes
+        ;;;</remark>
+        public property NewData    ,string
+            method get
+            proc
+                mreturn mNewData
+            endmethod
+
+            method set
+            proc
+                mNewData = value
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;New data property.  Read/write access to the new data area
+        ;;;</summary>
+        ;;;<remark>
+        ;;;The event handl;er should populate this property with any additional data changes
+        ;;;</remark>
+        public property IOObject    ,@SynPSG.Core.DataEntities.SDMSio
+            method get
+            proc
+                mreturn mIOObject
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace

@@ -1,0 +1,202 @@
+;;**********************************************************************
+;;
+;; Title:       TransactionViewer.dbc
+;;
+;; Type:        Class
+;;
+;; Description: store and display transaction event
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.ifdef OS_WINDOWSNT
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+.endc
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.Utilities
+
+    public class TransactionViewer
+
+        ;;include the toolkit defines
+        .define D_DEFINES_ONLY
+        .include "WND:tools.def"
+        .include "DBLDIR:windows.def"
+
+        ;;transaction viewer form
+.ifdef OS_WINDOWSNT
+        private static viewForm     ,@SynPSGNetCore.Forms.TransactionView
+.else
+        private static viewForm     ,int
+
+.endc
+        private static winID        ,int
+
+        ;;store the transaction log
+        private static textArray    ,@ArrayList
+
+        ;;if true, don't display transaction log
+        private static visible      ,boolean    ,true
+
+        ;;; <summary>
+        ;;; clear the transaction log
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; clear the transaction log
+        ;;; </remarks>
+        public static method ClearView  ,void
+            endparams
+        proc
+            textArray = new ArrayList()
+            mreturn
+        endmethod
+
+        ;;; <summary>
+        ;;; add text to te transaction view
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; add text to te transaction view
+        ;;; </remarks>
+        public static property Text ,string
+            method set
+            proc
+                if (textArray == ^null)
+                begin
+                    ;;create the test array list
+                    textArray = new ArrayList()
+                end
+                textArray.Add(value)
+            endmethod
+        endproperty
+
+        ;;; <summary>
+        ;;; display the transaction view window
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; place the transaction view window and display the stored messages
+        ;;; </remarks>
+        ;;; <param name="title">Pass the window title</param>
+        public static method ShowView   ,void
+            in  req title               ,string
+            endparams
+
+            record
+                group rect
+                    left    ,i4
+                    top     ,i4
+                    right   ,i4
+                    bottom  ,i4
+                endgroup
+                text        ,string
+                screenRows  ,int
+                screenCols  ,int
+            endrecord
+
+            literal
+                windowRows  ,int    ,12
+                windowCols  ,int    ,80
+            endliteral
+        proc
+            ;;only continue if we have something to view
+            if (visible && textArray.Count != 0)
+            begin
+.ifdef OS_WINDOWSNT
+                if (viewForm == ^null)
+                begin
+                    ;;create an instance of the TransactionView form
+                    viewForm = new SynPSGNetCore.Forms.TransactionView()
+                    addhandler(viewForm.FormClosing, handles_FormClosing)
+                    winID = dotnet_tkwin("", windowRows, windowCols, viewForm)
+                    u_gblwnd(winID)
+                    w_brdr(winID, WB_TITLE, (a)title)
+                    u_window(D_PLACE, WINid)
+                    u_winmetrics(D_CLIENT_RECT, w_info(WIF_HWND, winID), rect)
+                    viewForm.Size = new System.Drawing.Size(rect.right, rect.bottom)
+
+                    if (textArray == ^null)
+                    begin
+                        ;;create the test array list
+                        textArray = new ArrayList()
+                    end
+                end
+
+                ;;move all the text to the form
+                foreach text in textArray
+                begin
+                    viewForm.Text = text
+                end
+
+                screenRows = w_info(WIF_SROWS)
+                screenCols = w_info(WIF_SCOLS)
+                u_window(D_PLACE, winID, (screenRows/2) - (windowRows/2), (screenCols/2) - (windowCols/2))
+                dotnet_tkinput(winID)
+                u_window(D_REMOVE, winID)
+                u_update()
+
+                ;;clear the intrnal array
+                ClearView()
+.else
+                ;;non-windows version
+.endc
+            end
+
+            mreturn
+
+        endmethod
+
+        public static property  IsVisible   ,boolean
+            method set
+            proc
+                visible = value
+            endmethod
+            method get
+            proc
+                mreturn visible
+            endmethod
+        endproperty
+
+.ifdef OS_WINDOWSNT
+        ;;*******************************************************************
+        ;;
+        ;;event handler called when the form is closing
+        ;;
+        ;;*******************************************************************
+        private static method handles_FormClosing   ,void
+            inout req sender                          ,@Object
+            inout req e                               ,@FormClosingEventArgs
+            endparams
+        proc
+            m_signal("I_OK")
+            viewForm = ^null
+            mreturn
+        endmethod
+.endc
+    endclass
+endnamespace

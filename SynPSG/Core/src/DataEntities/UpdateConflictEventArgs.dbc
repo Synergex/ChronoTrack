@@ -1,0 +1,124 @@
+;;**********************************************************************
+;;
+;; Title:       UpdateConflictEventArgs.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the UpdateConflict event handling argument
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+import SynPSG.Core.DataEntities
+
+namespace SynPSG.Core.DataEntities
+
+    ;;;<summary>
+    ;;;This class defines the event argumentsfor the UpdateConflict event handler
+    ;;;</summary>
+    ;;;<remarks>
+    ;;;By default the PerformUpdate boolean flag is defined as FALSE.  The implementing
+    ;;;DataEntity class must set this boolean flag fo TRUE to allow the update
+    ;;;operation to continue
+    ;;;</remarks>
+    public sealed class UpdateConflictEventArgs
+
+        ;;private members
+        private mOriginalData       ,string
+        private mModifiedData       ,string
+        private mPerformUpdate      ,boolean
+
+        ;;;<summary>
+        ;;;Defalt constructor.
+        ;;;</summary>
+        ;;;<remarks>
+        ;;;Sets the PerformUpdate flag to FALSE
+        ;;;</remarks>
+        ;;;<param name=OriginalData>Pass the original record data area</param>
+        ;;;<param name=ModifiedData>Pass the modified record data area</param>
+        public method UpdateConflictEventArgs
+            in  req originalRecord      ,string
+            in  req modifiedRecord      ,string
+            endparams
+        proc
+            ;;default to prevent update
+            mPerformUpdate = false
+            mOriginalData = originalRecord
+            mModifiedData = modifiedRecord
+            mreturn
+        endmethod
+
+        ;;;<summary>
+        ;;;Original data property.  Read only access to the original data area
+        ;;;</summary>
+        public property OriginalData    ,string
+            method get
+            proc
+                mreturn mOriginalData
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;Modified data property.  Read/write only access to the modified data area
+        ;;;</summary>
+        ;;;<remark>
+        ;;;The event handling code should update this property with any modified
+        ;;;data.  Assuming the PerformUpdate property is set to TRUE then the data
+        ;;;here will be used to update the data file.
+        ;;;</remark>
+        public property ModifiedData    ,string
+            method get
+            proc
+                mreturn mModifiedData
+            endmethod
+
+            method set
+            proc
+                mModifiedData = value
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;Flag indicating if the update conflict has been resolved and the update action can
+        ;;;continue
+        ;;;</summary>
+        public property PerformUpdate   ,boolean
+            method get
+            proc
+                mreturn mPerformUpdate
+            endmethod
+
+            method set
+            proc
+                mPerformUpdate = value
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace

@@ -1,0 +1,117 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+#
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=Core ; export WORKSPACE
+PROJECT=Utilities ; export PROJECT
+COMMONAREA=NetCommon ; export COMMONAREA
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetLIB=$SRCDEV/$DEVAREA/$COMMONAREA/lib/SynPSGNetLibrary.olb ; export SynPSGNetLIB
+
+# *************************************************************
+# These setings are for the base SynPSG core libray routines
+# *************************************************************
+
+SynPSGROOT=$SRCDEV/Development/SynPSG/Core ; export SynPSGROOT
+SynPSGEXE=$SynPSGROOT/exe ; export SynPSGEXE
+SynPSGLIB=$SynPSGROOT/lib ; export SynPSGLIB
+SynPSGHDR=$SynPSGROOT/hdr ; export SynPSGHDR
+SynPSGGENHDR=$SynPSGROOT/genhdr ; export SynPSGGENHDR
+SynPSGNetCoreDLL=$SynPSGROOT/VSSolutions/SynPSGNetCore/bin/Release ; export SynPSGNetCoreDLL
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d -W0 ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+SRC=$DEVROOT/src/$PROJECT ; export SRC
+NAMESPACE=synpsg-core-utilities ; export NAMESPACE
+SYNDEFNS=SynPSG.Core.Utilities ; export SYNDEFNS
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+
+OLIB=$DEVROOT/lib ; export OLIB
+OBJ=$DEVROOT/obj/$PROJECT ; export OBJ
+
+EXE=$DEVROOT/exe ; export EXE
+DEF=$DEVROOT/src/Includes ; export DEF
+
+SYNEXPDIR=$DEVROOT/hdr ; export SYNEXPDIR
+SYNIMPDIR=$SynPSGNetHDR,$DEVROOT/hdr,$DEVROOT/genhdr/ ; export SYNIMPDIR
+
+# *************************************************************
+# runtime settings
+# *************************************************************
+
+DATA=$DEVROOT/dat ; export DATA
+NETBIN=$DEVROOT/VSSolutions/SynPSGNetCore/bin/Release ; export NETBIN
+CHRONOTRACK_DEBUG_MODE=OFF ; export CHRONOTRACK_DEBUG_MODE
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then 
+ COMPILEFLAGS=;export COMPILEFLAGS 
+ LINKERFLAGS=;export LINKERFLAGS 
+fi 
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $OLIB/CoreUtilities.olb 
+rm -f $OBJ/CoreUtilities.dbo 
+rm -f $OBJ/Conversion.dbo 
+rm -f $OBJ/Debugger.dbo 
+rm -f $OBJ/Working.dbo 
+rm -f $OBJ/WindowManager.dbo 
+rm -f $OBJ/TransactionViewer.dbo 
+rm -f $SYNEXPDIR/$NAMESPACE-conversion.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-debugger.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-working.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-windowmanager.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-transactionviewer.dbh 
+if [ "$NAMESPACE" != "*" ] 
+then 
+  rm -f $SYNEXPDIR/$NAMESPACE-*.dbh 
+fi 
+dblproto  $VARIANT_FLAGS  SRC:Conversion.dbc SRC:Debugger.dbc SRC:Working.dbc SRC:WindowManager.dbc SRC:TransactionViewer.dbc 
+dbl $COMPILEFLAGS -TX $VARIANT_FLAGS -o OBJ:CoreUtilities.dbo  SRC:Conversion.dbc SRC:Debugger.dbc SRC:Working.dbc SRC:WindowManager.dbc SRC:TransactionViewer.dbc 
+dblibr -ca OLIB:CoreUtilities.olb OBJ:CoreUtilities.dbo 
+dblink $LINKERFLAGS -l EXE:CoreUtilities.elb OLIB:CoreUtilities.olb 

@@ -1,0 +1,223 @@
+;;**********************************************************************
+;;
+;; Title:       SDMSBase.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Base Class defining the base data layer. Include file IO access
+;;              DataTable and collection objects
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.DataEntities
+
+    ;;; <summary>
+    ;;; DataBase class.  Base class to define data IO access in a nunber of ways
+    ;;; </summary>
+    ;;; <remarks>
+    ;;; Creates a DataIO object to access the data files.  Also creates DataTable
+    ;;; and Collection objects.
+    ;;; </remark>
+
+    public class SDMSBase
+
+        ;;-------------------------------------------------------------------------
+        ;;private fields
+        ;;-------------------------------------------------------------------------
+
+        private mSDMSioObject           ,@SynPSG.Core.DataEntities.SDMSio
+        private mSDMSTalbeObject        ,@SynPSG.Core.DataEntities.SDMSTable
+        private mSDMSCollectionObject   ,@SynPSG.Core.DataEntities.SDMSCollection
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; default constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; </remarks>
+        ;;; <param name="fileName">File name to open</param>
+        ;;; <param name="preStore">pre-store event class object</param>
+        ;;; <param name="postStore">post-store event class object</param>
+        ;;; <param name="preUpdate">pre-update event class object</param>
+        ;;; <param name="updateConflict">update conflict event class object</param>
+        ;;; <param name="formatTransView">format transaction view event class object</param>
+        ;;; <param name="onDelete">on delete event class object</param>
+        ;;; <param name="viewType">TableView typ</param>
+        ;;; <param name="tableName">name of the DataTable to create</param>
+        ;;; <param name="defineTable">define table structure event class object</param>
+        ;;; <param name="updateFields">DataTable update fields event class object</param>
+        ;;; <param name="collectionName">name of the collection</param>
+        ;;; <param name="collectionObject">instance of collection structure</param>
+        ;;; <param name="collectionLoad">collection load event class object</param>
+        ;;; <param name="structureName">Name of the data structure for replication purposes</param>
+        ;;; <param name="">sql time stamp field</param>
+        ;;; <param name="noDotNet">True=do not load framework</param>
+        public method SDMSBase
+            in  req fileName            ,string
+            in  req preStore            ,@SynPSG.Core.DataEntities.PreStore
+            in  req postStore           ,@SynPSG.Core.DataEntities.PostStore
+            in  req preUpdate           ,@SynPSG.Core.DataEntities.PreUpdate
+            in  req updateConflict      ,@SynPSG.Core.DataEntities.UpdateConflict
+            in  req formatTransView     ,@SynPSG.Core.DataEntities.FormatTransView
+            in  req onDelete            ,@SynPSG.Core.DataEntities.OnDelete
+            in  req viewType            ,TableView
+            in  req tableName           ,string
+            in  req defineTable         ,@SynPSG.Core.DataEntities.DefineTable
+            in  req updateFields        ,@SynPSG.Core.DataEntities.UpdateFields
+            in  req collectionName      ,string
+            in  req collectionObject    ,@Object
+            in  req collectionLoad      ,@SynPSG.Core.DataEntities.CollectionLoad
+            in  req noDotNet            ,boolean
+            endparams
+
+        proc
+
+            ;;create an instance of the SDMS IO class so we can transvers
+            ;;through the data in the file.
+            mSDMSioObject = new SDMSio(fileName, noDotNet)
+
+            ;;assign (if not null) the pre store record event handler to the DataIO object
+            if (preStore != ^null)
+                mSDMSioObject.SetPreStoreEventHandler(preStore)
+
+            ;;assign (if not null) the post store record event handler to the DataIO object
+            if (postStore != ^null)
+                mSDMSioObject.SetPostStoreEventHandler(postStore)
+
+            ;;assign (if not null) the pre update record event handler to the DataIO object
+            if (preUpdate != ^null)
+                mSDMSioObject.SetPreUpdateEventHandler(preUpdate)
+
+            ;;assign (if not null) the pre store record event handler to the DataIO object
+            if (updateConflict != ^null)
+                mSDMSioObject.SetUpdateEventHandler(updateConflict)
+
+            ;;assign (if not null) the format transaction view event handler to the DataIO object
+            if (formatTransView != ^null)
+                mSDMSioObject.SetFormatTransViewEventHandler(formatTransView)
+
+            ;;assign (if not null) the data consistency event handler to the DataIO object
+            if (onDelete != ^null)
+                mSDMSioObject.SetOnDeleteEventHandler(onDelete)
+
+            ;;create an instance of the base DataBase class.  This creates
+            ;;a DataTable and allows us to populate it as required
+            mSDMSTalbeObject = new SDMSTable(mSDMSioObject, tableName, noDotNet, viewType)
+
+            ;;assign (if not null) the define table event handler to the DataTable object
+            if (defineTable != ^null)
+                mSDMSTalbeObject.SetDefineTableEventHandler(defineTable)
+
+            ;;assign (if not null) the update fields event handler to the DataTable object
+            if (defineTable != ^null)
+                mSDMSTalbeObject.SetUpdateFieldsEventHandler(updateFields)
+
+            ;;create an instance of the DataCollection class.  This allows
+            ;;the ability to expose data in the form of an ArrayList colleciton
+            mSDMSCollectionObject = new SDMSCollection(mSDMSioObject, collectionName, viewType, collectionObject)
+
+            ;;assign (if not null) the update fields event handler to the DataTable object
+            if (collectionLoad != ^null)
+                mSDMSCollectionObject.SetCollectionLoadEventHandler(collectionLoad)
+
+        endmethod
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; default destructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; default destructor. ensures resources are released
+        ;;; </remarks>
+        method ~SDMSBase
+            endparams
+
+        proc
+
+            ;;release the Data IO object
+            mSDMSioObject = ^null
+
+            ;;release the DataTable object
+            mSDMSTalbeObject = ^null
+
+            ;;release the collecton object
+            mSDMSCollectionObject = ^null
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the base IO onject so that we can perform base IO
+        ;;; functions like Locate, etc.
+        ;;; </summary>
+        public property IO  ,@SynPSG.Core.DataEntities.SDMSio
+            method get
+            proc
+                mreturn mSDMSioObject
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the base DataBase onject so that we can perform
+        ;;; operations like Commit(), etc.
+        ;;; </summary>
+        public property DataTable  ,@SynPSG.Core.DataEntities.SDMSTable
+            method get
+            proc
+                mreturn mSDMSTalbeObject
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the base DataCollection object to allow access to collectons
+        ;;; </summary>
+        public property DataCollection  ,@SynPSG.Core.DataEntities.SDMSCollection
+            method get
+            proc
+                mreturn mSDMSCollectionObject
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace
+
+

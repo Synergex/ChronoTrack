@@ -1,0 +1,510 @@
+;;**********************************************************************
+;;
+;; Title:       SDMSTable.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Base Class defining the SDMSTable IO layer
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.DataEntities
+
+    ;;; <summary>
+    ;;; DataTable class.  Use to create a DataTable and manage the data within
+    ;;; </summary>
+    ;;; <remarks>
+    ;;; Creates a DaaTable and manages the data within it.  It assumes a SDMSio object
+    ;;; has been created to allow the manipulation of the data within a file
+    ;;; </remark>
+
+    public sealed class SDMSTable
+
+        ;;-------------------------------------------------------------------------
+        ;;private class variables
+        ;;-------------------------------------------------------------------------
+
+        ;;;<summary>store the DefineTable event handling object</summary>
+        private mDefineTableEventHandler        ,@SynPSG.core.dataentities.DefineTable
+        private mTableViewType                  ,TableView
+
+        ;;;<summary>store the UpdateFields event handling object</summary>
+        private mUpdateFieldsEventHandler       ,@SynPSG.core.dataentities.UpdateFields
+
+        ;;;<summary>store the On Delete event handling object</summary>
+        private mOnDeleteEventHandler    ,@SynPSG.core.dataentities.OnDelete
+
+        ;;*************************************************************************
+
+        ;;;<summary>hold an instance of the data IO object</summary>
+        private mIOObject               ,@SynPSG.Core.DataEntities.SDMSio
+
+        ;;;<summary> private field holding the data table </summary>
+        private mInternalTable          ,@System.Data.DataTable
+
+        ;;; <summary>flag to indicate creating a new DataTable. </summary>
+        private mNewTable               ,boolean
+
+        ;;; <summary>hold the table name. </summary>
+        private mTableName              ,string
+
+        ;;; <summary>flag to indicate not to reload table. Used for static tables</summary>
+        private mTableReload            ,boolean
+
+        ;;; <smmary>flag indicating that we do not require .NET class usage</summary>
+        private mNoDotNet               ,boolean
+
+        ;;; <summary>set to not include the GRFA in the table</summary>
+        private mIncludeGRFA            ,boolean
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; default constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; accepts the table name and a flag indicating that te .NET framework
+        ;;; should not be loaded.
+        ;;; </remarks>
+        ;;; <param name="ioObject">instance of the DATA IO class.</param>
+        ;;; <param name="tableName">Name to call the DataTable.</param>
+        ;;; <param name="noDotNet">If passed true then no .NET processing.</param>
+        ;;; <param name="tableView">type of table to create</param>
+        public method SDMSTable
+            in  req ioObject        ,@SynPSG.Core.DataEntities.SDMSio
+            in  req tableName       ,string
+            in  req noDotNet        ,boolean
+            in  opt tableView       ,TableView
+            endparams
+
+        proc
+
+            mIOObject = ioObject
+
+            mTableViewType = SynPSG.Core.DataEntities.TableView.Full
+            if (%passed(tableView))
+                mTableViewType = tableView
+
+            ;;inittialise the debugger
+            mNoDotNet = false
+            if (%passed(noDotNet))
+                mNoDotNet = noDotNet
+
+            Debugger.Init(mNoDotNet)
+
+            ;;store the table name
+            mTableName = tableName
+
+            debugInfoDT("DataTable::DataTable() : New DataTable object creating : " + mTableName)
+
+            mNewTable = true
+            mTableReload = true
+            mIncludeGRFA = true
+
+        endmethod
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; default destructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; default destructor. ensures resources are released
+        ;;; </remarks>
+        method ~SDMSTable
+            endparams
+
+        proc
+
+            ;;release the Data IO object
+            mIOObject = ^null
+
+            ;;release the internal DataTable
+            mInternalTable = ^null
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Add columns to the DataTable
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Allows the creation of columns within the DataTable.  The table will
+        ;;; be created if it does not exist
+        ;;; </remarks>
+        public method AddColumn ,void
+            in  req columnName  ,string
+            in  req columnType  ,@System.Type
+            in  req caption     ,string
+            in  req uniqueFlag  ,boolean
+            in  req nullFlag    ,boolean
+            endparams
+
+            record
+                col                     ,@DataColumn
+            endrecord
+        proc
+            if (mNewTable)
+            begin
+                debugInfoDT("DataTable::AddColumn() : Creating new DataTable")
+                mInternalTable = new System.Data.Datatable(mTableName)
+
+                if (mIncludeGRFA)
+                begin
+                    ;;add our RFA column, always column [0]
+                    col=new DataColumn("SynergyGRFA")
+                    col.DataType = SynPSG.Core.DataEntities.DataEntityTypes.StringType
+                    col.Unique = false
+                    col.AllowDBNull = true
+                    mInternalTable.Columns.Add(col)
+                    debugInfoDT("DataTable::AddColumn() : Added GRFA column at position 0")
+                end
+                mNewTable = false
+                debugInfoDT("DataTable::AddColumn() : Table created")
+            end
+
+            ;;first create the columns
+            debugInfoDT("DataTable::AddColumn() : Adding column to table : " + columnName)
+            col=new DataColumn(columnName)
+
+            ;;assign column type
+            col.DataType = columnType
+
+            ;;add caption
+            col.Caption = caption
+
+            col.Unique = uniqueFlag
+            col.AllowDBNull = nullFlag
+
+            ;;add the column to the table
+            mInternalTable.Columns.Add(col)
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Method to allow the clearing of an existing DataTable object
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Method to allow the clearing of an existing DataTable object
+        ;;; </remarks>
+        public method Clear ,void
+            endparams
+        proc
+            debugInfoDT("DataTable::Clear() : Clear table")
+
+            if (mInternalTable == ^null)
+            begin
+                ;;no table created - no need to clear it!
+                mreturn
+            end
+
+            mInternalTable.Rows.Clear()
+
+            mreturn
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Update file based on the internal table changes
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Iterate through the table view and process the added, modified
+        ;;; and deleted rows
+        ;;; </remarks>
+        ;;; <returns>
+        ;;; Returns TRUE if the table was sccessfully processed
+        ;;; </returns>
+        public method Commit ,void
+            endparams
+
+            record
+                row     ,@DataRow
+                result  ,boolean
+            endrecord
+
+        proc
+            debugInfoDT("DataTable::Commit() : Commit changes")
+
+            if (mInternalTable == ^null)
+            begin
+                debugInfoDT("DataTable::Commit() : DataTable not created!!!")
+
+                throw new SynException("DataTable not created")
+            end
+
+            ;;check each row in the table
+            foreach row in mInternalTable.Rows
+            begin
+                using row.RowState select
+                (DataRowState.Added),
+                begin
+                    data e  ,@SynPSG.Core.DataEntities.UpdateFieldsEventArgs
+
+                    debugInfoDT("DataTable::Commit(): Process added row")
+
+                    ;;move the data to our synergy structure
+                    e = new UpdateFieldsEventArgs(mIOObject, row, mTableViewType)
+                    mUpdateFieldsEventHandler.EventMethod(this, e)
+                    if (e.CancelOperation)
+                    begin
+                        debugInfoDT("DataTable::Commit(): UpdateFields event canceled the operation")
+                        nextloop
+                    end
+
+                    ;;move the synergy record area
+                    mIOObject.DataArea = e.SynergyRecord
+
+                    debugInfoDT("DataTable::Commit(): DataArea : " + mIOObject.DataArea)
+
+                    ;;add the reocrd to the object file
+                    result = mIOObject.Create()
+
+                    debugInfoDT("DataTable::Commit(): Added new record, result = " + %string(result))
+
+                end
+                (DataRowState.Modified),
+                begin
+                    data e  ,@SynPSG.Core.DataEntities.UpdateFieldsEventArgs
+
+                    debugInfoDT("DataTable::Commit(): Process modified row")
+
+                    ;;move the data to our synergy structure
+                    e = new UpdateFieldsEventArgs(mIOObject, row, mTableViewType)
+                    mUpdateFieldsEventHandler.EventMethod(this, e)
+                    if (e.CancelOperation)
+                    begin
+                        debugInfoDT("DataTable::Commit(): UpdateFields event canceled the operation")
+                        nextloop
+                    end
+
+                    ;;move the synergy record area
+                    mIOObject.DataArea = e.SynergyRecord
+
+                    debugInfoDT("DataTable::Commit(): DataArea : " + mIOObject.DataArea)
+
+                    ;;get the oroginal GRFA
+                    mIOObject.GRFA = Conversion.toSynGRFA(row[0])
+
+                    ;;compare the original and save of the same
+                    result = mIOObject.CompareAndSave()
+
+                    debugInfoDT("DataTable::Commit(): Updated modified record, result = " + %string(result))
+                end
+                (DataRowState.Deleted),
+                begin
+                    data e  ,@SynPSG.Core.DataEntities.UpdateFieldsEventArgs
+
+                    debugInfoDT("DataTable::Commit(): Process deleted row")
+                    ;;move the data to our synergy structure
+
+                    ;;get the oroginal GRFA
+                    mIOObject.GRFA = Conversion.toSynGRFA(row[0, DataRowVersion.Original])
+
+                    debugInfoDT("DataTable::Commit(): deleted row may need linked records deleted")
+
+                    ;;compare the original and delete if the same
+                    result = mIOObject.FindAndDelete()
+
+                    debugInfoDT("DataTable::Commit(): deleted record, result = " + %string(result))
+                end
+                endusing
+            end
+
+            ;;commit the added rows to the table
+            mInternalTable.AcceptChanges()
+            debugInfoDT("DataTable::Commit(): Table changes commited")
+
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; manage data consistency when the tables changes are canceled
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Iterate through the table view and for added entried check data
+        ;;; consistency
+        ;;; </remarks>
+        public method Cancel    ,void
+            endparams
+
+            record
+                row     ,@DataRow
+                result  ,boolean
+            endrecord
+
+        proc
+            debugInfoDT("DataTable::Cancel(): Cancel DataTable changes")
+
+            ;;check each row in the table
+            foreach row in mInternalTable.Rows
+            begin
+                ;;if we are canceling the changes to the table we need to
+                ;;signal any added rows so that linked files can have
+                ;;records deleted
+                if (row.RowState == DataRowState.Added)
+                begin
+                    data e  ,@SynPSG.Core.DataEntities.UpdateFieldsEventArgs
+
+                    debugInfoDT("DataTable::Cancel(): added row may need linked records deleted")
+
+                    ;;move the data to our synergy structure
+                    e = new UpdateFieldsEventArgs(mIOObject, row, mTableViewType)
+                    mUpdateFieldsEventHandler.EventMethod(this, e)
+                    if (e.CancelOperation)
+                    begin
+                        debugInfoDT("DataTable::Cancel(): UpdateFields event canceled the operation")
+                        nextloop
+                    end
+
+                    ;;move the synergy record area
+                    mIOObject.DataArea = e.SynergyRecord
+
+                    ;;need to check data consistency and del;eted any related/added records
+                    mIOObject.DataConsistency(mIOObject.PrimaryKeyValue)
+                end
+            end
+
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+        ;;; <summary>
+        ;;; Expose the DataTable
+        ;;; </summary>
+        public property Table   ,@System.Data.DataTable
+            method get
+            proc
+                if (mInternalTable == ^null)
+                begin
+                    data e  ,@SynPSG.Core.DataEntities.DefineTableEventArgs
+
+                    e = new DefineTableEventArgs(mTableViewType)
+                    ;;need to create the table on first reference
+                    mDefineTableEventHandler.EventMethod(this, e)
+
+                end
+                mreturn mInternalTable
+            endmethod
+        endproperty
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; Get/set to indicate if to include the standard GRFA
+        ;;; </summary>
+        public property IncludeGRFA ,boolean
+            method set
+            proc
+                mIncludeGRFA = value
+            endmethod
+            method get
+            proc
+                mreturn mIncludeGRFA
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Gets/sets a flag indicating whether to reload the DataTable
+        ;;; whenh the method is called
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Gets/sets a flag indicating whether to reload the DataTable
+        ;;; whenh the method is called
+        ;;; </remarks>
+        public property PerformReloadTable  ,boolean
+            method get
+            proc
+                mreturn mTableReload
+            endmethod
+            method set
+            proc
+                mTableReload = value
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the DefineTable event handler object
+        ;;; </summary>
+
+        public method SetDefineTableEventHandler    ,void
+            in  req obj                             ,@SynPSG.Core.DataEntities.DefineTable
+            endparams
+        proc
+            mDefineTableEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the UpdateFields event handler object
+        ;;; </summary>
+
+        public method SetUpdateFieldsEventHandler    ,void
+            in  req obj                             ,@SynPSG.Core.DataEntities.UpdateFields
+            endparams
+        proc
+            mUpdateFieldsEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the OnDelete event handler object
+        ;;; </summary>
+
+        public method SetOnDeleteEventHandler    ,void
+            in  req obj                             ,@SynPSG.Core.DataEntities.OnDelete
+            endparams
+        proc
+            mOnDeleteEventHandler = obj
+            mreturn
+        endmethod
+
+    endclass
+
+endnamespace
+
+

@@ -1,0 +1,62 @@
+;;**********************************************************************
+;;
+;; Title:       UpdateFields.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Base Class defining the UpdateField event handling class
+;;              this class handles the updating of Synergy fields from a
+;;              DataRow object.  It's implementation is required
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+namespace SynPSG.Core.DataEntities
+
+    ;;;<summary>
+    ;;;event handling class.  Used to enable the implementing class to populate
+    ;;;synergy fields fro the passed DataRow object.
+    ;;;</summary>
+    public abstract class UpdateFields
+
+        ;;;<summary>
+        ;;;Method that must be implemented by the DataEntity class when UpdateFields
+        ;;;events is raised.  Us the passed DataRow to extract the field data and
+        ;;;populate the synergy fields/record area
+        ;;;</summary>
+        ;;;<param name=sender>DataBase object</param>
+        ;;;<param name=e>UpdateFieldsEventArgs</param>
+        public abstract method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSTable
+            inout   req e                   ,@SynPSG.Core.DataEntities.UpdateFieldsEventArgs
+        proc
+        endmethod
+
+    endclass
+
+endnamespace

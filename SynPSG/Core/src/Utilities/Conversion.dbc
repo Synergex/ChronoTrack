@@ -1,0 +1,636 @@
+;;**********************************************************************
+;;
+;; Title:       Conversions.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to perform conversions between .NET types and Synergy types.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.ifdef OS_WINDOWSNT
+.if ^variant .ne. 0 ;;toolkit
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+.endc
+.endc
+
+namespace SynPSG.Core.Utilities
+
+.define D_RFA_LEN 6
+
+    structure SynGUID
+        RFAddress  ,[D_RFA_LEN]a2
+        HashCode   ,d10
+    endstructure
+
+    public class Conversion
+
+        ;;;<summary>private constant holding the null object test value</summary>
+        private const objectName    ,a* ,"SYNERGEX.SYNNET.DOTNETOBJECT"
+
+        ;;;<summary>hold a reference to the SynPSGCLIB dll</summary>
+        private static mSynPSGCLIB  ,D_ADDR ,0
+
+.ifdef OS_WINDOWSNT
+.if ^variant .ne. 0 ;;toolkit
+
+        ;;; <summary>
+        ;;; Convert a Synergy boolean to a .NET type
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy boolean value into a .NET type
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inValue">Boolean value to convert</param>
+        public static method ToNetBoolean   ,@Object
+            in  req inValue                 ,boolean
+            endparams
+
+        proc
+            mreturn (object) inValue
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET boolean type to a Synergy boolean (I1)
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed .NET boolean type to a Synergy boolean (I1) type
+        ;;; </remark>
+        ;;; <value>Returned Boolean</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynBoolean   ,boolean
+            in  req inValue                 ,@Object
+            endparams
+
+            record
+                tmpString   ,string
+                result      ,boolean
+            endrecord
+
+        proc
+            ;;the object may be null, or jsut have "SYNERGEX.SYNNET.DOTNETOBJECT"!!
+            tmpString = inValue.ToString()
+
+            if (inValue == ^null || tmpString == objectName)
+            then
+            begin
+                result = false
+            end
+            else
+            begin
+                ;;it hasa value!!
+                tmpString = tmpString.ToUpper()
+                if (tmpString == "1")
+                    then
+                        result = true
+                    else
+                        result = false
+            end
+
+            mreturn result
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a Synergy alpha to a .NET string type
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy alpha value into a .NET string type
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inValue">String value to convert</param>
+        public static method ToNetString    ,@Object
+            in  req inValue                 ,a
+            endparams
+
+        proc
+            mreturn (object) %atrim(inValue)
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET string type to a Synergy alpha
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy alpha value into a .NET string type
+        ;;; </remark>
+        ;;; <value>Returned String</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynString    ,a
+            in  req inValue                 ,@Object
+            endparams
+
+            record
+                tmpString   ,string
+                result      ,string
+            endrecord
+        proc
+            tmpString = inValue.ToString()
+
+            if (inValue == ^null || tmpString == objectName)
+                then
+                    result = ""
+                else
+                    result = (string) inValue
+
+            mreturn result
+
+        endmethod
+
+
+        ;;; <summary>
+        ;;; Convert a Synergy integer to a .NET integer type
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy integer value into a .NET integer type
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inValue">Integer value to convert</param>
+        public static method ToNetInteger   ,@Object
+            in  req inValue                 ,d
+            endparams
+        proc
+            mreturn (object) inValue
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET integer type to a Synergy integer
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed .NET integer type to a Synergy I type
+        ;;; </remark>
+        ;;; <value>Returned Integer</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynInteger   ,d
+            in  req inValue                 ,@Object
+            endparams
+
+            record
+                tmpString   ,string
+                result      ,d18    ;;max size
+            endrecord
+        proc
+            tmpString = InValue.ToString()
+            if (inValue == ^null || tmpString == objectName)
+                then
+                    result = 0
+                else
+                    result = tmpString
+
+            mreturn result
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a Synergy integer to a .NET integer type
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy integer value into a .NET integer type
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inValue">Integer value to convert</param>
+        public static method ToNetInteger   ,@Object
+            in  req inValue                 ,i
+            endparams
+        proc
+            mreturn (object) inValue
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a Synergy decimal to a .NET decimal type
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy decimal value into a .NET decimal type
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inValue">Decimal value to convert</param>
+        public static method ToNetDecimal   ,@Object
+            in  req inValue                 ,d.
+            endparams
+
+        proc
+            mreturn (object) inValue
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET decimal type to a Synergy decimal
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed .NET decimal type to a synergy D type
+        ;;; </remark>
+        ;;; <value>Returned Decimal</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynDecimal   ,d.
+            in  req inValue                 ,@Object
+            endparams
+
+            record
+                tmpString   ,string
+                result      ,d28.10 ;;max size
+            endrecord
+        proc
+            tmpString = InValue.ToString()
+            if (inValue == ^null || tmpString == objectName)
+                then
+                    result = 0
+                else
+                    result = (decimal) inValue
+
+            mreturn result
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a Synergy decimal to a .NET long type
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy decimal value into a .NET long type
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inValue">Decimal value to convert</param>
+        public static method ToNetLong   ,@Object
+            in  req inValue              ,d
+            endparams
+
+        proc
+            mreturn (object) inValue
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET long type to a Synergy decimal
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed .NET long type to a synergy D type
+        ;;; </remark>
+        ;;; <value>Returned Decimal</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynLong  ,d
+            in  req inValue             ,@Object
+            endparams
+
+            record
+                tmpString   ,string
+                result      ,d18 ;;max size
+            endrecord
+        proc
+            tmpString = InValue.ToString()
+            if (inValue == ^null || tmpString == objectName)
+                then
+                    result = 0
+                else
+                    result = ^d((a)tmpString)
+
+            mreturn result
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a Synergy decimal to a .NET DateTime type
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy decimal value into a .NET DateTime type
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inDate">Decimal value to convert to the date portion</param>
+        ;;; <param name="inTime">Decimal value to convert to the time portion</param>
+        public static method ToNetDateTime  ,@Object
+            in  req inDate                  ,d
+            in  opt inTime                  ,d
+            endparams
+
+            record recArea
+                netDate ,@System.DateTime
+                synDate ,d8
+                synDay  ,int
+                synMon  ,int
+                synYear ,int
+                synHour ,int
+                synMin  ,int
+            endrecord
+        proc
+            if (inDate)
+            then
+            begin
+                init recArea
+                if (^size(inDate) == 6)
+                then
+                begin
+                    synDate(1:6) = inDate
+                    synYear = synDate(1:2) + 1900
+                    synMon = synDate(3:2)
+                    synDay = synDate(5:2)
+
+                end
+                else
+                begin
+                    synDate = inDate
+                    synYear = synDate(1:4)
+                    synMon = synDate(5:2)
+                    synDay = synDate(7:2)
+                end
+                if (^passed(inTime))
+                begin
+                    synHour = inTime(1:2)
+                    synMin = inTime(3:2)
+                end
+
+                netDate = new System.DateTime((int)synYear, (int)synMon, (int)synDay, (int)synHour, (int)synMin, (int)0)
+            end
+            else
+            begin
+                netDate = new System.DateTime((int)1900, (int)1, (int)1)
+            end
+
+            mreturn (object) netDate
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET DateTime type to a Synergy decimal
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed .NET DateTime type to a synergy D type
+        ;;; </remark>
+        ;;; <value>Returned Decimal</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynDate  ,d
+            in  req inValue             ,@Object
+            endparams
+
+            record
+                tmpString   ,string
+                netDate     ,@System.DateTime
+                synDate     ,d8
+            endrecord
+        proc
+
+
+            netDate = (System.DateTime)InValue
+            if (netDate == ^null)
+                then
+                    synDate = 0
+                else
+                begin
+                    ;;sort out the date type
+                    synDate(1:4) = netDate.Year
+                    synDate(5:2) = netDate.Month
+                    synDate(7:2) = netDate.Day
+                end
+
+            mreturn synDate
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET DateTime type to a Synergy decimal
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed .NET DateTime type to a synergy D type
+        ;;; </remark>
+        ;;; <value>Returned Decimal</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynTime  ,d
+            in  req inValue             ,@Object
+            endparams
+
+            record
+                tmpString   ,string
+                netDate     ,@System.DateTime
+                synTime     ,d8
+            endrecord
+        proc
+
+
+            tmpString = InValue.ToString()
+            if (inValue == ^null || tmpString == objectName)
+                then
+                    synTime = 0
+                else
+                begin
+                    ;;sort out the date type
+                    netDate = (DateTime)inValue
+                    synTime(1:2) = netDate.Hour
+                    synTime(3:2) = netDate.Minute
+                end
+
+            mreturn synTime
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a Synergy alpha to a .NET object
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed Synergy alpha value into a .NET object
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="inValue">String value to convert</param>
+        public static method ToNetObject    ,@Object
+            in  req inValue                 ,a
+            endparams
+
+        proc
+            mreturn (object) %atrim(inValue)
+
+        endmethod
+
+.endc
+.endc
+
+        ;;; <summary>
+        ;;; Convert a Synergy RFA and record area to a GRFA
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; enables the conversion from a synergy rfa and
+        ;;; a record area to a GRFA
+        ;;; </remark>
+        ;;; <value>SynGUID</value>
+        ;;; <param name="address">String value containing the RFA</param>
+        ;;; <param name="dataArea">String value containing the data area</param>
+        public static method ToGRFA ,SynGUID
+            in  req address         ,string
+            in  req dataArea        ,string
+            endparams
+
+            .align
+            record localRFA
+                rfaByte     ,[D_RFA_LEN] i1
+            endrecord
+
+            record
+                guid        ,SynGUID
+            endrecord
+
+            .align
+            record
+                ii          ,int
+            endrecord
+
+        proc
+
+            ;;move the passed address into our byte[] record area
+            localRFA = address
+
+            ;;extract each byte as a hex string
+            for ii from 1 thru D_RFA_LEN
+                guid.RFAddress[ii] = hex(rfaByte[ii], 1)
+
+            ;;create the hash code from the dat area
+            guid.HashCode = Conversion.ToHashCode(dataArea)
+
+            mreturn guid
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a GRFA to a RFA addess
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; enables the conversion from a GRFA to a synergy RFA address
+        ;;; </remark>
+        ;;; <value>string</value>
+        ;;; <param name="guid">the SynGUID value</param>
+        public static method ToRFA  ,string
+            in  req guid            ,SynGUID
+            endparams
+
+            .align
+            record localRFA
+                rfaByte     ,[D_RFA_LEN] i1
+            endrecord
+
+            .align
+            record
+                ii          ,int
+            endrecord
+
+        proc
+
+            ;;extract each byte as a hex string
+            for ii from 1 thru D_RFA_LEN
+                rfaByte[ii] = ^x(guid.RFAddress[ii])
+
+            mreturn localRFA
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a Synergy GRFA to a .NET string
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; enables the conversion from a synergyGRFA, which is a
+        ;;; 25 byte string, to a .NET GRFA string
+        ;;; </remark>
+        ;;; <value>Returned Object</value>
+        ;;; <param name="guid">SynGUID to convert</param>
+        public static method ToNetGRFA  ,@Object
+            in  req guid                ,SynGUID
+            endparams
+        proc
+            mreturn (object) ((string)guid)
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Convert a .NET GRFA field (string) to a synergy GRFA
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Convert the passed string to a synergy GRFA
+        ;;; </remark>
+        ;;; <value>Returned GRFA</value>
+        ;;; <param name="inValue">Object to convert</param>
+        public static method ToSynGRFA  ,SynGUID
+            in  req inValue             ,@Object
+            endparams
+
+            record
+                result      ,SynGUID
+                tmpString   ,string
+            endrecord
+        proc
+            tmpString = inValue.ToString()
+
+            if (inValue == ^null || tmpString == objectName)
+                then
+                    init result
+                else
+                begin
+                    result = (string) inValue
+                end
+
+            mreturn result
+
+        endmethod
+
+        ;;; <summary>
+        ;;; return a hash code for the given string
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; return a hash code to identify a given string
+        ;;; </remark>
+        ;;; <value>return intger hash code</value>
+        ;;; <param name="text">String value to convert</param>
+        public static method ToHashCode ,d
+            in  req text                ,a
+            endparams
+
+            record
+                hashCode    ,int
+                ii          ,int
+            endrecord
+        proc
+
+
+            if (!mSynPSGCLIB)
+            begin
+                ;our DLL is not open, or we had a mega error!
+.ifdef OS_WINDOWSNT
+                mSynPSGCLIB = dll_open("EXE:SynPSGCLIB.dll")
+.else
+                mSynPSGCLIB = dll_open("EXE:SynPSGCLIB.so")
+.endc
+                if (!mSynPSGCLIB)
+                begin
+                    throw new SynException("unable to load SynPSGCLIB dll")
+                end
+            end
+
+            clear hashCode
+            hashCode = dll_call(mSynPSGCLIB, DLL_TYPE_C, "GenSynGRFA", text, ii = ^size(text))
+
+            mreturn hashCode
+        endmethod
+
+    endclass
+
+endnamespace

@@ -1,0 +1,619 @@
+;;**********************************************************************
+;;
+;; Title:       WindowManager.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to manage toolkit windows with embeded .NET forms
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.ifdef OS_WINDOWSNT
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+.else
+import System.Collections
+.endc
+
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.Utilities
+
+    public class WindowManager
+
+
+        ;;include the toolkit defines
+        .define D_DEFINES_ONLY
+        .include "WND:tools.def"
+        .include "DBLDIR:windows.def"
+
+        ;;
+        ;;private members
+        ;;
+.ifdef OS_WINDOWSNT
+        private mInterop        ,@SynPSGNetCore.Interop.SynInterop
+.endc
+        private mMenuTable      ,@ArrayList
+        private static sRows    ,int
+        private static sCols    ,int
+
+        ;;
+        ;;private constants
+        ;;
+        private mLibrary        ,string
+        private mTitle          ,string
+.ifdef OS_WINDOWSNT
+        private lastSize        ,@System.Drawing.Size
+.endc
+        private mMenuVisible    ,boolean
+        ;;
+        ;;private structures
+        ;;
+        private structure mMenuItem
+            name    ,a15
+            cID     ,i4
+        endstructure
+
+        ;;; <summary>
+        ;;; Constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Constructor initialises the window manager class
+        ;;; </remarks>
+        public method WindowManager
+            in  req libraryName         ,string
+            in  req applicationTitle    ,string
+            endparams
+
+        proc
+            mLibrary = libraryName
+            mTitle = applicationTitle
+
+            ;;start the toolkit
+            u_start(mLibrary, 1 ,1)
+
+            e_sect(mTitle, D_CAPTION)
+
+            ;;create an instance of the interop class
+            debugInfo("Create the .NET synergy interop layer")
+.ifdef OS_WINDOWSNT
+            mInterop = new SynPSGNetCore.Interop.SynInterop()
+            ;;assign the available event handlers
+            debugInfo("Assign available event handlers")
+            addhandler(mInterop.MenuSignal, WindowManager_MenuSignal)
+            addhandler(mInterop.DebugOutput, WindowManager_DebugOutput)
+.endc
+            ;;register toolkit event/method pairs
+            e_method(D_METH_APPCLOSE, "Toolkit_AppClose")
+            e_method(D_METH_APPSIZE, "Toolkit_AppSize")
+
+            ;;create internal collections
+            mMenuTable = new ArrayList()
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Destructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; save settings and shut down the toolkit
+        ;;; </remarks>
+        method ~WindowManager
+            endparams
+
+        proc
+            if (sRows < 24)
+                sRows = 24
+            if (sCols < 90)
+                sCols = 90
+            u_resize(sRows, sCols)
+            u_savesettings(D_APP_STATE .bor. D_APP_POS .bor. D_APP_SIZE)
+            u_finish()
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Enable the ability to save and set the application screen rows
+        ;;; </summary>
+        public static property ScreenRows   ,int
+            method set
+            proc
+                sRows = value
+            endmethod
+        endproperty
+
+        ;;; <summary>
+        ;;; Enable the ability to save and set the application screen columns
+        ;;; </summary>
+        public static property ScreenCols   ,int
+            method set
+            proc
+                sCols = value
+            endmethod
+        endproperty
+
+        ;;; <summary>
+        ;;; Event handler when the form signals a menu entry
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Event handler when the form signals a menu entry
+        ;;; </remarks>
+        public static method WindowManager_MenuSignal   ,void
+            in  req menuName                            ,string
+            endparams
+        proc
+            debugInfo("Menu signal event handler, result : " + menuName)
+
+            m_signal(menuName)
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Event handler when debug output required
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Event handler when debug output is required
+        ;;; </remarks>
+        public static method WindowManager_DebugOutput  ,void
+            in  req message                             ,string
+            endparams
+        proc
+            debugInfo(message)
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Set the footer text value
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; display the passed text to the footer
+        ;;; </remarks>
+        public method Footer    ,void
+            in  req message     ,string
+            endparams
+        proc
+
+            e_sect(message, D_FOOTER, D_LEFT)
+            u_update()
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; clear the footer text
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; clear the footer text
+        ;;; </remarks>
+        public method ClearFooter   ,void
+            endparams
+        proc
+
+            e_sect("", D_FOOTER, D_LEFT)
+            u_update()
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; set, unset the current environment
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; pass true to enter a new environment, false to exit it
+        ;;; </remarks>
+        public method Environment   ,void
+            in  req entering        ,boolean
+            in  req message         ,string
+            endparams
+        proc
+            if (entering)
+            then
+            begin
+                e_enter()
+                Working.ShowForm(message)
+            end
+            else
+                e_exit()
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; set, unset the current environment
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; pass true to enter a new environment, false to exit it
+        ;;; </remarks>
+        public method Environment   ,void
+            in  req entering        ,boolean
+            endparams
+        proc
+            if (entering)
+            then
+            begin
+                e_enter()
+            end
+            else
+                e_exit()
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; assign .NET form to a window
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; assign a .NET form to a window and return the window ID
+        ;;; </remarks>
+.ifdef OS_WINDOWSNT
+        public method TKWindow      ,int
+            in  req netForm         ,@Object
+            in  req height          ,int
+            in  req width           ,int
+            in  req title           ,string
+            in  opt centre          ,boolean
+            endparams
+
+            record
+                winID       ,int
+                windowRows  ,int
+                windowCols  ,int
+            endrecord
+        proc
+            ;;create the required toolkit window
+            winID = loadWindow(netForm, height, width, title)
+            if (%passed(centre))
+            begin
+                if (sRows == 0 || sCols == 0)
+                begin
+                    sRows = w_info(WIF_SROWS)
+                    sCols = w_info(WIF_SCOLS)
+                end
+                windowRows = w_info(WIF_ROWS, winID)
+                windowCols = w_info(WIF_COLS, winID)
+                u_window(D_PLACE, winID, (sRows/2) - (windowRows/2), (sCols/2) - (windowCols/2))
+            end
+
+            mreturn winID
+
+        endmethod
+.endc
+        ;;; <summary>
+        ;;; Load a menu column into the window manager
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; loads the pssed menu column into the window manager and
+        ;;; optionaly makes it global
+        ;;; </remarks>
+        ;;; <param name="name">Menu column name</param>
+        ;;; <param name="global">boolean to make the column global</param>
+        public method LoadMenu  ,boolean
+            in  req name        ,string
+            in  req global      ,boolean
+            endparams
+
+            record
+                errFlag     ,int
+                colID       ,int
+                menu        ,mMenuItem
+            endrecord
+
+        proc
+            init menu
+            ;;load the menu column
+            menu.name = name
+            upcase (menu.name)
+            m_ldcol(menu.cID, , name,,, errFlag, global)
+
+            if (!errFlag)
+            begin
+                ;;store in the collection
+                mMenuTable.Add((@mMenuItem) menu)
+            end
+
+            ;;return error status
+            mreturn (boolean)errFlag
+
+        endmethod
+
+        ;;; <summary>
+        ;;; disable a menu column
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Disable the passed menu column
+        ;;; </remarks>
+        ;;; <param name="name">Menu column name</param>
+        public method DisableMenu   ,void
+            in  req mnuName         ,string
+            endparams
+
+            record
+                menu    ,@mMenuItem
+                tmpName ,a15
+            endrecord
+
+        proc
+
+            if (!mMenuVisible)
+                mreturn
+
+            foreach menu in mMenuTable
+            begin
+                upcase(tmpName = mnuName)
+                if (menu.name == tmpName)
+                begin
+                    m_disable(D_COLUMN, menu.cID)
+                    exitloop
+                end
+            end
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; hide the menu bar
+        ;;;  </summary>
+        public method HideMenu  ,void
+        proc
+            m_column(D_REMOVE, D_ALL)
+            mMenuVisible = false
+        endmethod
+
+        ;;; <summary>
+        ;;; reveal the menu bar
+        ;;;  </summary>
+        public method ShowMenu  ,void
+
+        record
+            menu    ,@mMenuItem
+        endrecord
+        proc
+            foreach menu in mMenuTable
+            begin
+                m_column(D_PLACE, menu.cID)
+            end
+            mMenuVisible = true
+        endmethod
+
+        ;;; <summary>
+        ;;; place the passed window and force an update
+        ;;; </summary>
+        public method PlaceForm     ,void
+            in  req winID           ,int
+            endparams
+        proc
+            u_window(D_PLACE, winID)
+            u_update()
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; process the passed toolkit window
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; proces the fom contained within a toolkit window
+        ;;; </remarks>
+        public method ProcessForm   ,void
+            in  req winID           ,int
+            endparams
+
+        proc
+
+.ifdef OS_WINDOWSNT
+            ;;place the window and process is
+            ClearFooter()
+            PlaceForm(winID)
+            dotnet_tkinput(winID)
+.endc
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; hide the passed toolkit window
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; hide the passed window from the user
+        ;;; </remarks>
+        public method HideWindow    ,void
+            in  req winID           ,int
+            endparams
+
+        proc
+
+            ;;hide the window
+            u_window(D_REMOVE, winID)
+            u_update()
+
+            mreturn
+
+        endmethod
+
+        ;;*******************************************************************
+        ;; public properties
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; property to expose the SynInterop object.
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; pass the returned SynInterop object to each .NET forms constructor
+        ;;; This allows the .NET forms t reference the Synergy instance
+        ;;; </remarks>
+.ifdef OS_WINDOWSNT
+        public property SynInteropInstance  ,@SynInterop
+            method get
+            proc
+                mreturn mInterop
+            endmethod
+        endproperty
+.endc
+        ;;********************************************************************
+
+        ;;; <summary>
+        ;;; property to expose the the last window form size
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; return the last windo form size so we can resize
+        ;;; the actual form to the correct size.
+        ;;; </remarks>
+.ifdef OS_WINDOWSNT
+        public property FormResize  ,@System.Drawing.Size
+            method get
+
+            proc
+                mreturn lastSize
+
+            endmethod
+        endproperty
+
+        public method FormGetsize    ,@System.Drawing.Size
+            in  req winID           ,int
+            endparams
+
+            record
+                group rect
+                    left    ,int
+                    top     ,int
+                    right   ,int
+                    bottom  ,int
+                endgroup
+            endrecord
+
+            proc
+                ;;get the window size
+                u_winmetrics(D_CLIENT_RECT, w_info(WIF_HWND, winID), rect)
+                lastSize = new System.Drawing.Size(rect.right, rect.bottom)
+
+                mreturn lastSize
+
+        endmethod
+.endc
+        ;;********************************************************************
+        ;;
+        ;; private method t create the toolkit window, load the form into
+        ;; it and optionaly resize the .NET form
+        ;;
+        ;;********************************************************************
+.ifdef OS_WINDOWSNT
+        private method loadWindow   ,int
+            in      req netForm         ,@Object
+            in      req height          ,int
+            in      req width           ,int
+            in      req title           ,string
+            endparams
+
+            record
+                winID       ,int
+                group rect
+                    left    ,int
+                    top     ,int
+                    right   ,int
+                    bottom  ,int
+                endgroup
+            endrecord
+
+        proc
+
+            winID = dotnet_tkwin("", height, width, (DotNetObject)netForm)
+            w_brdr(winID, WB_TITLE, (a)title)
+
+            if (!height && !width)
+                w_brdr(winID, WB_OFF)
+
+            ;;get the window size
+            u_winmetrics(D_CLIENT_RECT, w_info(WIF_HWND, winID), rect)
+            lastSize = new System.Drawing.Size(rect.right, rect.bottom)
+
+            mreturn winID
+        endmethod
+.endc
+
+    endclass
+
+    ;;
+    ;;define some event handlers for toolkit methods
+    ;;
+
+    ;;; <summary>
+    ;;; handle toolkit close event
+    ;;; </summary>
+    ;;; <param name="noClear">u_finis no clear flag</param>
+    ;;; <param name="cancel">optionally cancel the shutdown processing</param>
+    ;;; <param name="type">how is the event being called</param>
+    subroutine Toolkit_AppClose
+        inout   req noClear     ,int
+        inout   req cancel      ,int
+        in      req type        ,int
+        endparams
+    proc
+        if (type != 0)  ;;not u_finish call
+        begin
+            if (%passed(cancel))
+            begin
+                cancel = true
+            end
+        end
+        xreturn
+    endsubroutine
+
+    ;;; <summary>
+    ;;; handle toolkit application resize event
+    ;;; </summary>
+    ;;; <param name="noClear"></param>
+    ;;; <param name="cancel"></param>
+    ;;; <param name="type"></param>
+    function Toolkit_AppSize    ,^VAL
+        in  req columns         ,int
+        in  req rows            ,int
+        in  req width           ,int
+        in  req height          ,int
+        endparams
+    proc
+        ;;store the resize values
+
+        WindowManager.ScreenRows = rows
+        WindowManager.ScreenCols = columns
+
+        freturn 1   ;;return as documeneted
+    endfunction
+
+endnamespace
+

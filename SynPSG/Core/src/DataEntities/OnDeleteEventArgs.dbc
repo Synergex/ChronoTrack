@@ -1,0 +1,95 @@
+;;**********************************************************************
+;;
+;; Title:       OnDeleteEventArgs.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the OnDelete event handling argument
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+import SynPSG.Core.DataEntities
+
+namespace SynPSG.Core.DataEntities
+
+    ;;;<summary>
+    ;;;This class defines the event arguments for the DataConsistency event handler
+    ;;;</summary>
+    ;;;<remarks>
+    ;;;When a record in one file is removed then the system allows for the registering
+    ;;;of the OnDelete event handler that allows the implementor to code
+    ;;;the logic required to delete records from related files.
+    ;;;</remarks>
+    public sealed class OnDeleteEventArgs
+
+        ;;private members
+        private mKeySegment     ,string
+        private mNoDotNet       ,boolean
+
+        ;;;<summary>
+        ;;;Defalt constructor.
+        ;;;</summary>
+        ;;;<remarks>
+        ;;;Sets the key segment
+        ;;;</remarks>
+        ;;;<param name=keySegment>Pass the master key segment</param>
+        public method OnDeleteEventArgs
+            in  req noDotNet                    ,boolean
+            in  req keySegment                  ,string
+
+            endparams
+        proc
+            mNoDotNet = noDotNet
+            mKeySEgment = keySegment
+            mreturn
+        endmethod
+
+        ;;;<summary>
+        ;;;Key segment value of on the mater file
+        ;;;</summary>
+        public property KeySegment  ,string
+            method get
+            proc
+                mreturn mKeySEgment
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;Key segment value of on the mater file
+        ;;;</summary>
+        public property NoDotNet    ,boolean
+            method get
+            proc
+                mreturn mNoDotNet
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace

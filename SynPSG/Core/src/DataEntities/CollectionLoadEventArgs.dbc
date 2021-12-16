@@ -1,0 +1,124 @@
+;;**********************************************************************
+;;
+;; Title:       CollectionLoadEventArgs.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the CollectionLoad event handling argument
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+import SynPSG.Core.DataEntities
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.DataEntities
+
+    ;;;<summary>
+    ;;;This class defines the event arguments for the UpdateFields event handler
+    ;;;</summary>
+    ;;;<remarks>
+    ;;;This event class must be implemented if the process of commiting changes
+    ;;;to the DataTable is requried.  When the Commit() method is evecuted then
+    ;;;this event method is called so each DataRow can be converted to a Synergy
+    ;;;record type.  The synergy record should be returned in the SynergyRecord
+    ;;;property.  This will then be used to update the data file
+    ;;;</remarks>
+    public sealed class CollectionLoadEventArgs
+
+        ;;private members
+        private mDataIO             ,@SynPSG.Core.DataEntities.SDMSio
+        private mSynergyRecord      ,string
+        private mStructureType      ,@Object
+
+        ;;;<summary>
+        ;;;Default constructor.
+        ;;;</summary>
+        ;;;<param name=dataRow>Pass the extracted DataRow object</param>
+        public method CollectionLoadEventArgs
+            in  req structureType           ,@Object
+            in  req dataIO                  ,@SynPSG.Core.DataEntities.SDMSio
+            endparams
+        proc
+            mStructureType = structureType
+            mDataIO = dataIO
+
+            ;;create an intial empry string
+            mSynergyRecord = new string("")
+
+            mreturn
+        endmethod
+
+        ;;;<summary>
+        ;;;Base IO object
+        ;;;</summary>
+        ;;;<remark>
+        ;;;Allows access to the base IO object.  This object allows access to the
+        ;;;base DataArea and GRFA properties.
+        ;;;</remark>
+        public property IO    ,@SynPSG.Core.DataEntities.SDMSio
+            method get
+            proc
+                mreturn mDataIO
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;DataArea property.  read/write access to the data record
+        ;;;</summary>
+        ;;;<remark>
+        ;;;The implementing code should populate the required synergy record and
+        ;;;then update tis property prior to returning.  The data within this
+        ;;;property will then be used to update the data file
+        ;;;</remark>
+        public property DataArea    ,string
+            method get
+            proc
+                mreturn mSynergyRecord
+            endmethod
+            method set
+            proc
+                mSynergyRecord = value
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;structure object
+        ;;;</summary>
+        public property StructureType   ,@Object
+            method get
+            proc
+                mreturn mStructureType
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace

@@ -1,0 +1,68 @@
+;;**********************************************************************
+;;
+;; Title:       OnDelete.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Base Class defining the DataConsistency event handling class
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+import SynPSG.Core.DataEntities
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.DataEntities
+
+    ;;;<summary>
+    ;;;event handling class.  Used to allow DataEntity classes to define
+    ;;;an event handling class which will be executed a delete within te file
+    ;;;is proessed.  The event can then perform data consistency with other files
+    ;;;</summary>
+    public abstract class OnDelete
+
+        ;;;<summary>
+        ;;;Method that must be implemented by the DataEntity class when data consistency
+        ;;;events are required to be handled.
+        ;;;</summary>
+        ;;;<param name=sender>DataIO object</param>
+        ;;;<param name=e>DataConsistencyEventArgs</param>
+        public abstract method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSio
+            inout   req e                   ,@SynPSG.Core.DataEntities.OnDeleteEventArgs
+            endparams
+
+        proc
+            ;;the implementing code should read through related files and delete
+            ;;records that match the primary key segment held in e.KeySegment
+        endmethod
+    endclass
+
+endnamespace

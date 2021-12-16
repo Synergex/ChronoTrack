@@ -1,0 +1,178 @@
+;;**********************************************************************
+;;
+;; Title:       DataEntityTypes.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the types used by the DataEntity class to
+;;              define the .NET types for columns within a DataRow
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.ifdef OS_WINDOWSNT
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+.endc
+
+namespace SynPSG.Core.DataEntities
+
+    public sealed class DataEntityTypes
+
+.ifdef OS_WINDOWSNT
+
+        ;;*******************************************************************
+        ;; Private member fields
+        ;;*******************************************************************
+
+        private static stringDataType       ,@System.Type
+        private static booleanDataType      ,@System.Type
+        private static int32DataType        ,@System.Type
+        private static decimalDataType      ,@System.Type
+        private static int64DataType        ,@System.Type
+        private static dateTimeDataType     ,@System.Type
+        private static objectDataType       ,@System.Type
+        private static byteArrayDataType    ,@System.Type
+
+        ;;*******************************************************************
+        ;;public properties that expose the .NET types when building columns
+        ;;*******************************************************************
+
+        ;;;<summary>
+        ;;;return the System.Byte type as an array
+        ;;;</summary>
+        public static property ByteArrayType   ,@System.Type
+            method get
+            proc
+                if (byteArrayDataType == ^null)
+                begin
+                    byteArrayDataType = System.Type.GetType("System.Byte")
+                    ;;make it an array
+                    byteArrayDataType.MakeArrayType()
+                end
+                mreturn byteArrayDataType
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;return the System.String data type
+        ;;;</summary>
+        public static property StringType   ,@System.Type
+            method get
+            proc
+                if (stringDataType == ^null)
+                    stringDataType = System.Type.GetType("System.String")
+                mreturn stringDataType
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;return the System.Boolean data type
+        ;;;</summary>
+        public static property BooleanType  ,@System.Type
+            method get
+            proc
+                if (booleanDataType == ^null)
+                    booleanDataType = System.Type.GetType("System.Boolean")
+                mreturn booleanDataType
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;return the System.Int32 data type
+        ;;;</summary>
+        public static property Int32Type    ,@System.Type
+            method get
+            proc
+                if (int32DataType == ^null)
+                    int32DataType = System.Type.GetType("System.Int32")
+                mreturn int32DataType
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;return the System.Decimal data type
+        ;;;</summary>
+        public static property DecimalType  ,@System.Type
+            method get
+            proc
+                if (decimalDataType == ^null)
+                    decimalDataType = System.Type.GetType("System.Decimal")
+                mreturn decimalDataType
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;return the System.Int64 data type
+        ;;;</summary>
+        public static property Int64Type    ,@System.Type
+            method get
+            proc
+                if (int64DataType == ^null)
+                    int64DataType = System.Type.GetType("System.Int64")
+                mreturn int64DataType
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;return the System.DateTime data type
+        ;;;</summary>
+        public static property DateTimeType ,@System.Type
+            method get
+            proc
+                if (dateTimeDataType == ^null)
+                    dateTimeDataType = System.Type.GetType("System.DateTime")
+                mreturn dateTimeDataType
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;return the System.Object data type
+        ;;;</summary>
+        public static property ObjectType   ,@System.Type
+            method get
+            proc
+                if (objectDataType == ^null)
+                    objectDataType = System.Type.GetType("System.Object")
+                mreturn objectDataType
+            endmethod
+        endproperty
+
+.else
+        public static StringType       ,@Object
+        public static BooleanType      ,@Object
+        public static Int32Type        ,@Object
+        public static DecimalType      ,@Object
+        public static Int64Type        ,@Object
+        public static DateTimeType     ,@Object
+        public static ObjectType       ,@Object
+        public static ByteArrayType    ,@Object
+
+.endc
+
+    endclass
+endnamespace

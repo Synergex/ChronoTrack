@@ -1,0 +1,2148 @@
+;;**********************************************************************
+;;
+;; Title:       SDMSio.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Base Class defining the base SDMS IO layer
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;**********************************************************************
+
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.DataEntities
+
+    ;;; <summary>
+    ;;; Base data SDMS IO class.
+    ;;; </summary>
+    ;;; <remarks>
+    ;;; This class cal be used to manage data within SDMS data files
+    ;;; </remark>
+
+    public class SDMSio
+
+        ;;-------------------------------------------------------------------------
+        ;;private class variables
+        ;;-------------------------------------------------------------------------
+
+        ;;;<summary>hold a sige reference to the action channel</summary>
+        private static actionIOChan             ,int
+
+        ;;; <summary> internal file name variable.</summary>
+        private mFileName                       ,string
+
+        ;;;<summary>store the UpdatConflict event hadling object</summary>
+        private mPreUpdateEventHandler          ,@SynPSG.Core.DataEntities.PreUpdate
+
+        ;;;<summary>store the UpdatConflict event hadling object</summary>
+        private mUpdateEventHandler             ,@SynPSG.Core.DataEntities.UpdateConflict
+
+        ;;;<summary>store the pre-store event hadling object</summary>
+        private mPreStoreEventHandler           ,@SynPSG.Core.DataEntities.PreStore
+
+        ;;;<summary>store the post store event hadling object</summary>
+        private mPostStoreEventHandler          ,@SynPSG.Core.DataEntities.PostStore
+
+        ;;;<summary>store the TransactionView event hadling object</summary>
+        private mFormatTransViewEventHandler    ,@SynPSG.Core.DataEntities.FormatTransView
+
+        ;;;<summary>store the OnDelete event hadling object</summary>
+        private mOnDeleteEventHandler    ,@SynPSG.Core.DataEntities.OnDelete
+
+        ;;; <smmary>flag indicating that we do not require .NET class usage</summary>
+        private mNoDotNet                       ,boolean
+
+        ;;; <summary>set to not include the GRFA in the table</summary>
+        private mIncludeGRFA                    ,boolean
+
+        ;;; <summary> store the last exception details</summary>
+        private mLastException                  ,@Exception
+
+        ;;;<summary>should we throw errors </summary>
+        private shouldThrow                     ,boolean
+
+        ;;; <summary> iternal channel number. </summary>
+        private mChannelNumber                  ,int
+
+        ;;; <summary> record the record size from the opned file. </summary>
+        private mRecordSize                     ,int
+
+        ;;; <summary> retain the last call status. </summary>
+        private mCallStatus                     ,boolean
+
+        ;;; <summary> Record locking option. </summary>
+        private mLockedOption                   ,@LockedAction
+
+        ;;; <summary> hold the required sleep time when a locked record is encountered </summary>
+        private mSleepTime                      ,d28.10
+
+        ;;; <summary> Number of retries when a record is locked </summary>
+        private mRetryCount                     ,int
+
+        ;;; <summary> Maximum locked record retry count </summary>
+        private mMaximumRetry                   ,int
+
+        ;;; <summary>Memory pointer for holding last read record. </summary>
+        private mMemPnt                         ,int
+
+        ;;; <summary>Memory pointer for holding last read record. </summary>
+        private mOriginalMemPnt                 ,int
+
+        ;;; <summary>store the current records GRFA</summary>
+        private mGRFA                           ,SynGUID
+
+        ;;; <summary>hold the current record data</summary>
+        structure mHoldData
+            ,a1
+        endstructure
+
+        ;;;<summary>allow access to the sql time stamp field</summary>
+        structure sqlTimeStamp
+            field   ,a20
+        endstructure
+
+        ;;;<summary>hold the pointer to the addressof the time stamp field</summary>
+        private sqlPointer                      ,int
+
+        ;;;<summary>hold structure name for replication</summary>
+        private mStructureName                  ,string
+
+        ;;;<summary>what operation happened</summary>
+        private enum replicateFlag
+            Store   ,1
+            Update  ,2
+            Delete  ,3
+        endenum
+
+        ;;; <summary>constants defining text for the transaction viewer</summary>
+        private const constCreateRecord         ,a  ,"Creating : "
+        private const constUpdateRecord         ,a  ,"Updating : "
+        private const constDeleteRecord         ,a  ,"Deleting : "
+        private const constFailedOperation      ,a  ,"An error occured : "
+
+        private const grfaSize                  ,i4 ,22
+
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; default constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Accepts the file name and opens the file
+        ;;; </remarks>
+        ;;; <param name="fileName">The file name to open.</param>
+        ;;; <param name="noDotNet">If passed true then no .NET processing.</param>
+        public method SDMSio
+            in  req fileName        ,string
+            in  req noDotNet        ,boolean
+            endparams
+
+        proc
+            initMemberFields(fileName, noDotNet)
+
+            ;;open the file
+            openFile("U:I")
+
+        endmethod
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; default destructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; default destructor. ensures resources are released
+        ;;; </remarks>
+        method ~SDMSio
+            endparams
+
+        proc
+            if (mMemPnt) mMemPnt = mem_proc(DM_FREE, mMemPnt)
+            if (mOriginalMemPnt) mOriginalMemPnt = mem_proc(DM_FREE, mOriginalMemPnt)
+            if (mChannelNumber && chopen(mChannelNumber))
+                close(mChannelNumber)
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Check to see if a record exists
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Accept the key value and opion key of reference and check to see if
+        ;;; the record exists in the file.
+        ;;; Non-expected exceptions will be thrown
+        ;;; </remarks>
+        ;;; <param name="keyValue">Pass in the required key value</param>
+        ;;; <param name="keyOfRef">Key of reference value</param>
+        ;;; <returns>
+        ;;; Returns the status of the request.  TRUE for success
+        ;;; </returns>
+        public method CheckExists   ,boolean
+            in  req keyValue        ,string
+            in  req keyOfRef        ,int
+            endparams
+
+            record localRecord
+                kor     ,int
+                result  ,boolean
+                address ,a6
+            endrecord
+
+        proc
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            ;;try to locate the record.  No lock is tested for or applied
+            try
+            begin
+                debugInfoIO("SDMSio::CheckExists() : key value : " + keyValue + ", KOR : " + %string(kor))
+                ;;do a find to see if the record exists
+                find(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), keyValue
+                &   , KEYNUM:kor, LOCK:Q_NO_TLOCK, GETRFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                &   $ERR_RNF=errorLabel]
+
+                debugInfoIO("SDMSio::CheckExists() : file operation success : Record exists")
+
+                ;;indicate success
+                result = true
+                exittry
+
+errorLabel,     clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+            end
+
+            catch (e, @SynException)
+            begin
+                TransactionViewer.Text = constFailedOperation + "Operstion was READ (CheckExisits) : " + e.Message
+                ;;record error details
+                storeErrorDetails(e)
+                if (shouldThrow)
+                    throw   ;;let the calling program catch unexpected errors
+            end
+            endtry
+
+            mreturn result
+        endmethod
+
+        ;;*************************************************************************
+        ;;; <summary>
+        ;;; Read the required record
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Given the passed key value and optional key of reference then read
+        ;;; the required record from the file.  The record can be optionally locked.
+        ;;; Any non-expceted exceptions will be thrown
+        ;;; </remarks>
+        ;;; <param name="keyValue">Pass in the required key value</param>
+        ;;; <param name="keyOfRef">Key of reference value</param>
+        ;;; <param name="performLock">place a lock on the record</param>
+        ;;; <returns>
+        ;;; Returns the status of the request.  TRUE for success
+        ;;; </returns>
+        public method Locate    ,boolean
+            in  req keyValue    ,string
+            in  req keyOfRef    ,int
+            in  req performLock ,boolean
+            endparams
+
+            record localRecord
+                kor             ,int
+                lockFlag        ,int
+                lockProcessing  ,boolean
+                result          ,boolean
+                address         ,a6
+            endrecord
+
+        proc
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            ;;set key to use
+            kor = keyOfRef
+
+            ;;determine required locking operation
+            lockFlag = Q_NO_TLOCK
+            if (performLock)
+                lockFlag = Q_AUTO_LOCK
+
+            repeat
+            begin
+                try
+                begin
+
+                    lockProcessing = false
+                    debugInfoIO("SDMSio::Locate() : key value : " + keyValue + ", KOR : " + %string(kor))
+
+                    ;;read the record
+                    read(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), keyValue
+                    &   , KEYNUM:kor, LOCK:lockFlag, GETRFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    if (mIncludeGRFA)
+                    begin
+                        ;;store the records RFA and hash code details
+                        mGRFA = Conversion.ToGRFA(address, ^m(mHoldData(1:mRecordSize), mMemPnt))
+
+                        ;;store the data
+                        ^m(mHoldData(1:grfaSize), mMemPnt) = mGRFA
+                    end
+
+                    debugInfoIO("SDMSio::Locate() : file operation success : " + this.DataArea)
+
+                    result = true
+                    exittry
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::Locate() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::Locate() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::Locate() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::Locate() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::Locate() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operstion was READ (Locate) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                ;;only loop if we are doing lock processing
+                if (!lockProcessing) exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Read the first record in the file
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Attempt to locate the first record in the file.  Expected errors
+        ;;; will be trapped and a status of false will be returned.  Unexpected
+        ;;; exceptions will be thrown
+        ;;; </remarks>
+        ;;; <param name=keyOfRef>optional key of reference</param>
+        ;;; <param name=performLock>optional flag to indicate if record should be locked</param>
+        ;;; <returns>
+        ;;; Returns TRUE if sccessful, FALSE if in error
+        ;;; </returns>
+        public method ReadFirst ,boolean
+            in  req keyOfRef    ,int
+            in  req performLock ,boolean
+            endparams
+
+            record localRecord
+                kor             ,int
+                lockFlag        ,int
+                lockProcessing  ,boolean
+                result          ,boolean
+                address         ,a6
+            endrecord
+
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            ;;determine required locking operation
+            lockFlag = Q_NO_TLOCK
+            if (performLock)
+                lockFlag = Q_AUTO_LOCK
+
+            repeat
+            begin
+                try
+                begin
+                    lockProcessing = false
+
+                    debugInfoIO("SDMSio::ReadFirst() : read First record in file")
+                    ;;read the first record in the file
+                    read(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), ^FIRST
+                    &   , KEYNUM:kor, LOCK:lockFlag, GETRFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    if (mIncludeGRFA)
+                    begin
+                        ;;store the records RFA and hash code details
+                        mGRFA = Conversion.ToGRFA(address, ^m(mHoldData(1:mRecordSize), mMemPnt))
+
+                        ;;store the data
+                        ^m(mHoldData(1:grfaSize), mMemPnt) = mGRFA
+                    end
+
+                    debugInfoIO("SDMSio::ReadFirst() : file operation success : " + this.DataArea)
+
+                    result = true
+
+                    exittry
+
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::ReadFirst() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadFirst() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadFirst() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::ReadFirst() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::ReadFirst() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operstion was READ (ReadFirst) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                ;;only loop if we are doing lock processing
+                if (!lockProcessing) exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Read the next record in the file
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Attempt to locate the next record in the file.  Expected errors
+        ;;; will be trapped and a status of false will be returned.  Unexpected
+        ;;; exceptions will be thrown
+        ;;; </remarks>
+        ;;; <param name=performLock>optional flag to indicate if record should be locked</param>
+        ;;; <returns>
+        ;;; Returns TRUE if sccessful, FALSE if in error
+        ;;; </returns>
+        public method ReadNext  ,boolean
+            in  req performLock ,boolean
+            endparams
+
+            record localRecord
+                lockFlag        ,int
+                lockProcessing  ,boolean
+                result          ,boolean
+                address         ,a6
+            endrecord
+
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            ;;determine required locking operation
+            lockFlag = Q_NO_TLOCK
+            if (performLock)
+                lockFlag = Q_AUTO_LOCK
+
+            repeat
+            begin
+                try
+                begin
+                    lockProcessing = false
+
+                    debugInfoIO("SDMSio::ReadNext() : read Next record in file")
+                    ;;read the next record in the file
+                    reads(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), errorLabel
+                    &   ,LOCK:lockFlag, GETRFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    if (mIncludeGRFA)
+                    begin
+                        ;;store the records RFA and hash code details
+                        mGRFA = Conversion.ToGRFA(address, ^m(mHoldData(1:mRecordSize), mMemPnt))
+
+                        ;;store the data
+                        ^m(mHoldData(1:grfaSize), mMemPnt) = mGRFA
+                    end
+
+                    debugInfoIO("SDMSio::ReadNext() : file operation success : " + this.DataArea)
+
+                    result = true
+
+                    exittry
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::ReadNext() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadNext() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadNext() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::ReadNext() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::ReadNext() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operation was READS (ReadNext) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                ;;only loop if we are doing lock processing
+                if (!lockProcessing) exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Read the previous record in the file
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Attempt to locate the previous record in the file.  Expected errors
+        ;;; will be trapped and a status of false will be returned.  Unexpected
+        ;;; exceptions will be thrown
+        ;;; </remarks>
+        ;;; <param name=performLock>optional flag to indicate if record should be locked</param>
+        ;;; <returns>
+        ;;; Returns TRUE if sccessful, FALSE if in error
+        ;;; </returns>
+        public method ReadPrev  ,boolean
+            in  req performLock ,boolean
+            endparams
+
+            record localRecord
+                lockFlag        ,int
+                lockProcessing  ,boolean
+                result          ,boolean
+                address         ,a6
+            endrecord
+
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            ;;determine required locking operation
+            lockFlag = Q_NO_TLOCK
+            if (performLock)
+                lockFlag = Q_AUTO_LOCK
+
+            repeat
+            begin
+                try
+                begin
+                    lockProcessing = false
+
+                    debugInfoIO("SDMSio::ReadPrev() : read Previous record in file")
+
+                    ;;read the previous record in the file
+                    reads(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), errorLabel
+                    &   , DIRECTION:Q_REVERSE, LOCK:lockFlag, GETRFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    if (mIncludeGRFA)
+                    begin
+                        ;;store the records RFA and hash code details
+                        mGRFA = Conversion.ToGRFA(address, ^m(mHoldData(1:mRecordSize), mMemPnt))
+
+                        ;;store the data
+                        ^m(mHoldData(1:grfaSize), mMemPnt) = mGRFA
+                    end
+
+                    debugInfoIO("SDMSio::ReadPrev() : file operation success : " + this.DataArea)
+
+                    result = true
+
+                    exittry
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::ReadPrev() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadPrev() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadPrev() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::ReadPrev() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::ReadPrev() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operation was READ (ReadPrev) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                ;;only loop if we are doing lock processing
+                if (!lockProcessing) exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Read the last record in the file
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Attempt to locate the last record in the file.  Expected errors
+        ;;; will be trapped and a status of false will be returned.  Unexpected
+        ;;; exceptions will be thrown
+        ;;; </remarks>
+        ;;; <param name=keyOfRef>optional key of reference</param>
+        ;;; <param name=performLock>optional flag to indicate if record should be locked</param>
+        ;;; <returns>
+        ;;; Returns TRUE if sccessful, FALSE if in error
+        ;;; </returns>
+        public method ReadLast  ,boolean
+            in  req keyOfRef    ,int
+            in  req performLock ,boolean
+            endparams
+
+            record localRecord
+                kor             ,int
+                lockFlag        ,int
+                lockProcessing  ,boolean
+                result          ,boolean
+                address         ,a6
+            endrecord
+
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            ;;determine required locking operation
+            lockFlag = Q_NO_TLOCK
+            if (performLock)
+                lockFlag = Q_AUTO_LOCK
+
+            repeat
+            begin
+                try
+                begin
+                    lockProcessing = false
+
+                    debugInfoIO("SDMSio::ReadLast() : read Last record in file")
+
+                    ;;read the last record in the file
+                    read(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), ^LAST
+                    &   , KEYNUM:kor, LOCK:lockFlag, GETRFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    if (mIncludeGRFA)
+                    begin
+                        ;;store the records RFA and hash code details
+                        mGRFA = Conversion.ToGRFA(address, ^m(mHoldData(1:mRecordSize), mMemPnt))
+
+                        ;;store the data
+                        ^m(mHoldData(1:grfaSize), mMemPnt) = mGRFA
+                    end
+
+                    debugInfoIO("SDMSio::ReadLast() : file operation success : " + this.DataArea)
+
+                    result = true
+
+                    exittry
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::ReadLast() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadLast() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::ReadLast() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::ReadLast() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::ReadLast() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operstion was READ (ReadLast) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                ;;only loop if we are doing lock processing
+                if (!lockProcessing) exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; updates the current record
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Updates the currently locked record with the internal data.  Unexpceted
+        ;;; expcetions will be thrown
+        ;;; </remarks>
+        ;;; <returns>
+        ;;; Returns TRUE if the deletion was successful, else FALSE
+        ;;; </returns>
+        public method update ,boolean
+            endparams
+
+            record localRecord
+                result      ,boolean
+                address     ,a6
+            endrecord
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            try
+            begin
+                data text       ,string
+
+                debugInfoIO("SDMSio::Update() : Write record")
+
+                if (mPreUpdateEventHandler != ^null)
+                begin
+                    data e  ,@SynPSG.Core.DataEntities.PreUpdateEventArgs
+                    e = new PreUpdateEventArgs(^m(mHoldData(1:mRecordSize), mMemPnt), this)
+                    mPreUpdateEventHandler.EventMethod(this, e)
+                end
+
+                clear ^m(mHoldData(1:grfaSize), mMemPnt)
+
+                ;;update the file with the new record details
+                write(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt),GETRFA=address)
+
+                replicate(replicateFlag.Update)
+
+                if (mIncludeGRFA)
+                begin
+                    ;;store the records RFA and hash code details
+                    mGRFA = Conversion.ToGRFA(address, ^m(mHoldData(1:mRecordSize), mMemPnt))
+
+                    ;;store the data
+                    ^m(mHoldData(1:grfaSize), mMemPnt) = mGRFA
+                end
+
+                ;;update the transaction view
+                text = constUpdateRecord + "(" + this.PrimaryKeyValue + ")"
+
+                if (mFormatTransViewEventHandler != ^null)
+                begin
+                    data e  ,@SynPSG.Core.DataEntities.FormatTransViewEventArgs
+                    e = new FormatTransViewEventArgs(text, this.DataArea)
+                    mFormatTransViewEventHandler.EventMethod(this, e)
+                    TransactionViewer.Text = e.TransactionView
+                end
+
+
+                debugInfoIO("SDMSio::Update() : file operation success : " + this.DataArea)
+
+                result = true
+                exittry
+            end
+
+            ;;no need to record this error, or report it - it's expected
+            catch (e, @NoCurrentRecordException)
+                clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+            catch (e, @SynException)
+            begin
+                TransactionViewer.Text = constFailedOperation + "Operstion was WRITE (Update) : " + e.Message
+                ;;record error details
+                storeErrorDetails(e)
+                if (shouldThrow)
+                    throw   ;;let the calling program catch unexpected errors
+            end
+
+            endtry
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Deletes the current record
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Deletes the currently locked record.  Any unexpected errors are
+        ;;; thrown
+        ;;; </remarks>
+        ;;; <returns>
+        ;;; Returns TRUE if the deletion was successful, else FALSE
+        ;;; </returns>
+        public method Remove ,boolean
+            endparams
+
+            record localRecord
+                result      ,boolean
+            endrecord
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            try
+            begin
+                data e              ,@SynPSG.Core.DataEntities.FormatTransViewEventArgs
+                data text           ,string
+                data storeKey       ,string
+                data storeDataArea  ,string
+
+                storeKey = this.PrimaryKeyValue
+                storeDataArea = this.DataArea
+
+                debugInfoIO("SDMSio::Remove() : Delete record : " + storeKey)
+
+                ;;delete the record from the files
+                delete(mChannelNumber)
+                replicate(replicateFlag.Delete)
+
+                ;;update the transaction view
+                text = constDeleteRecord + "(" + storeKey + ")"
+                e = new FormatTransViewEventArgs(text, storeDataArea)
+
+                if (mFormatTransViewEventHandler != ^null)
+                begin
+                    mFormatTransViewEventHandler.EventMethod(this, e)
+                end
+
+                TransactionViewer.Text = e.TransactionView
+
+                debugInfoIO("SDMSio::Remove() : file operation success : ")
+
+                result = true
+
+                exittry
+
+            end
+
+            ;;no need to record this error, or report it - it's expected
+            catch (e, @NoCurrentRecordException)
+                clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+            catch (e, @SynException)
+            begin
+                TransactionViewer.Text = constFailedOperation + "Operstion was DELETE (Remove) : " + e.Message
+                ;;record error details
+                storeErrorDetails(e)
+                if (shouldThrow)
+                    throw   ;;let the calling program catch unexpected errors
+            end
+
+            endtry
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Store the currently held record details into the file
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Store the currently held record details into the file.  Unexpceted
+        ;;; exceptions will be thrown.
+        ;;; </remarks>
+        ;;; <returns>
+        ;;; Returns TRUE if the record was stored, else FALSE
+        ;;; </returns>
+        public method Create ,boolean
+            endparams
+
+            record localRecord
+                result      ,boolean
+                tryAgain    ,boolean
+                address     ,a6
+            endrecord
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            clear tryAgain
+
+            repeat
+            begin
+                try
+                begin
+                    data e      ,@SynPSG.Core.DataEntities.FormatTransViewEventArgs
+                    data text   ,string
+
+                    debugInfoIO("SDMSio::Create() : Store record")
+
+                    ;;call any pre-processing logic
+                    if (mPreStoreEventHandler != ^null)
+                    begin
+                        data ps      ,@SynPSG.Core.DataEntities.PreStoreEventArgs
+
+                        ps = new PreStoreEventArgs(this.DataArea, this)
+                        mPreStoreEventHandler.EventMethod(this, ps)
+                        this.DataArea = ps.NewData
+                    end
+
+                    clear ^m(mHoldData(1:grfaSize), mMemPnt)
+
+                    debugInfoIO("SDMSio::Create() : Data area after BeforeStore event " + this.DataArea)
+
+                    ;;create a new record in the file
+                    store(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), GETRFA:address) [$ERR_NODUPS=dupKey]
+                    replicate(replicateFlag.Store)
+
+                    if (mIncludeGRFA)
+                    begin
+                        ;;store the records RFA and hash code details
+                        mGRFA = Conversion.ToGRFA(address, ^m(mHoldData(1:mRecordSize), mMemPnt))
+
+                        ;;store the data
+                        ^m(mHoldData(1:grfaSize), mMemPnt) = mGRFA
+                    end
+
+                    ;;update the transaction view
+                    text = constCreateRecord + "(" + this.PrimaryKeyValue + ")"
+                    e = new FormatTransViewEventArgs(text, this.DataArea)
+
+                    if (mFormatTransViewEventHandler != ^null)
+                    begin
+                        mFormatTransViewEventHandler.EventMethod(this, e)
+                    end
+
+                    TransactionViewer.Text = e.TransactionView
+
+                    ;;call any post store processing logic
+                    if (mPostStoreEventHandler != ^null)
+                    begin
+                        data ps ,@SynPSG.Core.DataEntities.PostStoreEventArgs
+
+                        ps = new PostStoreEventArgs(this.DataArea, this)
+                        mPostStoreEventHandler.EventMethod(this, ps)
+                    end
+
+                    result = true
+
+                    exittry
+
+dupKey,
+                    if (tryAgain)
+                        throw new Synergex.SynergyDE.DuplicateException()
+
+                    sleep 0.1
+                    tryAgain = true
+                    nextloop
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operstion was STORE (Create) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; reload the record, compare it and if the same update it
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; use the original GRFA to locate the record and test it's has code.
+        ;;; If te consuming class has registered an UpdateConflict class then
+        ;;; any conflicts will be sent to this event handler
+        ;;; </remarks>
+        ;;; <returns>
+        ;;; Returns TRUE if the record was updated, else FALSE
+        ;;; </returns>
+        public method CompareAndSave ,boolean
+            endparams
+
+            record localRecord
+                result          ,boolean
+                newData         ,string
+                address         ,a6
+                lockProcessing  ,boolean
+            endrecord
+
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            debugInfoIO("SDMSio::CompareAndSave() : data area : " + this.DataArea)
+
+            repeat
+            begin
+                try
+                begin
+                    lockProcessing = false
+
+                    debugInfoIO("SDMSio::CompareAndSave() : Read and lock using GRFA: " + mGRFA)
+
+                    ;;read and lock the required record, using the current GRFA
+
+                    ;;get the records RFA
+                    address = Conversion.ToRFA(mGRFA)
+
+                    read(mChannelNumber, ^m(mHoldData(1:mRecordSize), mOriginalMemPnt),
+                    &   , KEYNUM:Q_PRIMARY, LOCK=Q_AUTO_LOCK, RFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    debugInfoIO("SDMSio::CompareAndSave() : (readAndLock) result = Success, check hash code")
+
+                    if (this.HashCode == this.OriginalHashCode)
+                    then
+                    begin
+                        ;;we can update
+                        result = this.update()
+                    end
+                    else
+                    begin
+                        data e  ,@SynPSG.Core.DataEntities.UpdateConflictEventArgs
+                        e =  new UpdateConflictEventArgs(this.OriginalDataArea, this.DataArea)
+                        ;;There is a conflict when attepting to update so
+                        ;;attempt to raise the entities UpdateConflict event handler
+
+                        if (mUpdateEventHandler != ^null)
+                        begin
+                            ;;call the event handler
+                            mUpdateEventHandler.EventMethod(this, e)
+                        end
+
+                        if (!e.PerformUpdate) then
+                        begin
+                            ;;record not the same
+                            data ex  ,@SynException
+
+                            unlock mChannelNumber
+                            result = false
+                        end
+                        else
+                        begin
+                            ;;we can update
+                            ;;first copy back the newData incase the handles_CompareConflict event
+                            ;;handler changed it
+                            this.DataArea = newData
+                            result = this.update()
+                        end
+                    end
+
+                    exittry
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::CompareAndSave() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::CompareAndSave() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::CompareAndSave() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::CompareAndSave() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::CompareAndSave() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operstion was READ/WRITE (CompareAndSave) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                if (!lockProcessing)
+                    exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; reload the record and delete it
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; use the current GRFA to lcoate the record and delete it
+        ;;; </remarks>
+        ;;; <returns>
+        ;;; Returns TRUE if the record was deleted, else FALSE
+        ;;; </returns>
+        public method FindAndDelete ,boolean
+            endparams
+
+            record localRecord
+                result          ,boolean
+                lockProcessing  ,boolean
+                address         ,a6
+            endrecord
+
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            debugInfoIO("SDMSio::FindAndDelete() : Find And Delete using GRFA: " + mGRFA)
+
+            repeat
+            begin
+                try
+                begin
+                    lockProcessing = false
+
+                    ;;read and lock the required record, using the current GRFA
+
+                    ;;get the records RFA
+                    address = Conversion.ToRFA(mGRFA)
+
+                    read(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt),
+                    &   , KEYNUM:Q_PRIMARY, LOCK=Q_AUTO_LOCK, RFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    debugInfoIO("SDMSio::FindAndDelete() : (ReadAndLock) result = Success, check hash code")
+
+                    ;;first do any data consistency checks
+                    this.DataConsistency(this.PrimaryKeyValue)
+
+                    debugInfoIO("SDMSio::FindAndDelete() : Attempt record delete")
+
+                    ;;delete the record
+                    result = this.Remove()
+
+                    debugInfoIO("SDMSio::FindAndDelete() : Delete successful")
+
+                    exittry
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::FindAndDelete() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::FindAndDelete() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::FindAndDelete() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::FindAndDelete() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::FindAndDelete() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operstion was READ/DELETE (FindAndDelete) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                if (!lockProcessing)
+                    exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; delete all records that matched the partial primary key segment
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; locate all records that match the passed partial key and remove them
+        ;;; from the file
+        ;;; </remarks>
+        ;;; <returns>
+        ;;; Returns TRUE if the record was deleted, else FALSE
+        ;;; </returns>
+        ;;; <param name="primaryKeySegment">partial key value to match</param>
+        public method DeleteAllMatching ,boolean
+            in  req primaryKeySegment   ,a
+            endparams
+
+            record localRecord
+                lockProcessing  ,boolean
+                result          ,boolean
+                address         ,a6
+            endrecord
+
+        proc
+
+            init localRecord
+            mLastException = ^null
+
+            ;;if the file name is null then we must be processing a "combined" data layer
+            ;;so do no processing.  The extending class MUST implement this routine
+            if (mFileName == ^null)
+                mreturn false
+
+            debugInfoIO("SDMSio::DeleteAllMatching() : Delete All Matching: " + primaryKeySegment)
+
+            repeat
+            begin
+                try
+                begin
+                    lockProcessing = false
+
+                    ;;read the next record in the file
+                    ;;read the record
+                    read(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), primaryKeySegment
+                    &   , KEYNUM:Q_PRIMARY, LOCK:Q_AUTO_LOCK, GETRFA:address) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                    &   $ERR_RNF=errorLabel]
+
+                    result = true
+
+                    while (primaryKeySegment .eq. this.PrimaryKeyValue)
+                    begin
+                        delete(mChannelNumber)
+                        replicate(replicateFlag.Delete)
+
+                        debugInfoIO("SDMSio::DeleteAllMatching() : Record deleted")
+
+                        ;;read the next record in the file
+                        reads(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), errorLabel) [$ERR_EOF=errorLabel, $ERR_KEYNOT=errorLabel,
+                        &   $ERR_RNF=errorLabel]
+                        debugInfoIO("SDMSio::DeleteAllMatching() : Next key value: " + this.PrimaryKeyValue)
+                    end
+
+                    result = true
+
+                    exittry
+errorLabel,
+                    clear ^m(mHoldData(1:mRecordSize), mMemPnt)
+
+                end
+
+                ;;catch record locked exceptions
+                catch (e, @RecordLockedException)
+                begin
+                    debugInfoIO("SDMSio::DeleteAllMatching() : record locked processing")
+
+                    ;;decide what to do
+                    using mLockedOption select
+                    ;;record locked, wait for a sleep time and retry
+                    (LockedAction.WaitOnLock),
+                    begin
+                        debugInfoIO("SDMSio::DeleteAllMatching() : lock processing, sleeping")
+                        sleep mSleepTime
+                        lockProcessing = true
+                        exittry
+                    end
+                    ;;Record locked, check it timeout value exceeded
+                    (LockedAction.TimeoutOnLock),
+                    begin
+                        debugInfoIO("SDMSio::DeleteAllMatching() : lock processing, checking timeout value")
+                        incr mRetryCount
+                        if (mRetryCount > mMaximumRetry)
+                        begin
+                            sleep mSleepTime
+                            lockProcessing = true
+                        end
+                            exittry
+                    end
+                    ;;REcord locked - return no record
+                    (LockedAction.ReturnNoRecord),
+                    begin
+                        debugInfoIO("SDMSio::DeleteAllMatching() : lock processing, return no record")
+                        exittry
+                    end
+                    ;;throw an exception when record is locked
+                    (LockedAction.ThrowException),
+                    begin
+                        debugInfoIO("SDMSio::DeleteAllMatching() : lock processing, throw exception")
+                        throw
+                    end
+                    endusing
+                end
+
+                catch (e, @SynException)
+                begin
+                    TransactionViewer.Text = constFailedOperation + "Operstion was READ/DELETE (DeleteAllMatching) : " + e.Message
+                    ;;record error details
+                    storeErrorDetails(e)
+                    if (shouldThrow)
+                        throw   ;;let the calling program catch unexpected errors
+                end
+
+                endtry
+
+                ;;only loop if we are doing lock processing
+                if (!lockProcessing) exitloop
+
+            end
+
+            mreturn result
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Data consistence method
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Given the passed primary key the method will check that the record
+        ;;; still exists in the file.  If so then any registered OnDelete
+        ;;; event method will be executed.  The implementor can then delete
+        ;;; related records.
+        ;;; </remarks>
+        public method DataConsistency    ,void
+            in  req keySegment           ,string
+            endparams
+
+            record
+                row     ,@DataRow
+            endrecord
+
+        proc
+            ;;have a method, call it as required
+            debugInfoIO("SDMSio::DataConsistency() : key segment value " + keySegment)
+
+            ;;if we have a method registered, then call it
+            ;;to delete related records
+            if (mOnDeleteEventHandler != ^null)
+            begin
+                data e, @SynPSG.core.dataentities.OnDeleteEventArgs
+                e = new OnDeleteEventArgs(mNoDotNet, keySegment)
+
+                ;;call the event method
+                mOnDeleteEventHandler.EventMethod(this, e)
+            end
+
+            mreturn
+
+        endmethod
+
+        ;;*******************************************************************
+
+        ;;; <summary>
+        ;;; Get/set to indicate if to include the standard GRFA
+        ;;; </summary>
+        ;;; <remarks>
+        public property IncludeGRFA ,boolean
+            method set
+            proc
+                mIncludeGRFA = value
+            endmethod
+            method get
+            proc
+                mreturn mIncludeGRFA
+            endmethod
+        endproperty
+
+        ;;; <summary>
+        ;;; return current record primary key
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; return the primary key value for the current record to
+        ;;; allow for comparison
+        ;;; This field is returned as an alpha and not a string becuase of the
+        ;;; issues regarding alpha/string comparisons.
+        ;;; </remarks>
+        public property PrimaryKeyValue ,string
+            method get
+            proc
+                mreturn %keyval(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), 0)
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; return current record alternate key
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; return the alternate key value for the current record given the key of reference
+        ;;; </remarks>
+        public method KeyValue ,string
+            in  req keyOfRef            ,int
+            endparams
+        proc
+            mreturn %keyval(mChannelNumber, ^m(mHoldData(1:mRecordSize), mMemPnt), keyOfRef)
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Allow access to the current recod GFRA
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Allow access to the current recod GFRA
+        ;;; </remarks>
+        public property GRFA    ,SynGUID
+            method get
+            proc
+                mreturn mGRFA
+            endmethod
+            method set
+            proc
+                mGRFA = value
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Gets and Sets the record data
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Gets and Sets the internal data area.
+        ;;; </remarks>
+        public property DataArea        ,string
+            method get
+            proc
+                mreturn ^m(mHoldData(1:mRecordSize), mMemPnt)
+            endmethod
+
+            method set
+            proc
+                ^m(mHoldData(1:mRecordSize), mMemPnt) = value
+                ;;move the first 22 bytes into the mGUID
+                mGRFA = value
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Gets the current records hash code
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Gets the current records hash code
+        ;;; </remarks>
+        public property HashCode    ,i4
+            method get
+            proc
+                mreturn mGRFA.hashCode
+            endmethod
+
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Gets the original records hash code
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Gets the original records hash code
+        ;;; </remarks>
+        public property OriginalHashCode    ,i4
+            method get
+            proc
+                mreturn Conversion.ToHashCode(^m(mHoldData(1:mRecordSize), mOriginalMemPnt))
+            endmethod
+
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Gets the original records area
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; return the oiginal (current) record that has just been read - this
+        ;;; allows fo the handled_CompareConfilct() event to match record details
+        ;;; </remarks>
+        public property OriginalDataArea    ,string
+            method get
+            proc
+                mreturn ^m(mHoldData(1:mRecordSize), mOriginalMemPnt)
+            endmethod
+
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Sets the required locked record option.
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Sets the required action to perform when a locked record is encountered.
+        ;;; </remarks>
+        public property RecordLockOption      ,@LockedAction
+            method set
+            proc
+                mLockedOption = value
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Sets the maximum retry value.
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Sets the maximum number of retrys to attempt when a record locked is encountered
+        ;;; </remarks>
+        public property MaxRetry        ,int
+            method set
+            proc
+                mMaximumRetry = value
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Gets the last recorded error message
+        ;;; </summary>
+        public property LastErrorMessage    ,string
+            method get
+            proc
+                if (mLastException != ^null)
+                then
+                    mreturn mLastException.Message
+                else
+                    mreturn ""
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the pre store event handler object
+        ;;; </summary>
+
+        public method SetPreStoreEventHandler ,void
+            in  req obj                       ,@SynPSG.Core.DataEntities.PreStore
+            endparams
+        proc
+            mPreStoreEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the pos store event handler object
+        ;;; </summary>
+
+        public method SetPostStoreEventHandler ,void
+            in  req obj                        ,@SynPSG.Core.DataEntities.PostStore
+            endparams
+        proc
+            mPostStoreEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the PreUpdate event handler object
+        ;;; </summary>
+
+        public method SetPreUpdateEventHandler ,void
+            in  req obj                        ,@SynPSG.Core.DataEntities.PreUpdate
+            endparams
+        proc
+            mPreUpdateEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the UpdateConflict event handler object
+        ;;; </summary>
+
+        public method SetUpdateEventHandler ,void
+            in  req obj                     ,@SynPSG.Core.DataEntities.UpdateConflict
+            endparams
+        proc
+            mUpdateEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the FormatTransView event handler object
+        ;;; </summary>
+
+        public method SetFormatTransViewEventHandler    ,void
+            in  req obj                                 ,@SynPSG.Core.DataEntities.FormatTransView
+            endparams
+        proc
+            mFormatTransViewEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the FormatTransView event handler object
+        ;;; </summary>
+
+        public method SetOnDeleteEventHandler    ,void
+            in  req obj                          ,@SynPSG.Core.DataEntities.OnDelete
+            endparams
+        proc
+            mOnDeleteEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Set the replication details
+        ;;; </summary>
+
+        public method SetReplicationDetails ,void
+            in      req structureName       ,a
+            inout   req structureArea       ,a
+            inout   req sqlTimeStampField   ,a
+            endparams
+        proc
+            ;;store the structure name
+            mStructureName = structureName
+
+            ;;fill the time stamp field so we can identify where the field is
+            sqlTimeStampField = "XXXXXXXXXXXXXXXXXXXX"
+            sqlPointer = %instr(1, structureArea, "XXXXXXXXXXXXXXXXXXXX")
+
+            ;;clear the data area
+            clear structureArea
+
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; set if the object throws exceptsion (default true)
+        ;;; </summary>
+        public property ThrowExceptions ,boolean
+            method get
+            proc
+                mreturn shouldThrow
+            endmethod
+            method set
+            proc
+                shouldThrow = value
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+        ;;
+        ;;private methods
+        ;;
+        ;;*************************************************************************
+
+        ;;*************************************************************************
+        ;;method to init member fields
+        ;;*************************************************************************
+        private method initMemberFields ,void
+            in  req fileName            ,string
+            in  req noDotNet            ,boolean
+            endparams
+
+        proc
+            ;;inittialise the debugger
+            mNoDotNet = noDotNet
+            Debugger.Init(mNoDotNet)
+
+            shouldThrow = true
+
+            clear mRecordSize
+
+            ;;store the passed file name
+            mFileName = fileName
+
+            debugInfoIO("SDMSio::initMemberFields() : New Data Entity object creating : " + fileName)
+
+            ;;set defaults
+            mSleepTime = 1
+            mIncludeGRFA = true
+
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+        ;;method to perform the opening of the channel
+        ;;*************************************************************************
+        private method openFile     ,void
+            in req openMode         ,string
+        proc
+            ;;open the file.
+            ;;throw any errors encountered.
+
+            if (mFileName .ne. ^null)
+            begin
+                try
+                begin
+                    debugInfoIO("SDMSio::openFile() : Opening data file : " + mFileName)
+                    mChannelNumber = syn_freechn()
+                    open(mChannelNumber, openMode, mFileName)
+                    getfa(mChannelNumber, "RSZ" , mRecordSize)
+                    ;;allocate memory
+                    mMemPnt = mem_proc(DM_ALLOC+DM_STATIC, mRecordSize)
+                    mOriginalMemPnt = mem_proc(DM_ALLOC+DM_STATIC, mRecordSize)
+                    debugInfoIO("SDMSio::openFile() : File opened, channel : " + %string(mChannelNumber) + ", record size : " + %string(mREcordSize))
+                end
+
+                catch (e, @FileIOException)
+                begin
+                    if (shouldThrow)
+                        throw
+                end
+                endtry
+            end
+        endmethod
+
+        ;;*************************************************************************
+        ;;
+        ;;replicate the IO operations into te action file
+        ;;
+        ;;*************************************************************************
+        private method replicate    ,void
+            in  req transactionType ,replicateFlag
+            endparams
+
+            record action
+                unique_key_value    ,a20
+                sdms_operation      ,d1
+                structure_name      ,a32
+                structure_key       ,a20
+            endrecord
+
+        proc
+
+            ;;only replication if we have a sql key registered
+            if (sqlPointer)
+            begin
+                ;Do we need to open the replication transaction file?
+                if (!actionIOChan)
+                    open(actionIOChan = %syn_freechn,"u:i","DAT:replication.ism")
+
+                ;Populate the new transaction record
+                action.sdms_operation = (int)transactionType
+                action.structure_name = mStructureName
+                action.structure_key = ^m(mHoldData(sqlPointer,mRecordSize), mMemPnt)
+;               &   ^m(sqlTimeStamp, sqlPointer)
+
+                ;And add it to the transaction log
+                repeat
+                begin
+                    ;Give the transaction a unique and time sequenced primary key
+                    action.unique_key_value = %datetime
+                    store(actionIOChan, action) [$ERR_NODUPS=duplicate_key]
+                    exitloop
+    duplicate_key,
+                    sleep 0.25
+                end
+            end
+
+            mreturn
+
+        endmethod
+        ;;*************************************************************************
+        ;;store error details into class fields
+        ;;*************************************************************************
+        private method storeErrorDetails    ,void
+            in  req e                       ,@Synergex.SynergyDE.SynException
+        proc
+            ;;record the error details
+            debugError("SDMSio::storeErrorDetails() : Data IO error on " + mFileName + ", error : ", e)
+            mLastException = e
+
+        endmethod
+
+    endclass
+
+    public enum LockOption
+        ReadAndLock
+        ReadRegardless
+    endenum
+
+    public enum LockedAction
+        WaitOnLock
+        TimeoutOnLock
+        ReturnNoRecord
+        ThrowException
+    endenum
+
+    public enum TableView
+        Full
+        Breif
+        Combined
+    endenum
+
+endnamespace
+

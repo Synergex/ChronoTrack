@@ -1,0 +1,155 @@
+;;**********************************************************************
+;;
+;; Title:       UpdateFieldsEventArgs.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class defining the UpdateFields event handling argument
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+namespace SynPSG.Core.DataEntities
+
+    ;;;<summary>
+    ;;;This class defines the event arguments for the UpdateFields event handler
+    ;;;</summary>
+    ;;;<remarks>
+    ;;;This event class must be implemented if the process of commiting changes
+    ;;;to the DataTable is requried.  When the Commit() method is evecuted then
+    ;;;this event method is called so each DataRow can be converted to a Synergy
+    ;;;record type.  The synergy record should be returned in the SynergyRecord
+    ;;;property.  This will then be used to update the data file
+    ;;;</remarks>
+    public sealed class UpdateFieldsEventArgs
+
+        ;;private members
+        private mDataIO             ,@SynPSG.Core.DataEntities.SDMSio
+        private mDataRow            ,@System.Data.DataRow
+        private mSynergyRecord      ,string
+        private mCancelOperation    ,boolean
+        private mCurrentOperation   ,int
+        private mTableViewType      ,TableView
+
+        ;;;<summary>
+        ;;;Default constructor.
+        ;;;</summary>
+        ;;;<remarks>
+        ;;;record the passed DataRow object
+        ;;;</remarks>
+        ;;;<param name=dataRow>Pass the extracted DataRow object</param>
+        public method UpdateFieldsEventArgs
+            in  req dataIO                  ,@SynPSG.Core.DataEntities.SDMSio
+            in  req dataRow                 ,@System.Data.DataRow
+            in  req viewType                ,TableView
+            endparams
+        proc
+            mDataIO = dataIO
+            mDataRow = dataRow
+            ;;create an intial empry string
+            mSynergyRecord = new string("")
+            ;;set to updat as default
+            mCancelOperation = false
+
+            mTableViewType = viewType
+
+            mreturn
+        endmethod
+
+        ;;;<summary>
+        ;;;Base IO object
+        ;;;</summary>
+        ;;;<remark>
+        ;;;Allows access to the base IO object.  This object allows access to the
+        ;;;base DataArea and GRFA properties.
+        ;;;</remark>
+        public property IO    ,@SynPSG.Core.DataEntities.SDMSio
+            method get
+            proc
+                mreturn mDataIO
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;Data row property.  read only access to the current DataRow object
+        ;;;</summary>
+        public property DataRow    ,@System.Data.DataRow
+            method get
+            proc
+                mreturn mDataRow
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;Synergy record data.
+        ;;;</summary>
+        ;;;<remark>
+        ;;;The implementing code should populate the required synergy record and
+        ;;;then update tis property prior to returning.  The data within this
+        ;;;property will then be used to update the data file
+        ;;;</remark>
+        public property SynergyRecord    ,string
+            method get
+            proc
+                mreturn mSynergyRecord
+            endmethod
+            method set
+            proc
+                mSynergyREcord = value
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;Flag indicating if the update implementng code has requested that the
+        ;;;update/store operation can not continue
+        ;;;</summary>
+        public property CancelOperation   ,boolean
+            method get
+            proc
+                mreturn mCancelOperation
+            endmethod
+
+            method set
+            proc
+                mCancelOperation = value
+            endmethod
+        endproperty
+
+        ;;;<summary>
+        ;;;Table view property determining the type of view to process
+        ;;;</summary>
+        public property TableViewType    ,TableView
+            method get
+            proc
+                mreturn mTableViewType
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace

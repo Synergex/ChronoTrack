@@ -1,0 +1,450 @@
+;;**********************************************************************
+;;
+;; Title:       SDMSCollection.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Base Class defining the Data collection loayer
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+.include "SynPSGNetSRC_CORE:SynPSGNetCore.inc"
+import SynPSG.Core.Utilities
+
+.include "DEF:Core.def"
+
+namespace SynPSG.Core.DataEntities
+
+    ;;; <summary>
+    ;;; DataCollection class.  USe to create a System.Collection and manage the data within
+    ;;; </summary>
+    ;;; <remarks>
+    ;;; Creates a System.Collection and manages the data within it.  It assumes a DataIO object
+    ;;; has been created to allow the manipulation of the data within a file
+    ;;; </remark>
+
+    public class SDMSCollection
+
+        ;;*******************************************************************
+        ;;private fields
+        ;;*******************************************************************
+
+        ;;;<summary>store the DefineTable event handling object</summary>
+        private mCollectionLoadEventHandler     ,@SynPSG.core.dataentities.CollectionLoad
+        private mTableViewType                  ,TableView
+
+        ;;;hold an instance of the data IO object
+        private mIOObject       ,@SynPSG.Core.DataEntities.SDMSio
+
+        ;;;hold a reference to the data entitry structure object
+        private mItemObject     ,@object
+
+        ;;;hold a collecton name (for debugging purposes
+        private mCollectionName ,string
+
+        ;;;store the internal array list
+        private mInternalList       ,@ArrayList
+        private mInternalType       ,TableView
+        private mInitialiseArray    ,boolean
+
+        ;;;store the used primary key for the last call to Count()
+        private mStoreKey       ,string
+        private mEndKey         ,string
+        private mRangeOfRecords ,boolean
+
+        ;;; <summary>
+        ;;; Class constructor.  Initialises internal members
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Pass in the required data entiry structure so that te array collection
+        ;;; can be build using the correct object type.
+        ;;; </remarks>
+        ;;; <param name="ioObject">instance of the DATA IO class.</param>
+        ;;; <param name="structorType">pass in the DataEntity structure</param>
+        public method SDMSCollection
+            in  req ioObject            ,@SynPSG.Core.DataEntities.SDMSio
+            in  req collectionName      ,string
+            in  req viewType            ,TableView
+            in  req structureType       ,@Object
+            endparams
+        proc
+
+            mInitialiseArray = true
+
+            mCollectionName = collectionName
+
+            debugInfoDC("DataCollection::Constructor(): New collection")
+
+            ;;store the IO object
+            mIOObject = ioObject
+
+            mTableViewType = SynPSG.Core.DataEntities.TableView.Full
+            mTableViewType = viewType
+
+            ;;store the structure
+            mItemObject = structureType
+
+            mreturn
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Method to return the number of entries in the collection
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Pass in the required primary key segment.  Matching records will be
+        ;;; loaded and stoed into the collection.   The mehtod returns the
+        ;;; number of matching record.  If no key is passed, all records within
+        ;;; the file will be loaded
+        ;;; </remarks>
+        ;;; <param name=primaryKey>pass in the optional primary key segment</param>
+        ;;; <param name=KeyOfRef>pass in the optional key of reference</param>
+        public method Count     ,int
+            in  req partialKey  ,a
+            in  req keyOfRef    ,int
+            endparams
+
+        proc
+            debugInfoDC("DataCollection::Count(): Build collecton count")
+
+            buildCollection(mTableViewType, mItemObject, partialKey, keyOfRef)
+
+            debugInfoDC("DataCollection::Count(): returning count : " + %string(mInternalList.Count))
+
+            mreturn mInternalList.Count
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Overloaded
+        ;;; </summary>
+        public method Count     ,int
+            endparams
+
+        proc
+            debugInfoDC("DataCollection::Count(): Build collecton count")
+
+            buildCollection(mTableViewType, mItemObject)
+
+            debugInfoDC("DataCollection::Count(): returning count : " + %string(mInternalList.Count))
+
+            mreturn mInternalList.Count
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Overloaded.  Allows the specification of an alternate structure
+        ;;; </summary>
+        ;;; <param name=viewType>pass in the collection/table view required</param>
+        ;;; <param name=alternateStructure>pass in the matching structure</param>
+        ;;; <param name=primaryKey>pass in the optional primary key segment</param>
+        ;;; <param name=KeyOfRef>pass in the optional key of reference</param>
+        public method Count             ,int
+            in  req viewType            ,TableView
+            in  req alternateStructure  ,@Object
+            endparams
+
+        proc
+            debugInfoDC("DataCollection::Count(): Build collecton count")
+
+            buildCollection(viewType, alternateStructure)
+
+            debugInfoDC("DataCollection::Count(): returning count : " + %string(mInternalList.Count))
+
+            mreturn mInternalList.Count
+
+        endmethod
+
+        ;;; <summary>
+        ;;; overloaded
+        ;;; </summary>
+        public method Count             ,int
+            in  req viewType            ,TableView
+            in  req alternateStructure  ,@Object
+            in  req partialKey          ,a
+            in  req keyOfRef            ,int
+            endparams
+
+        proc
+            debugInfoDC("DataCollection::Count(): Build collecton count")
+
+            buildCollection(viewType, alternateStructure, partialKey, keyOfRef)
+
+            debugInfoDC("DataCollection::Count(): returning count : " + %string(mInternalList.Count))
+
+            mreturn mInternalList.Count
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Method to return the collection of records
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Pass in the required primary key segment.  Matching records will be
+        ;;; loaded and stored into the collection.   If the Count() method was previously
+        ;;; called and the stored key matches the passed key then the current cached
+        ;;; collection will be returned
+        ;;; </remarks>
+        ;;; <param name=primaryKey>pass in the optional primary key segment</param>
+        ;;; <param name=KeyOfRef>pass in the optional key of reference</param>
+        public method Collection        ,@System.Collections.ArrayList
+            endparams
+
+        proc
+
+            debugInfoDC("DataCollection::Collection(): Build collecton")
+
+            buildCollection(mTableViewType, mItemObject)
+
+            mreturn mInternalList
+
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Overloaded
+        ;;; </summary>
+        public method Collection        ,@System.Collections.ArrayList
+            in  req partialKey          ,a
+            in  req keyOfRef            ,int
+            endparams
+
+        proc
+
+            debugInfoDC("DataCollection::Collection(): Build collecton")
+
+            buildCollection(mTableViewType, mItemObject, partialKey, keyOfRef)
+
+            mreturn mInternalList
+
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Overridden.
+        ;;; </summary>
+        ;;; <param name=viewType>pass in the collection/table view required</param>
+        ;;; <param name=alternateStructure>pass in the matching structure</param>
+        ;;; <param name=primaryKey>pass in the optional primary key segment</param>
+        ;;; <param name=KeyOfRef>pass in the optional key of reference</param>
+        public method Collection        ,@System.Collections.ArrayList
+            in  req viewType            ,TableView
+            in  req alternateStructure  ,@Object
+            endparams
+
+        proc
+
+            debugInfoDC("DataCollection::Collection(): Build collecton (alternate)")
+
+            buildCollection(viewType, alternateStructure)
+
+            mreturn mInternalList
+
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Overridden.
+        ;;; </summary>
+        ;;; <param name=viewType>pass in the collection/table view required</param>
+        ;;; <param name=alternateStructure>pass in the matching structure</param>
+        ;;; <param name=primaryKey>pass in the optional primary key segment</param>
+        ;;; <param name=KeyOfRef>pass in the optional key of reference</param>
+        public method Collection        ,@System.Collections.ArrayList
+            in  req viewType            ,TableView
+            in  req alternateStructure  ,@Object
+            in  req partialKey          ,a
+            in  req keyOfRef            ,int
+            endparams
+
+        proc
+
+            debugInfoDC("DataCollection::Collection(): Build collecton (alternate)")
+
+            buildCollection(viewType, alternateStructure, partialKey, keyOfRef)
+
+            mreturn mInternalList
+
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Overridden.
+        ;;; </summary>
+        ;;; <param name=startKey>key to start at</param>
+        ;;; <param name=endKey>end key to test</param>
+        ;;; <param name=KeyOfRef>pass in the optional key of reference</param>
+        public method Collection    ,@System.Collections.ArrayList
+            in  req startKey        ,a
+            in  req endKey          ,a
+            in  req keyOfRef        ,int
+            endparams
+
+        proc
+
+            debugInfoDC("DataCollection::Collection(): Build collecton (alternate)")
+
+            buildCollection(mTableViewType, mItemObject, startKey, keyOfRef, endKey)
+
+            mreturn mInternalList
+
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Set the Collection Load event handler object
+        ;;; </summary>
+
+        public method SetCollectionLoadEventHandler ,void
+            in  req obj                             ,@SynPSG.Core.DataEntities.CollectionLoad
+            endparams
+        proc
+            mCollectionLoadEventHandler = obj
+            mreturn
+        endmethod
+
+        ;;*************************************************************************
+        ;;
+        ;;private method to build the actual Collection
+        ;;
+        ;;*************************************************************************
+        private method buildCollection  ,void
+            in  req viewType            ,TableView
+            in  req structureType       ,@Object
+            in  opt partialKey          ,a
+            in  opt keyOfRef            ,int
+            in  opt endKey              ,a
+            endparams
+
+            record
+                str             ,@Object
+                status          ,boolean
+                gotKey          ,boolean
+                kor             ,int
+            endrecord
+
+        proc
+            debugInfoDC("DataCollection::buildCollection(): Build collecton ")
+
+            ;;check if we can use the cached array list
+            if (
+            &   (mInitialiseArray == false) &&
+            &   (mInternalType == viewType) &&
+            &   ((%passed(partialKey) && partialKey .eqs. mStoreKey) ||
+            &   (!%passed(partialKey) && mInternalList != ^null))
+            &   )
+            begin
+                ;;passed key matches, just return the loaded colleciton, or
+                ;;no key passed and the table it full
+
+                debugInfoDC("DataCollection::buildCollection(): returing cached collection")
+
+                mInitialiseArray = true
+
+                mreturn
+            end
+
+            kor = Q_PRIMARY
+
+            ;;either no key passed or passed key does not match
+            mInternalList = new ArrayList()
+
+            mRangeOfRecords = false
+
+            ;;read through the file and return all records (or those that match)
+            if (^passed(partialKey))
+            then
+            begin
+                if (%passed(keyOfRef))
+                    kor = keyOfRef
+
+                gotKey = true
+                mStoreKey = partialKey
+                status = mIOObject.Locate(mStoreKey, kor, false)
+                debugInfoDC("DataCollection::buildCollection(): Using partial key : " + mStoreKey)
+
+                ;are we processing a range of records?
+                if (%passed(endKey))
+                begin
+                    mRangeOfRecords = true
+                    mEndKey = endKey
+                end
+            end
+            else
+            begin
+                gotKey = false
+                mStoreKey = ^null
+                status = mIOObject.ReadFirst(Q_PRIMARY, false)
+            end
+
+            str = structureType
+
+            while (
+            &   (status && !gotKey)
+            &   || (status && gotKey && !mRangeOfRecords && mIOObject.KeyValue(kor) .eq. mStoreKey)
+            &   || (status && gotKey && mRangeOfRecords && mIOObject.KeyValue(kor) .le. mEndKey)
+            &   )
+            begin
+                if (viewType != TableView.Full) then
+                begin
+                    data e      ,@SynPSG.Core.DataEntities.CollectionLoadEventArgs
+                    data rec    ,string
+
+                    if (mCollectionLoadEventHandler == ^null)
+                        throw new SynException("CollectionLoad event not defined")
+
+                    debugInfoDC("DataCollection::buildCollection(): Calling registered event to load collection")
+
+                    ;;move the data to our synergy structure
+                    e = new CollectionLoadEventArgs(structureType, mIOObject)
+                    mCollectionLoadEventHandler.EventMethod(this, e)
+                    str = (object) ((a) e.DataArea)
+                end
+                else
+                begin
+                    str = (object) ((a)mIOObject.DataArea)
+                end
+
+                mInternalList.Add(str)
+
+                status = mIOObject.ReadNext(false)
+            end
+
+            debugInfoDC("DataCollection::buildCollection(): collection complete")
+
+            ;;remember the type of collection created
+            mInternalType = viewType
+
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace
