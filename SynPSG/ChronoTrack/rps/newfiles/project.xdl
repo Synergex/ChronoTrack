@@ -1,0 +1,93 @@
+!	Synergy ISAM XDL File created Sat May 16 09:51:39 2009
+FILE
+	NAME		"project.ism"
+	ADDRESSING	32
+	KEYS		5
+
+RECORD
+	SIZE		953
+	FORMAT		fixed
+	COMPRESS_DATA	no
+	STATIC_RFA	no
+
+	!5ca5 magic, revision 4, 7 byte record overhead
+	!Shared index cache allowed
+	!Creation version 9.1.5b 
+	!File created on Sat May 16 09:51:39 2009
+	!23 byte longest key
+	!0 free index blocks, 0x0 free list head
+	!0 records, 0 free
+
+KEY 0
+	!Primary key
+	START		23
+	LENGTH		8
+	TYPE		alpha
+	ORDER		ascending
+	NAME		"PROJECT_KEY0"
+	DUPLICATES	no
+	MODIFIABLE	no
+	DENSITY		50
+
+	!Root 0x800, index depth 1
+	!Minimum keys per block 42
+
+KEY 1
+	!Alternate key #1
+	START		31:41:51
+	LENGTH		10:10:3
+	TYPE		alpha:alpha:alpha
+	ORDER		ascending:ascending:ascending
+	NAME		"PROJECT_KEY1"
+	DUPLICATES	no
+	MODIFIABLE	no
+	DENSITY		50
+
+	!Root 0xc00, index depth 1
+	!Minimum keys per block 18
+
+KEY 2
+	!Alternate key #2
+	START		114
+	LENGTH		8
+	TYPE		alpha
+	ORDER		ascending
+	NAME		"PROJECT_KEY2"
+	DUPLICATES	yes
+	DUPLICATE_ORDER	fifo
+	MODIFIABLE	yes
+	DENSITY		50
+
+	!Root 0x1000, index depth 1
+	!Qualifier offset 1
+	!Minimum keys per block 34
+
+KEY 3
+	!Alternate key #3
+	START		140:130
+	LENGTH		15:2
+	TYPE		alpha:alpha
+	ORDER		ascending:ascending
+	NAME		"PROJECT_KEY3"
+	DUPLICATES	yes
+	DUPLICATE_ORDER	fifo
+	MODIFIABLE	yes
+	DENSITY		50
+
+	!Root 0x1400, index depth 1
+	!Qualifier offset 4
+	!Minimum keys per block 21
+
+KEY 4
+	!Alternate key #4
+	START		23
+	LENGTH		8
+	TYPE		alpha
+	ORDER		ascending
+	NAME		"PROJECT_ID_FORE"
+	DUPLICATES	no
+	MODIFIABLE	no
+	DENSITY		50
+
+	!Root 0x1800, index depth 1
+	!Minimum keys per block 42

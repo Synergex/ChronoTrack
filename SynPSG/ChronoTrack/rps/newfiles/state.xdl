@@ -1,0 +1,47 @@
+!	Synergy ISAM XDL File created Sat May 16 09:51:39 2009
+FILE
+	NAME		"state.ism"
+	ADDRESSING	32
+	KEYS		2
+
+RECORD
+	SIZE		74
+	FORMAT		fixed
+	COMPRESS_DATA	no
+	STATIC_RFA	no
+
+	!5ca5 magic, revision 4, 1 byte record overhead
+	!Shared index cache allowed
+	!Creation version 9.1.5b 
+	!File created on Sat May 16 09:51:39 2009
+	!20 byte longest key
+	!0 free index blocks, 0x0 free list head
+	!0 records, 0 free
+
+KEY 0
+	!Primary key
+	START		23
+	LENGTH		2
+	TYPE		alpha
+	ORDER		ascending
+	NAME		"STATE_KEY0"
+	DUPLICATES	no
+	MODIFIABLE	no
+	DENSITY		50
+
+	!Root 0x800, index depth 1
+	!Minimum keys per block 85
+
+KEY 1
+	!Alternate key #1
+	START		55
+	LENGTH		20
+	TYPE		alpha
+	ORDER		ascending
+	NAME		"REPLICATION_KEY"
+	DUPLICATES	no
+	MODIFIABLE	yes
+	DENSITY		50
+
+	!Root 0xc00, index depth 1
+	!Minimum keys per block 21

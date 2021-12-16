@@ -1,0 +1,86 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=ChronoTrack ; export WORKSPACE
+PROJECT=Repository ; export PROJECT
+COMMONAREA=NetCommon ; export COMMONAREA
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+SynPSGNetLIB_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/lib ; export SynPSGNetLIB_CORE
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/Core ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetSRC_CHRONOTRACK=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CHRONOTRACK
+
+# *************************************************************
+# These setings are for the core library details
+# *************************************************************
+
+COREEXE=$SRCDEV/$DEVAREA/Core/exe ; export COREEXE
+CORELIB=$SRCDEV/$DEVAREA/Core/lib ; export CORELIB
+COREHDR=$SRCDEV/$DEVAREA/Core/hdr ; export COREHDR
+COREDEF=$SRCDEV/$DEVAREA/Core/src/Includes ; export COREDEF
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+VARIANT_FLAGS= ; export VARIANT_FLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+DAT=$DEVROOT/dat ; export DAT
+XDL=$DEVROOT/xdl ; export XDL
+
+CODEGEN_EXE=$SRCDEV/Development/SynPSG/Builder/exe ; export CODEGEN_EXE
+PATH=$PATH;$CODEGEN_EXE ; export PATH
+NAMESPACE=* ; export NAMESPACE
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then 
+ COMPILEFLAGS=;export COMPILEFLAGS 
+ LINKERFLAGS=;export LINKERFLAGS 
+fi 
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $RPSPTH/rpsmain.is* 
+rm -f $RPSPTH/rpstext.is* 
+dbs RPS:rpsutl -i $SRCDEV/$ROOTFOLDER/rps/rpsschema.sch -ir 
+isutl -r -o 0 -p 100 $RPSMFIL 
+isutl -r -o 0 -p 100 $RPSTFIL 
