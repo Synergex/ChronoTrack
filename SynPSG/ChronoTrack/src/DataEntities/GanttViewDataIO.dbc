@@ -1,0 +1,236 @@
+;;**********************************************************************
+;;
+;; Title:       GanttViewDataIO.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to allow access to the GanttView data files.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class GanttViewDataIO
+
+        ;;;<summary>need an instance of the project data</summary>
+        private projectData         ,@SynPSG.Core.DataEntities.SDMSio
+
+        ;;;<summary>Need an instance o the request data</summary>
+        private requestData         ,@SynPSG.Core.DataEntities.SDMSio
+
+        ;;set to true if processing the project file
+        private doingProjectFile    ,boolean
+
+        ;;store the key of reference
+        private storeKOR            ,int
+
+        .include 'project' repository, private record = "mProject", prefix="m"  ,end
+        .include 'request' repository, private record = "mRequest", prefix="m"  ,end
+        .include 'gantt_view' repository, private record = "mGanttView", prefix="m"  ,end
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Constructor defines the file name and opens the file.  Creates the
+        ;;; required event handler classes
+        ;;; </remarks>
+        ;;; <param name=noDotNet>Pass TRUE to prevent the .NET framework being loaded</param>
+        public method GanttViewDataIO
+            in  req noDotNet            ,boolean
+            endparams
+
+        proc
+
+            projectData = new SDMSio("DAT:project.ism", noDotNet)
+            requestData = new SDMSio("DAT:request.ism", noDotNet)
+
+            mreturn
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Read the first record in the file
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Read the first record in the project file
+        ;;; </remarks>
+        ;;; Returns TRUE if sccessful, FALSE if in error
+        ;;; </returns>
+        public method ReadFirst ,boolean
+            in  req keyOfRef    ,int
+            in  req performLock ,boolean
+            endparams
+
+            record
+                status  ,boolean
+            endrecord
+        proc
+            doingProjectFile = true
+            status = projectData.ReadFirst(keyOfRef, performLock)
+            if (!status) then
+            begin
+                ;;nothing in the project file!! read the request
+                doingProjectFile = false
+                status = requestData.ReadFirst(keyOfRef, performLock)
+                if (status) requestToGantt()
+            end
+            else
+            begin
+                projectToGantt()
+            end
+
+            storeKOR = keyOfRef
+
+            mreturn status
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Read the first record in the file
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Read the next record in the project file.  If the EOF is reashed,
+        ;;; read the first/next record in the request file
+        ;;; </remarks>
+        ;;; Returns TRUE if sccessful, FALSE if in error
+        ;;; </returns>
+        public method ReadNext  ,boolean
+            in  req performLock ,boolean
+            endparams
+
+            record
+                status  ,boolean
+            endrecord
+        proc
+            if (doingProjectFile) then
+            begin
+                status = projectData.ReadNext(performLock)
+
+                if (!status) then
+                begin
+                    ;;must be at the end of the project file, start the request
+                    doingProjectFile = false
+                    status = requestData.ReadFirst(storeKOR, performLock)
+                    if (status) requestToGantt()
+                end
+                else
+                begin
+                    projectToGantt()
+                end
+            end
+            else
+            begin
+                ;read the next record in the request file
+                status = requestDAta.ReadNext(performLock)
+                if (status) requestToGantt()
+            end
+
+            mreturn status
+
+        endmethod
+
+        ;;; <summary>
+        ;;; Gets and Sets the record data
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Gets and Sets the internal data area.
+        ;;; </remarks>
+        public property DataArea        ,string
+            method get
+            proc
+                mreturn mGanttView
+            endmethod
+
+            method set
+            proc
+                mreturn
+            endmethod
+        endproperty
+
+        ;;******************************************************************
+        ;;
+        ;;private method to move the project data to the gantt_view data area
+        ;;
+        ;;******************************************************************
+        private method projectToGantt   ,void
+            endparams
+        proc
+            init mGanttView
+
+            mProject = projectData.DataArea
+
+            mGanttView.mUser_id = mProject.mLead_consultant
+            mGanttView.mProject_id = mProject.mProject_id
+            mGanttView.mProject_type = 1
+            mGanttView.mDescription = mProject.mDescription
+            mGanttView.mStart_date = mProject.mStart_date
+            mGanttView.mEnd_date = mProject.mEnd_date
+            mGanttView.mOutbound_travel_days = 0
+            mGanttView.mInbound_travel_days = 0
+
+        endmethod
+
+        ;;******************************************************************
+        ;;
+        ;;private method to move the request data to the gantt_view data area
+        ;;
+        ;;******************************************************************
+        private method requestToGantt   ,void
+            endparams
+        proc
+            init mGanttView
+
+            mRequest = requestData.DataArea
+
+            mGanttView.mUser_id = mRequest.mResource
+            mGanttView.mProject_id = mRequest.mRequest_id
+            mGanttView.mProject_type = 2
+            mGanttView.mDescription = mRequest.mDescription
+            mGanttView.mStart_date = mRequest.mStart_date
+            mGanttView.mEnd_date = mRequest.mEnd_date
+            mGanttView.mOutbound_travel_days = 0
+            mGanttView.mInbound_travel_days = 0
+
+        endmethod
+
+    endclass
+
+endnamespace
+

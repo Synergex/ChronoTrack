@@ -1,0 +1,93 @@
+;;**********************************************************************
+;;
+;; Title:       CustomerContractUpdateFields.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class that defines the event handler to move the fields
+;;              from a DataRow to a Syenrgy record for the Contract data file
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class CustomerContractUpdateFields extends SynPSG.Core.DataEntities.UpdateFields
+
+        ;;; <summary>
+        ;;; Method that is called when the DataEntity class is attempting to commit
+        ;;; data from a DataTable to the Synergy file.  This method is require
+        ;;; to extract the data contained in the passed DataRow and populate
+        ;;; a synergy record area.  This is then retrned to the base class
+        ;;; </summary>
+        ;;; <param name=sender>DataBase object</param>
+        ;;; <param name=e>Update fields event argument class</param>
+        public override method EventMethod  ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSTable
+            in      req e                   ,@SynPSG.Core.DataEntities.UpdateFieldsEventArgs
+            endparams
+
+        .include 'customer_contract' repository, stack record = "customerContract", end
+
+        proc
+.ifdef OS_WINDOWSNT
+            debugInfo("CustomerContractUpdateFields:: EventMethod : Extract data from the Row to the synergy table")
+
+            init customerContract
+
+            customerContract.synergygrfa = Conversion.toSynGRFA(e.DataRow[0])
+            customerContract.customer_ID = Conversion.ToSynString(e.DataRow[1])
+            customerContract.contract_ID = Conversion.ToSynString(e.DataRow[2])
+            customerContract.issued_By = Conversion.ToSynString(e.DataRow[3])
+            customerContract.issued_Date = Conversion.ToSynDate(e.DataRow[4])
+            customerContract.signed_By = Conversion.ToSynInteger(e.DataRow[5])
+            customerContract.signed_Date = Conversion.ToSynDate(e.DataRow[6])
+            customerContract.created_By = Conversion.ToSynString(e.DataRow[7])
+            customerContract.created_Date = Conversion.ToSynDate(e.DataRow[8])
+            customerContract.contract_Document = Conversion.ToSynString(e.DataRow[9])
+            customerContract.replication_key = Conversion.ToSynString(e.DataRow[10])
+
+            ;;record the record data
+            e.SynergyRecord = customerContract
+
+            debugInfo("CustomerContractUpdateFields:: EventMethod : data Extracted + " + customerContract)
+.endc
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace

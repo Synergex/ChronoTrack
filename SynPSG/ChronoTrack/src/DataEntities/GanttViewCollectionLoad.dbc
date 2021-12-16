@@ -1,0 +1,127 @@
+;;**********************************************************************
+;;
+;; Title:       GanttViewCollectionLoad.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class that builds the alternate collection structure
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class GanttViewCollectionLoad extends SynPSG.Core.DataEntities.CollectionLoad
+
+        ;;; <summary>
+        ;;; Method that is called when the DataEntity class is attempting to load
+        ;;; a colleciton with an alternate structure.
+        ;;; </summary>
+        ;;; <param name=sender>DataIO object</param>
+        ;;; <param name=e>Update fields event argument class</param>
+        public override method EventMethod  ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSCollection
+            in      req e                   ,@SynPSG.Core.DataEntities.CollectionLoadEventArgs
+            endparams
+
+            .include 'gantt_view' repository, record = "ganttView" ,end
+            .include "project" repository, record = "project", end
+            .include "request" repository, record = "request", end
+
+        proc
+;           projectData = new DataIO("DAT:project.ism", noDotNet)
+;           requestData = new DataIO("DAT:request.ism", noDotNet)
+
+
+;           debugInfo("RequestDataEntity::Collection : Building the colleciton")
+;
+;           status = projectData.ReadFirst()
+;           while (status)
+;           begin
+;               project = projectData.DataArea
+;
+;               ;;add to the collection
+;               ganttView.user_ID = project.lead_consultant
+;               ganttView.project_ID = 1000000 + project.project_id
+;               ganttView.project_Type = 1
+;               ganttView.description = project.description
+;               ganttView.start_date = project.start_date
+;               ganttView.end_date = project.end_date
+;               ganttView.outbound_Travel_Days = 0  ;;outbound travel days
+;               ganttView.inbound_Travel_Days = 0   ;;inbound travel days
+;
+;               gantt = ganttView
+;
+;               objHandle.Add((@sGanttView) gantt)
+;
+;               ;;read the next record
+;               status = projectData.ReadNext()
+;           end
+;
+;           ;;load all request data into the table
+;           status = requestData.ReadFirst()
+;           while (status)
+;           begin
+;               request = requestData.DataArea
+;
+;               ganttView.user_ID = request.resource
+;               ganttView.project_ID = request.request_id
+;               ganttView.project_Type = 2
+;               ganttView.description = request.description
+;               ganttView.start_date = request.start_date
+;               ganttView.end_date = request.end_date
+;               ganttView.outbound_Travel_Days = 0  ;;outbound travel days
+;               ganttView.inbound_Travel_Days = 0   ;;inbound travel days
+;
+;               gantt = ganttView
+;
+;               objHandle.Add((@sGanttView) gantt)
+;
+;               status = requestData.ReadNext()
+;           end
+;
+;           debugInfo("RequestDataEntity::Collection : Collection completed.")
+;
+;           ;;record the record data
+;           e.DataArea = gRec
+;
+            ;;return to calling program
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace

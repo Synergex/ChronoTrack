@@ -1,0 +1,86 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectExpenseDefineTable.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to define project expenses data table field structure/layout
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class ProjectExpenseDefineTable extends SynPSG.Core.DataEntities.DefineTable
+
+        ;;;<summary>
+        ;;;Method that is called when the DataEntity class required the definition
+        ;;;of the data table to be created.  This method calls the AddColumn
+        ;;;method to add the requried columns
+        ;;;</summary>
+        ;;;<param name=sender>DataBase object</param>
+        public override method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSTable
+            in      req e                   ,@SynPSG.Core.DataEntities.DefineTableEventArgs
+            endparams
+        proc
+            debugInfo("ProjectExpenseDefineTable:: EventMethod : Creating the expense table")
+
+            ;;add the required columns to build te table
+            sender.AddColumn("Project_id", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Project ID", false,  false)
+            sender.AddColumn("Expense_id", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Expense ID", false, false)
+            sender.AddColumn("Expense_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Date", false, false)
+            sender.AddColumn("Expense_type", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Type", false, false)
+            sender.AddColumn("Description", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Description", false, false)
+            sender.AddColumn("Currency_code", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Currency", false, false)
+            sender.AddColumn("Unit_price", SynPSG.Core.DataEntities.DataEntityTypes.DecimalType, "Unit price", false, false)
+            sender.AddColumn("Quantity", SynPSG.Core.DataEntities.DataEntityTypes.DecimalType, "Quantity", false, false)
+            sender.AddColumn("Expensed_by", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Expensed by", false, false)
+            sender.AddColumn("Entered_by", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Entered by", false, false)
+            sender.AddColumn("Entered_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Entered date", false, false)
+            sender.AddColumn("Modified_by", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Modified by", false, false)
+            sender.AddColumn("Modified_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Modified date", false, false)
+            sender.AddColumn("Is_estimate", SynPSG.Core.DataEntities.DataEntityTypes.BooleanType, "Estimate", false, false)
+            sender.AddColumn("Replication_key", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Replication key", true, true)
+
+            debugInfo("StateDefineTable:: EventMethod : expense table created")
+
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace

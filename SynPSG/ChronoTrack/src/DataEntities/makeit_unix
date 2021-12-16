@@ -1,0 +1,327 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+NOVCS=yes ; export NOVCS
+
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=ChronoTrack ; export WORKSPACE
+PROJECT=DataEntities ; export PROJECT
+COMMONAREA=NetCommon ; export COMMONAREA
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+SynPSGNetLIB_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/lib ; export SynPSGNetLIB_CORE
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetSRC_CHRONOTRACK=$SRCDEV/$DEVAREA/$COMMONAREA/src/ChronoTrack ; export SynPSGNetSRC_CHRONOTRACK
+
+# *************************************************************
+# These setings are for the core library details
+# *************************************************************
+
+COREEXE=$SRCDEV/$DEVAREA/Core/exe ; export COREEXE
+CORELIB=$SRCDEV/$DEVAREA/Core/lib ; export CORELIB
+COREHDR=$SRCDEV/$DEVAREA/Core/hdr ; export COREHDR
+COREDEF=$SRCDEV/$DEVAREA/Core/src/Includes ; export COREDEF
+
+# *************************************************************
+# These setings are for the System library details
+# *************************************************************
+
+SYSTEMEXE=$SRCDEV/$DEVAREA/System/exe ; export SYSTEMEXE
+SYSTEMHDR=$SRCDEV/$DEVAREA/System/hdr ; export SYSTEMHDR
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+SRC=$DEVROOT/src/$PROJECT ; export SRC
+
+NAMESPACE=synpsg-chronotrack-dataentities ; export NAMESPACE
+SYNDEFNS=SynPSG.ChronoTrack.DataEntities ; export SYNDEFNS
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+
+OLIB=$DEVROOT/lib ; export OLIB
+OBJ=$DEVROOT/obj/$PROJECT ; export OBJ
+
+EXE=$DEVROOT/exe ; export EXE
+DEF=$DEVROOT/def ; export DEF
+
+PRJEXPDIR=$DEVROOT/hdr ; export PRJEXPDIR
+SYNEXPDIR=$DEVROOT/hdr ; export SYNEXPDIR
+SYNIMPDIR=$SynPSGNetHDR,$SYSTEMHDR,$COREHDR,$DEVROOT/hdr ; export SYNIMPDIR
+
+# *************************************************************
+# runtime settings
+# *************************************************************
+
+DAT=$DEVROOT/dat ; export DAT
+CHRONOTRACK_DEBUG_MODE=OFF ; export CHRONOTRACK_DEBUG_MODE
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then 
+ COMPILEFLAGS=;export COMPILEFLAGS 
+ LINKERFLAGS=;export LINKERFLAGS 
+fi 
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $OLIB/DataEntities.olb 
+rm -f $OBJ/DataEntities.dbo 
+rm -f $OBJ/UserDataEntity.dbo 
+rm -f $OBJ/UserDefineTable.dbo 
+rm -f $OBJ/UserUpdateFields.dbo 
+rm -f $OBJ/UserPreStore.dbo 
+rm -f $OBJ/UserPreUpdate.dbo 
+rm -f $OBJ/UserCollectionLoad.dbo 
+rm -f $OBJ/StateDataEntity.dbo 
+rm -f $OBJ/StateDefineTable.dbo 
+rm -f $OBJ/StateUpdateFields.dbo 
+rm -f $OBJ/StatePreStore.dbo 
+rm -f $OBJ/StatePreUpdate.dbo 
+rm -f $OBJ/StateFormatTrans.dbo 
+rm -f $OBJ/CountryDataEntity.dbo 
+rm -f $OBJ/CountryDefineTable.dbo 
+rm -f $OBJ/CountryUpdateFields.dbo 
+rm -f $OBJ/CountryPreStore.dbo 
+rm -f $OBJ/CountryPreUpdate.dbo 
+rm -f $OBJ/ConsultantFeeDataEntity.dbo 
+rm -f $OBJ/ConsultantFeeDefineTable.dbo 
+rm -f $OBJ/ConsultantFeeUpdateFields.dbo 
+rm -f $OBJ/ConsultantFeePreStore.dbo 
+rm -f $OBJ/ConsultantFeePreUpdate.dbo 
+rm -f $OBJ/CustomerContactDataEntity.dbo 
+rm -f $OBJ/CustomerContactDefineTable.dbo 
+rm -f $OBJ/CustomerContactUpdateFields.dbo 
+rm -f $OBJ/CustomerContactPreStore.dbo 
+rm -f $OBJ/CustomerContactPreUpdate.dbo 
+rm -f $OBJ/CustomerContractDataEntity.dbo 
+rm -f $OBJ/CustomerContractDefineTable.dbo 
+rm -f $OBJ/CustomerContractUpdateFields.dbo 
+rm -f $OBJ/CustomerContractPreStore.dbo 
+rm -f $OBJ/CustomerContractPreUpdate.dbo 
+rm -f $OBJ/CustomerDataEntity.dbo 
+rm -f $OBJ/CustomerDefineTable.dbo 
+rm -f $OBJ/CustomerUpdateFields.dbo 
+rm -f $OBJ/CustomerFormatTrans.dbo 
+rm -f $OBJ/CustomerOnDelete.dbo 
+rm -f $OBJ/CustomerPreStore.dbo 
+rm -f $OBJ/CustomerPreUpdate.dbo 
+rm -f $OBJ/CustomerLocationDataEntity.dbo 
+rm -f $OBJ/CustomerLocationDefineTable.dbo 
+rm -f $OBJ/CustomerLocationUpdateFields.dbo 
+rm -f $OBJ/CustomerLocationPreStore.dbo 
+rm -f $OBJ/CustomerLocationPreUpdate.dbo 
+rm -f $OBJ/ExpenseTypeDataEntity.dbo 
+rm -f $OBJ/ExpenseTypeDefineTable.dbo 
+rm -f $OBJ/ExpenseTypeUpdateFields.dbo 
+rm -f $OBJ/ExpenseTypePreStore.dbo 
+rm -f $OBJ/ExpenseTypePreUpdate.dbo 
+rm -f $OBJ/TaskTypeDataEntity.dbo 
+rm -f $OBJ/TaskTypeDefineTable.dbo 
+rm -f $OBJ/TaskTypeUpdateFields.dbo 
+rm -f $OBJ/TaskTypePreStore.dbo 
+rm -f $OBJ/TaskTypePreUpdate.dbo 
+rm -f $OBJ/FeeTypeDataEntity.dbo 
+rm -f $OBJ/FeeTypeDefineTable.dbo 
+rm -f $OBJ/FeeTypeUpdateFields.dbo 
+rm -f $OBJ/FeeTypePreStore.dbo 
+rm -f $OBJ/ProjectActivityDataEntity.dbo 
+rm -f $OBJ/ProjectActivityDefineTable.dbo 
+rm -f $OBJ/ProjectActivityUpdateFields.dbo 
+rm -f $OBJ/ProjectActivityPreStore.dbo 
+rm -f $OBJ/ProjectActivityPreUpdate.dbo 
+rm -f $OBJ/ProjectAttachmentDataEntity.dbo 
+rm -f $OBJ/ProjectAttachmentDefineTable.dbo 
+rm -f $OBJ/ProjectAttachmentUpdateFields.dbo 
+rm -f $OBJ/ProjectAttachmentPreStore.dbo 
+rm -f $OBJ/ProjectConsultantDataEntity.dbo 
+rm -f $OBJ/ProjectConsultantDefineTable.dbo 
+rm -f $OBJ/ProjectConsultantUpdateFields.dbo 
+rm -f $OBJ/ProjectConsultantPreStore.dbo 
+rm -f $OBJ/ProjectConsultantPreUpdate.dbo 
+rm -f $OBJ/ProjectExpenseDataEntity.dbo 
+rm -f $OBJ/ProjectExpenseDefineTable.dbo 
+rm -f $OBJ/ProjectExpenseUpdateFields.dbo 
+rm -f $OBJ/ProjectExpensePreStore.dbo 
+rm -f $OBJ/ProjectExpensePreUpdate.dbo 
+rm -f $OBJ/ProjectNoteDataEntity.dbo 
+rm -f $OBJ/ProjectNoteDefineTable.dbo 
+rm -f $OBJ/ProjectNoteUpdateFields.dbo 
+rm -f $OBJ/ProjectNotePreStore.dbo 
+rm -f $OBJ/ProjectNotePreUpdate.dbo 
+rm -f $OBJ/ProjectTaskDataEntity.dbo 
+rm -f $OBJ/ProjectTaskDefineTable.dbo 
+rm -f $OBJ/ProjectTaskUpdateFields.dbo 
+rm -f $OBJ/ProjectTaskPreStore.dbo 
+rm -f $OBJ/ProjectTaskPreUpdate.dbo 
+rm -f $OBJ/ProjectTaskOnDelete.dbo 
+rm -f $OBJ/ProjectDataEntity.dbo 
+rm -f $OBJ/ProjectDefineTable.dbo 
+rm -f $OBJ/ProjectUpdateFields.dbo 
+rm -f $OBJ/ProjectOnDelete.dbo 
+rm -f $OBJ/ProjectFormatTrans.dbo 
+rm -f $OBJ/ProjectPreStore.dbo 
+rm -f $OBJ/ProjectPreUpdate.dbo 
+rm -f $OBJ/ProjectPostStore.dbo 
+rm -f $OBJ/ProjectCollectionLoad.dbo 
+rm -f $OBJ/RequestDataEntity.dbo 
+rm -f $OBJ/RequestDefineTable.dbo 
+rm -f $OBJ/RequestUpdateFields.dbo 
+rm -f $OBJ/RequestPreStore.dbo 
+rm -f $OBJ/RequestPreUpdate.dbo 
+rm -f $OBJ/GanttViewDataEntity.dbo 
+rm -f $OBJ/GanttViewDefineTable.dbo 
+rm -f $OBJ/GanttViewCollectionLoad.dbo 
+rm -f $OBJ/GanttViewDataIO.dbo 
+rm -f $SYNEXPDIR/$NAMESPACE-userdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-userdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-userupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-userprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-userpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-usercollectionload.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-statedataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-statedefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-stateupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-stateprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-statepreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-stateformattrans.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-countrydataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-countrydefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-countryupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-countryprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-countrypreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-consultantfeedataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-consultantfeedefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-consultantfeeupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-consultantfeeprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-consultantfeepreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontactdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontactdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontactupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontactprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontactpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontractdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontractdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontractupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontractprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customercontractpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerformattrans.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerondelete.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerlocationdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerlocationdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerlocationupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerlocationprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-customerlocationpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-expensetypedataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-expensetypedefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-expensetypeupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-expensetypeprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-expensetypepreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-tasktypedataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-tasktypedefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-tasktypeupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-tasktypeprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-tasktypepreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-feetypedataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-feetypedefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-feetypeupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-feetypeprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectactivitydataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectactivitydefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectactivityupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectactivityprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectactivitypreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectattachmentdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectattachmentdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectattachmentupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectattachmentprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectconsultantdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectconsultantdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectconsultantupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectconsultantprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectconsultantpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectexpensedataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectexpensedefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectexpenseupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectexpenseprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectexpensepreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectnotedataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectnotedefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectnoteupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectnoteprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectnotepreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projecttaskdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projecttaskdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projecttaskupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projecttaskprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projecttaskpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projecttaskondelete.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectondelete.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectformattrans.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectpoststore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-projectcollectionload.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-requestdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-requestdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-requestupdatefields.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-requestprestore.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-requestpreupdate.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-ganttviewdataentity.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-ganttviewdefinetable.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-ganttviewcollectionload.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-ganttviewdataio.dbh 
+if [ "$NAMESPACE" != "*" ] 
+then 
+  rm -f $SYNEXPDIR/$NAMESPACE-*.dbh 
+fi 
+dblproto  $VARIANT_FLAGS  SRC:UserDataEntity.dbc SRC:UserDefineTable.dbc SRC:UserUpdateFields.dbc SRC:UserPreStore.dbc SRC:UserPreUpdate.dbc SRC:UserCollectionLoad.dbc SRC:StateDataEntity.dbc SRC:StateDefineTable.dbc SRC:StateUpdateFields.dbc SRC:StatePreStore.dbc SRC:StatePreUpdate.dbc SRC:StateFormatTrans.dbc SRC:CountryDataEntity.dbc SRC:CountryDefineTable.dbc SRC:CountryUpdateFields.dbc SRC:CountryPreStore.dbc SRC:CountryPreUpdate.dbc SRC:ConsultantFeeDataEntity.dbc SRC:ConsultantFeeDefineTable.dbc SRC:ConsultantFeeUpdateFields.dbc SRC:ConsultantFeePreStore.dbc SRC:ConsultantFeePreUpdate.dbc SRC:CustomerContactDataEntity.dbc SRC:CustomerContactDefineTable.dbc SRC:CustomerContactUpdateFields.dbc SRC:CustomerContactPreStore.dbc SRC:CustomerContactPreUpdate.dbc SRC:CustomerContractDataEntity.dbc SRC:CustomerContractDefineTable.dbc SRC:CustomerContractUpdateFields.dbc SRC:CustomerContractPreStore.dbc SRC:CustomerContractPreUpdate.dbc SRC:CustomerDataEntity.dbc SRC:CustomerDefineTable.dbc SRC:CustomerUpdateFields.dbc SRC:CustomerFormatTrans.dbc SRC:CustomerOnDelete.dbc SRC:CustomerPreStore.dbc SRC:CustomerPreUpdate.dbc SRC:CustomerLocationDataEntity.dbc SRC:CustomerLocationDefineTable.dbc SRC:CustomerLocationUpdateFields.dbc SRC:CustomerLocationPreStore.dbc SRC:CustomerLocationPreUpdate.dbc SRC:ExpenseTypeDataEntity.dbc SRC:ExpenseTypeDefineTable.dbc SRC:ExpenseTypeUpdateFields.dbc SRC:ExpenseTypePreStore.dbc SRC:ExpenseTypePreUpdate.dbc SRC:TaskTypeDataEntity.dbc SRC:TaskTypeDefineTable.dbc SRC:TaskTypeUpdateFields.dbc SRC:TaskTypePreStore.dbc SRC:TaskTypePreUpdate.dbc SRC:FeeTypeDataEntity.dbc SRC:FeeTypeDefineTable.dbc SRC:FeeTypeUpdateFields.dbc SRC:FeeTypePreStore.dbc SRC:ProjectActivityDataEntity.dbc SRC:ProjectActivityDefineTable.dbc SRC:ProjectActivityUpdateFields.dbc SRC:ProjectActivityPreStore.dbc SRC:ProjectActivityPreUpdate.dbc SRC:ProjectAttachmentDataEntity.dbc SRC:ProjectAttachmentDefineTable.dbc SRC:ProjectAttachmentUpdateFields.dbc SRC:ProjectAttachmentPreStore.dbc SRC:ProjectConsultantDataEntity.dbc SRC:ProjectConsultantDefineTable.dbc SRC:ProjectConsultantUpdateFields.dbc SRC:ProjectConsultantPreStore.dbc SRC:ProjectConsultantPreUpdate.dbc SRC:ProjectExpenseDataEntity.dbc SRC:ProjectExpenseDefineTable.dbc SRC:ProjectExpenseUpdateFields.dbc SRC:ProjectExpensePreStore.dbc SRC:ProjectExpensePreUpdate.dbc SRC:ProjectNoteDataEntity.dbc SRC:ProjectNoteDefineTable.dbc SRC:ProjectNoteUpdateFields.dbc SRC:ProjectNotePreStore.dbc SRC:ProjectNotePreUpdate.dbc SRC:ProjectTaskDataEntity.dbc SRC:ProjectTaskDefineTable.dbc SRC:ProjectTaskUpdateFields.dbc SRC:ProjectTaskPreStore.dbc SRC:ProjectTaskPreUpdate.dbc SRC:ProjectTaskOnDelete.dbc SRC:ProjectDataEntity.dbc SRC:ProjectDefineTable.dbc SRC:ProjectUpdateFields.dbc SRC:ProjectOnDelete.dbc SRC:ProjectFormatTrans.dbc SRC:ProjectPreStore.dbc SRC:ProjectPreUpdate.dbc SRC:ProjectPostStore.dbc SRC:ProjectCollectionLoad.dbc SRC:RequestDataEntity.dbc SRC:RequestDefineTable.dbc SRC:RequestUpdateFields.dbc SRC:RequestPreStore.dbc SRC:RequestPreUpdate.dbc SRC:GanttViewDataEntity.dbc SRC:GanttViewDefineTable.dbc SRC:GanttViewCollectionLoad.dbc SRC:GanttViewDataIO.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS -o OBJ:DataEntities.dbo  SRC:UserDataEntity.dbc SRC:UserDefineTable.dbc SRC:UserUpdateFields.dbc SRC:UserPreStore.dbc SRC:UserPreUpdate.dbc SRC:UserCollectionLoad.dbc SRC:StateDataEntity.dbc SRC:StateDefineTable.dbc SRC:StateUpdateFields.dbc SRC:StatePreStore.dbc SRC:StatePreUpdate.dbc SRC:StateFormatTrans.dbc SRC:CountryDataEntity.dbc SRC:CountryDefineTable.dbc SRC:CountryUpdateFields.dbc SRC:CountryPreStore.dbc SRC:CountryPreUpdate.dbc SRC:ConsultantFeeDataEntity.dbc SRC:ConsultantFeeDefineTable.dbc SRC:ConsultantFeeUpdateFields.dbc SRC:ConsultantFeePreStore.dbc SRC:ConsultantFeePreUpdate.dbc SRC:CustomerContactDataEntity.dbc SRC:CustomerContactDefineTable.dbc SRC:CustomerContactUpdateFields.dbc SRC:CustomerContactPreStore.dbc SRC:CustomerContactPreUpdate.dbc SRC:CustomerContractDataEntity.dbc SRC:CustomerContractDefineTable.dbc SRC:CustomerContractUpdateFields.dbc SRC:CustomerContractPreStore.dbc SRC:CustomerContractPreUpdate.dbc SRC:CustomerDataEntity.dbc SRC:CustomerDefineTable.dbc SRC:CustomerUpdateFields.dbc SRC:CustomerFormatTrans.dbc SRC:CustomerOnDelete.dbc SRC:CustomerPreStore.dbc SRC:CustomerPreUpdate.dbc SRC:CustomerLocationDataEntity.dbc SRC:CustomerLocationDefineTable.dbc SRC:CustomerLocationUpdateFields.dbc SRC:CustomerLocationPreStore.dbc SRC:CustomerLocationPreUpdate.dbc SRC:ExpenseTypeDataEntity.dbc SRC:ExpenseTypeDefineTable.dbc SRC:ExpenseTypeUpdateFields.dbc SRC:ExpenseTypePreStore.dbc SRC:ExpenseTypePreUpdate.dbc SRC:TaskTypeDataEntity.dbc SRC:TaskTypeDefineTable.dbc SRC:TaskTypeUpdateFields.dbc SRC:TaskTypePreStore.dbc SRC:TaskTypePreUpdate.dbc SRC:FeeTypeDataEntity.dbc SRC:FeeTypeDefineTable.dbc SRC:FeeTypeUpdateFields.dbc SRC:FeeTypePreStore.dbc SRC:ProjectActivityDataEntity.dbc SRC:ProjectActivityDefineTable.dbc SRC:ProjectActivityUpdateFields.dbc SRC:ProjectActivityPreStore.dbc SRC:ProjectActivityPreUpdate.dbc SRC:ProjectAttachmentDataEntity.dbc SRC:ProjectAttachmentDefineTable.dbc SRC:ProjectAttachmentUpdateFields.dbc SRC:ProjectAttachmentPreStore.dbc SRC:ProjectConsultantDataEntity.dbc SRC:ProjectConsultantDefineTable.dbc SRC:ProjectConsultantUpdateFields.dbc SRC:ProjectConsultantPreStore.dbc SRC:ProjectConsultantPreUpdate.dbc SRC:ProjectExpenseDataEntity.dbc SRC:ProjectExpenseDefineTable.dbc SRC:ProjectExpenseUpdateFields.dbc SRC:ProjectExpensePreStore.dbc SRC:ProjectExpensePreUpdate.dbc SRC:ProjectNoteDataEntity.dbc SRC:ProjectNoteDefineTable.dbc SRC:ProjectNoteUpdateFields.dbc SRC:ProjectNotePreStore.dbc SRC:ProjectNotePreUpdate.dbc SRC:ProjectTaskDataEntity.dbc SRC:ProjectTaskDefineTable.dbc SRC:ProjectTaskUpdateFields.dbc SRC:ProjectTaskPreStore.dbc SRC:ProjectTaskPreUpdate.dbc SRC:ProjectTaskOnDelete.dbc SRC:ProjectDataEntity.dbc SRC:ProjectDefineTable.dbc SRC:ProjectUpdateFields.dbc SRC:ProjectOnDelete.dbc SRC:ProjectFormatTrans.dbc SRC:ProjectPreStore.dbc SRC:ProjectPreUpdate.dbc SRC:ProjectPostStore.dbc SRC:ProjectCollectionLoad.dbc SRC:RequestDataEntity.dbc SRC:RequestDefineTable.dbc SRC:RequestUpdateFields.dbc SRC:RequestPreStore.dbc SRC:RequestPreUpdate.dbc SRC:GanttViewDataEntity.dbc SRC:GanttViewDefineTable.dbc SRC:GanttViewCollectionLoad.dbc SRC:GanttViewDataIO.dbc 
+dblibr -ca OLIB:DataEntities.olb OBJ:DataEntities.dbo 
+dblink $LINKERFLAGS -l EXE:DataEntities.elb OLIB:DataEntities.olb 

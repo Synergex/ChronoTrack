@@ -1,0 +1,110 @@
+;;**********************************************************************
+;;
+;; Title:       GanttViewDefineTable.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to define GanttView data table field structure/layout
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class GanttViewDefineTable extends SynPSG.Core.DataEntities.DefineTable
+
+        ;;;<summary>
+        ;;;Method that is called when the DataEntity class required the definition
+        ;;;of the data table to be created.  This method calls the AddColumn
+        ;;;method to add the requried columns
+        ;;;</summary>
+        ;;;<param name=sender>DataBase object</param>
+        public override method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSTable
+            in      req e                   ,@SynPSG.Core.DataEntities.DefineTableEventArgs
+            endparams
+        proc
+            debugInfo("GanttViewDefineTable:: EventMethod : Creating the GanttView table")
+
+            ;;add the required columns to build te table
+            sender.AddColumn("User_id", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "User ID",  false, false)
+            sender.AddColumn("Project_id", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Name",  false, false)
+            sender.AddColumn("Project_type", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Project type", false, false)
+            sender.AddColumn("Description", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Description", false , false)
+            sender.AddColumn("Start_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Start date", false , false)
+            sender.AddColumn("End_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "End date", false , false)
+            sender.AddColumn("Outbound_travel_days", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Outbound travel days", false , false)
+            sender.AddColumn("Inbound_travel_days", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Inbound travel days", false , false)
+            sender.AddColumn("Day1", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "1", false , true)
+            sender.AddColumn("Day2", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "2", false , true)
+            sender.AddColumn("Day3", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "3", false , true)
+            sender.AddColumn("Day4", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "4", false , true)
+            sender.AddColumn("Day5", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "5", false , true)
+            sender.AddColumn("Day6", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "6", false , true)
+            sender.AddColumn("Day7", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "7", false , true)
+            sender.AddColumn("Day8", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "8", false , true)
+            sender.AddColumn("Day9", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "9", false , true)
+            sender.AddColumn("Day10", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "10", false , true)
+            sender.AddColumn("Day11", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "11", false , true)
+            sender.AddColumn("Day12", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "12", false , true)
+            sender.AddColumn("Day13", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "13", false , true)
+            sender.AddColumn("Day14", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "14", false , true)
+            sender.AddColumn("Day15", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "15", false , true)
+            sender.AddColumn("Day16", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "16", false , true)
+            sender.AddColumn("Day17", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "17", false , true)
+            sender.AddColumn("Day18", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "18", false , true)
+            sender.AddColumn("Day19", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "19", false , true)
+            sender.AddColumn("Day20", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "20", false , true)
+            sender.AddColumn("Day21", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "21", false , true)
+            sender.AddColumn("Day22", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "22", false , true)
+            sender.AddColumn("Day23", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "23", false , true)
+            sender.AddColumn("Day24", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "24", false , true)
+            sender.AddColumn("Day25", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "25", false , true)
+            sender.AddColumn("Day26", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "26", false , true)
+            sender.AddColumn("Day27", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "27", false , true)
+            sender.AddColumn("Day28", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "28", false , true)
+            sender.AddColumn("Day29", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "29", false , true)
+            sender.AddColumn("Day30", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "30", false , true)
+            sender.AddColumn("Day31", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "31", false , true)
+
+            debugInfo("GanttViewDefineTable:: EventMethod : GanttView table created")
+
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace

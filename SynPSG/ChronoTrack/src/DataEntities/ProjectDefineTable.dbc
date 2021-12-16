@@ -1,0 +1,93 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectDefineTable.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to define Project data table field structure/layout
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class ProjectDefineTable extends SynPSG.Core.DataEntities.DefineTable
+
+        ;;;<summary>
+        ;;;Method that is called when the DataEntity class required the definition
+        ;;;of the data table to be created.  This method calls the AddColumn
+        ;;;method to add the requried columns
+        ;;;</summary>
+        ;;;<param name=sender>DataBase object</param>
+        public override method EventMethod   ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSTable
+            in      req e                   ,@SynPSG.Core.DataEntities.DefineTableEventArgs
+            endparams
+        proc
+            debugInfo("ProjectDefineTable:: EventMethod : Creating the state table")
+
+            ;;add the required columns to build te table
+            sender.AddColumn("Project_id", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Project ID", true,  false)
+            sender.AddColumn("Customer_id", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Customer ID", false, false)
+            sender.AddColumn("Contract_id", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Contract ID", false, false)
+            sender.AddColumn("Contract_project_id", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Contractg project ID", false, true)
+            sender.AddColumn("Description", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Description", false, false)
+            sender.AddColumn("Start_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Start date", false, false)
+            sender.AddColumn("End_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "End date", false, false)
+            sender.AddColumn("Current_status",SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Current status", false, true)
+            sender.AddColumn("Status_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Status date", false, true)
+            sender.AddColumn("Lead_consultant", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Lead consultant", false, false)
+            sender.AddColumn("Coordinator", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Coordinator", false, false)
+            sender.AddColumn("Approved_by_first", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Approved by first", false, true)
+            sender.AddColumn("Approved_by_last", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Approved by last", false, true)
+            sender.AddColumn("Approved_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Approved date", false, true)
+            sender.AddColumn("Approval_location", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Approval location ID", false, true)
+            sender.AddColumn("Work_location_id", SynPSG.Core.DataEntities.DataEntityTypes.Int32Type, "Work Location  ID", false, true)
+            sender.AddColumn("Created_by", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Create by", false, true)
+            sender.AddColumn("Created_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Created date", false, true)
+            sender.AddColumn("Modified_by", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Modified by", false, true)
+            sender.AddColumn("Modified_date", SynPSG.Core.DataEntities.DataEntityTypes.DateTimeType, "Modified date", false, true)
+            sender.AddColumn("Text", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Text", false, true)
+            sender.AddColumn("Replication_key", SynPSG.Core.DataEntities.DataEntityTypes.StringType, "Replication key", true, true)
+
+            debugInfo("ProjectDefineTable:: EventMethod : State table created")
+
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace

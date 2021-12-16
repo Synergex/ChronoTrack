@@ -1,0 +1,128 @@
+;;**********************************************************************
+;;
+;; Title:       ProjectCollectionLoad.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class that builds the alternate collection structure
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class ProjectCollectionLoad extends SynPSG.Core.DataEntities.CollectionLoad
+
+        ;;; <summary>
+        ;;; Method that is called when the DataEntity class is attempting to load
+        ;;; a colleciton with an alternate structure.
+        ;;; </summary>
+        ;;; <param name=sender>DataIO object</param>
+        ;;; <param name=e>LoadCollection fields event argument class</param>
+        public override method EventMethod  ,void
+            in      req sender              ,@SynPSG.Core.DataEntities.SDMSCollection
+            in      req e                   ,@SynPSG.Core.DataEntities.CollectionLoadEventArgs
+            endparams
+
+            .include 'project' repository, stack record = "project", end
+            .include 'project_combined' repository, structure = "sCombined", end
+
+            .include 'customer' repository, record='customer', end
+            .include 'customer_location' repository, record='location', end
+            .include 'customer_contact' repository, record='contact', end
+
+            .include 'user' repository, record='user', end
+
+            record
+                pRec    ,sCombined
+
+            endrecord
+
+        proc
+            init pRec
+
+            ;;move the current data area
+            project = e.IO.DataArea
+
+            pRec.project_ID = project.Project_id
+
+            ;;get customer details
+            CustomerDataEntity.Instance.IO.Locate(project.customer_id,Q_PRIMARY,false)
+            customer = CustomerDataEntity.Instance.IO.DataArea
+            pRec.customer_name = customer.company
+
+            CustomerLocationDataEntity.Instance.IO.Locate(project.customer_id + %string(project.work_location_id, "XX"), Q_PRIMARY, false)
+            location = CustomerLocationDataEntity.Instance.IO.DataArea
+            pRec.customer_location = location.description
+
+            CustomerContactDataEntity.Instance.IO.Locate(project.Customer_id + %string(project.Approved_by_first, "XXX"),Q_PRIMARY,false)
+            contact = CustomerContactDataEntity.Instance.IO.DataArea
+            pRec.customer_contact = contact.friendly_name
+
+            pRec.contact_phone = contact.office_phone
+
+            pRec.description = project.description
+            pRec.start_date = project.start_date
+            pRec.end_date = project.end_date
+            using project.current_status select
+            (0), pRec.current_status = "Created"
+            (1), pRec.current_status = "Quoted"
+            (2), pRec.current_status = "Signed"
+            (3), pRec.current_status = "Implementation"
+            (4), pRec.current_status = "Post-project"
+            (5), pRec.current_status = "Completed"
+            endusing
+            pRec.status_date = project.status_date
+
+            UserDataEntity.Instance.IO.Locate(project.lead_consultant, Q_PRIMARY, false)
+            user = UserDataEntity.Instance.IO.DataArea
+            pRec.consultant_full_name = user.friendly_name
+
+            UserDataEntity.Instance.IO.Locate(project.coordinator, Q_PRIMARY, false)
+            user = UserDataEntity.Instance.IO.DataArea
+            pRec.coordinator_full_name = user.friendly_name
+
+            pRec.text = project.text
+
+            ;;record the record data
+            e.DataArea = pRec
+
+            mreturn
+
+        endmethod
+
+    endclass
+
+endnamespace

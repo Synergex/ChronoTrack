@@ -1,0 +1,193 @@
+;;**********************************************************************
+;;
+;; Title:       GanttViewDataEntity.dbc
+;;
+;; Type:        Class
+;;
+;; Description: Class to allow access to the GanttView data file.
+;;
+;; Author:      Richard C. Morris, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;; ChronoTrack is an application written and managed by the Synergex Professional Services Group.
+;;
+;;***********************************************************************************
+
+.include "DEF:ChronoTrack.def"
+
+namespace SynPSG.ChronoTrack.DataEntities
+
+    public sealed class GanttViewDataEntity
+
+        ;;-------------------------------------------------------------------------
+        ;;private fields
+        ;;-------------------------------------------------------------------------
+
+        private mDataIOObject           ,@SynPSG.ChronoTrack.DataEntities.GanttViewDataIO
+        private mSDMSio                 ,@SynPSG.Core.DataEntities.SDMSio
+        private mSDMSTable              ,@SynPSG.Core.DataEntities.SDMSTable
+
+        ;;define event handler objects
+        private mDefineTable            ,@SynPSG.ChronoTrack.DataEntities.GanttViewDefineTable
+        private mCollectionLoad         ,@SynPSG.ChronoTrack.DataEntities.GanttViewCollectionLoad
+        private mDataCollectionObject   ,@SynPSG.Core.DataEntities.SDMSCollection
+
+        ;;;<summary> private user record area </summary>
+        .include 'gantt_view' repository, private record = "mGanttView", prefix="m"  ,end
+        .include 'gantt_view' repository, private structure = "sGanttView", prefix="s"  ,end
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Constructor
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Constructor defines the file name and opens the file.  Creates the
+        ;;; required event handler classes
+        ;;; </remarks>
+        ;;; <param name=noDotNet>Pass TRUE to prevent the .NET framework being loaded</param>
+        public method GanttViewDataEntity
+            in  req noDotNet            ,boolean
+            endparams
+
+            record
+                str ,sGanttView
+            endrecord
+        proc
+
+            mDataIOObject = new GanttViewDataIO(noDotNet)
+
+            mSDMSTable = new SDMSTable(mSDMSio, "GanttView", noDotNet)
+
+            ;;do not include the GRFA column when creating the table
+            mSDMSTable.IncludeGRFA = false
+
+            ;;create an instance of the DataCollection class.  This allows
+            ;;the ability to expose data in the form of an ArrayList colleciton
+            mDataCollectionObject = new SDMSCollection(mSDMSio, "GanttCollection", TableView.Combined, (@sGanttView) str)
+
+            ;;create the table definintion event handler object
+            mDefineTable = new GanttViewDefineTable()
+
+            ;;assign object to base classes
+            mSDMSTable.SetDefineTableEventHandler(mDefineTable)
+
+            ;;create the collecton load event handler
+            mCollectionLoad = new GanttViewCollectionLoad()
+
+            ;;assign object to base classed
+            mDataCollectionObject.SetCollectionLoadEventHandler(mCollectionLoad)
+
+        endmethod
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the data as a DataTable object
+        ;;; </summary>
+        ;;; <remarks>
+        ;;; Expose the data as a DataTable object.  This method returns
+        ;;; all data in the file as a DataTable unless the filter argument is passed.
+        ;;; </remarks>
+        ;;; <param name=primaryKey>optionally pass a filter on the primary key</param>
+        ;;; <returns>Populated DataTable</returns>
+.ifdef OS_WINDOWSNT
+        public method ResultsTable  ,@System.Data.DataTable
+            in  req primaryKey      ,a
+            endparams
+
+            record locrec
+                row     ,@DataRow
+                status  ,boolean
+            endrecord
+
+        proc
+            init locrec
+            mSDMSTable.Clear()
+
+            ;;load all project data into the gantt chart table
+            status = mDataIOObject.ReadFirst(Q_PRIMARY, false)
+            while (status)
+            begin
+                debugInfo("GanttViewtDataEntity::DataTable : Creating a new row")
+                row = mSDMSTable.Table.NewRow()
+
+                mGanttView = mDataIOObject.DataArea
+
+                row[0] = Conversion.ToNetString(mGanttView.mUser_id)
+                row[1] = Conversion.ToNetInteger(mGanttView.mProject_id)
+                row[2] = Conversion.ToNetInteger(mGanttView.mProject_type)
+                row[3] = Conversion.ToNetString(mGanttView.mDescription)
+                row[4] = Conversion.ToNetDateTime(mGanttView.mStart_date)
+                row[5] = Conversion.ToNetDateTime(mGanttView.mEnd_date)
+                row[6] = Conversion.ToNetInteger(mGanttView.mOutbound_travel_days)
+                row[7] = Conversion.ToNetInteger(mGanttView.mInbound_travel_days)
+
+                mSDMSTable.Table.Rows.Add(row)
+
+                debugInfo("GanttViewtDataEntity::DataTable : Row added to table, key : " + mGanttView.mUser_id + " : " + %string(mGanttView.mProject_id))
+
+                status = mDataIOObject.ReadNext(false)
+            end
+
+            ;;commit the added rows to the table
+            mSDMSTable.Table.AcceptChanges()
+
+            mreturn mSDMSTable.Table
+
+        endmethod
+.endc
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the base DataTable onject so that we can perform
+        ;;; operations like Commit(), etc.
+        ;;; </summary>
+        public property DataBase  ,@SynPSG.Core.DataEntities.SDMSTable
+            method get
+            proc
+                mreturn mSDMSTable
+            endmethod
+        endproperty
+
+        ;;*************************************************************************
+
+        ;;; <summary>
+        ;;; Expose the base DataCollection object to allow access to collectons
+        ;;; </summary>
+        public property DataCollection  ,@SynPSG.Core.DataEntities.SDMSCollection
+            method get
+            proc
+                mreturn mDataCollectionObject
+            endmethod
+        endproperty
+
+    endclass
+
+endnamespace
+
