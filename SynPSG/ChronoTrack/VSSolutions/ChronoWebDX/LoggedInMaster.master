@@ -1,0 +1,54 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeFile="LoggedInMaster.master.cs" Inherits="LoggedInMaster" %>
+
+<%@ register assembly="DevExpress.Web.ASPxEditors.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" namespace="DevExpress.Web.ASPxEditors" tagprefix="dxe" %>
+<%@ register assembly="DevExpress.Web.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" namespace="DevExpress.Web.ASPxSiteMapControl" tagprefix="dxsm" %>
+<%@ register assembly="DevExpress.Web.v9.2, Version=9.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" namespace="DevExpress.Web.ASPxMenu" tagprefix="dxm" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+    <link href="App_Themes/ChronoTrackWebClient.css" rel="stylesheet" type="text/css" />
+    <asp:contentplaceholder id="HeaderContent" runat="server">
+    </asp:contentplaceholder>
+</head>
+<body>
+<form id="form1" runat="server">
+    <asp:scriptmanager id="ScriptManager1" runat="server" />
+    <asp:sitemapdatasource ID="MenuDataSource" runat="server" ShowStartingNode="False" StartingNodeOffset="1" />
+    <asp:sitemapdatasource ID="BreadcrumbsDataSource" runat="server" startingnodeurl="~/Home.aspx"/>
+<div>
+<table border="0" align="center" width="850px" cellpadding="0" cellspacing="0">
+<tr>
+    <td align="left" valign="top" width="140px" rowspan="2">
+        <asp:image ID="imgLogo" runat="server" AlternateText="ChronoTrack Logo" Height="47px" Width="126px" ImageUrl="~/images/ChronoTrack.png" />
+    </td>
+    <td align="left" valign="top" width="710px">
+        <dxm:aspxmenu id="MainMenu" runat="server" datasourceid="MenuDataSource" width="710px">
+        </dxm:aspxmenu>
+    </td>
+</tr>
+<!-- Breadcrumbs control -->
+<tr>
+    <td>
+        <asp:sitemappath id="Breadcrumbs" runat="server" font-names="Tahoma" font-size="9pt" pathseparator="&gt; " height="35px">
+            <pathseparatorstyle font-bold="True" forecolor="Black" />
+            <currentnodestyle forecolor="#333333" />
+            <nodestyle font-bold="True" forecolor="#3E6B96" />
+            <rootnodestyle font-bold="True" forecolor="White" cssclass="Hidden" font-size="XX-Small" width="0px" />
+        </asp:sitemappath>
+    </td>
+</tr>
+<!-- Main page content content -->
+<tr>
+    <td colspan="2">
+    <asp:contentplaceholder id="BodyContent" runat="server">
+    
+    </asp:contentplaceholder>
+    </td>
+</tr>
+</table>
+</div>
+</form>
+</body>
+</html>

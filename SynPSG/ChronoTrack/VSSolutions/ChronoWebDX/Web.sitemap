@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+  <siteMapNode url="Default.aspx" title="Home"  description="Home">
+    <siteMapNode url="~/About.aspx" title="Web Client" description="">
+      <siteMapNode url="~/AboutChronoTrack.aspx" title="Intro"  description="" />
+      <siteMapNode url="" title="Customers" description="">
+        <siteMapNode url="~/customer/BrowseCustomers.aspx" title="Browse Customers" description="" />
+        <siteMapNode url="~/customer/NewCustomer.aspx" title="New Customer" description="" />
+        <siteMapNode url="~/customer/Locations.aspx" title="Locations" description="">
+          <siteMapNode url="~/customer/NewLocation.aspx" title="New Location" description="" />
+        </siteMapNode>
+        <siteMapNode url="~/customer/Contacts.aspx" title="Contacts" description="">
+          <siteMapNode url="~/customer/NewContact.aspx" title="New Contact" description="" />
+        </siteMapNode>
+        <siteMapNode url="~/customer/ContactsAllCustomers.aspx" title="Contacts (All Customers)" description="" />
+        <siteMapNode url="~/customer/Contracts.aspx" title="Contracts" description="">
+          <siteMapNode url="~/customer/NewContract.aspx" title="New Contract" description="" />
+        </siteMapNode>
+      </siteMapNode>
+      <siteMapNode url="" title="Consultants" description="">
+        <siteMapNode url="~/consultant/ConsultantBrowser.aspx" title="Browse" description="" />
+        <siteMapNode url="~/consultant/ReserveConsultant.aspx" title="Reserve" description="" />
+      </siteMapNode>
+      <siteMapNode url="" title="Projects" description="">
+        <siteMapNode url="~/project/MyProjects.aspx" title="My Projects" description="" />
+        <siteMapNode url="~/project/ProjectConsultant.aspx" title="Add Consultant" description="" />
+        <siteMapNode url="~/project/ProjectNote.aspx" title="Add Note" description="" />
+        <siteMapNode url="~/project/ProjectTask.aspx" title="Add Task" description="" />
+        <siteMapNode url="~/project/ProjectActivity.aspx" title="Add Activity" description="" />
+        <siteMapNode url="~/project/ProjectExpense.aspx" title="Add Expense" description="" />
+        <siteMapNode url="~/project/Default.aspx" title="Browse Projects" description="" />
+        <siteMapNode url="~/project/NewProject.aspx" title="New Project" description="" />
+      </siteMapNode>
+      <siteMapNode url="" title="Reports" description="">
+        <siteMapNode url="~/reports/CustomerContactsReport.aspx" title="Customer Contacts" description="" />
+        <siteMapNode url="~/reports/CustomerLocationsReport.aspx" title="Customer Locations" description="" />
+        <siteMapNode url="~/reports/ConsultantFeesReport.aspx" title="Consultant Fees" description="" />
+        <siteMapNode url="~/reports/CountriesReport.aspx" title="Countries" description="" />
+        <siteMapNode url="~/reports/StatesReport.aspx" title="States" description="" />
+        <siteMapNode url="~/reports/UsersReport.aspx" title="ChronoTrack Contacts" description="" />
+      </siteMapNode>
+      <siteMapNode url="" title="Admin" description="">
+        <siteMapNode url="~/admin/Requests.aspx" title="Resource Requests" description="" />
+        <siteMapNode url="~/admin/Countries.aspx" title="Country Codes" description="" />
+        <siteMapNode url="~/admin/ExpenseTypes.aspx" title="Expense Types" description="" />
+        <siteMapNode url="~/admin/FeeTypes.aspx" title="Fee Types" description="" />
+        <siteMapNode url="~/admin/States.aspx" title="State Codes" description="" />
+      </siteMapNode>
+      <siteMapNode url="" title="Tools" description="">
+        <siteMapNode url="~/admin/Users.aspx" title="ChronoTrack Users" description="">
+          <siteMapNode url="~/admin/User.aspx" title="User Details" description="" />
+        </siteMapNode>
+        <siteMapNode url="~/tools/ChangeTheme.aspx" title="Change Theme" description="" />
+        <siteMapNode url="~/tools/ChangePassword.aspx" title="Change Password" description="" />
+        <siteMapNode url="~/tools/EditProfile.aspx" title="Edit Profile" description="" />
+        <siteMapNode url="~/SiteMap.aspx" title="Site Map"  description="" />
+      </siteMapNode>
+      <siteMapNode url="~/Logout.aspx" title="Logout"  description="" />
+    </siteMapNode>
+  </siteMapNode>
+</siteMap>
