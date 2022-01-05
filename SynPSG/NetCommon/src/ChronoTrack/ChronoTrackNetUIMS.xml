@@ -1,0 +1,61 @@
+<?xml version='1.0'?>
+    <assemblies>
+        <assembly Name="mscorlib">
+            <class Name = "System.DateTime"/>
+            <class Name = "System.Type"/>
+            <class Name = "System.Collections.IEnumerable"/>
+            <class Name = "System.Collections.IEnumerator"/>
+            <class Name = "System.Threading.SynchronizationContext"/>
+            <class Name = "System.Threading.SendOrPostCallback"/>
+        </assembly>
+        <assembly Name="SynPSGNetCore">
+            <class Name = "SynPSGNetCore.Logging.DebugOutput"/>
+            <class Name = "SynPSGNetCore.Interop.SynInterop"/>
+            <class Name = "SynPSGNetCore.Utility"/>
+            <class Name = "SynPSGNetCore.SynergyGRFA"/>
+            <class Name = "SynPSGNetCore.Forms.TransactionView"/>
+            <class Name = "SynPSGNetCore.Forms.Working"/>
+        </assembly>
+        <assembly Name="System.Data">
+            <class Name = "System.Data.DataTable"/>
+            <class Name = "System.Data.DataRow"/>
+            <class Name = "System.Data.DataRowCollection"/>
+            <class Name = "System.Data.DataColumn"/>
+            <class Name = "System.Data.DataColumnCollection"/>
+        </assembly>
+        <assembly Name="System.Windows.Forms">
+            <class Name = "System.Windows.Forms.BindingSource"/>
+            <class Name = "System.Windows.Forms.Form"/>
+            <class Name = "System.Windows.Forms.FormClosingEventArgs"/>
+        </assembly>
+        <assembly Name="System.Drawing">
+            <class Name = "System.Drawing.Size"/>
+            <class Name = "System.Drawing.Text.FontCollection"/>
+            <class Name = "System.Drawing.Drawing2D.LineCap"/>
+            <class Name = "System.Drawing.Drawing2D.DashCap"/>
+            <class Name = "System.Drawing.Drawing2D.LineJoin"/>
+            <class Name = "System.Drawing.Drawing2D.CustomLineCap"/>
+            <class Name = "System.Drawing.Drawing2D.PenAlignment"/>
+            <class Name = "System.Drawing.Drawing2D.Matrix"/>
+            <class Name = "System.Drawing.Drawing2D.PenType"/>
+            <class Name = "System.Drawing.Drawing2D.DashStyle"/>
+        </assembly>
+        <assembly Name="ChronoTrackNetUIMS">
+            <class Name = "ChronoTrackNetUIMS.Forms.CountryMaintenance"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.StateMaintenance"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.UserMaintenance"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.MainMenu"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.FeeTypeMaintenance"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.CustomerMaintenance"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.CustomerContactMaintenance"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.CustomerLocationMaintenance"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.RequestCreate"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.Login"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.Options"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.About"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.ProjectCreate"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.PasswordMaint"/>
+            <class Name = "ChronoTrackNetUIMS.Forms.ProjectView"/>
+        </assembly>
+    </assemblies>
+

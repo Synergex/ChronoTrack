@@ -1,0 +1,23 @@
+[Global]
+CurrentProject=prj\Common.vpj
+[ProjectDates]
+prj\Common.vpj=20090714084832050
+[TreeExpansion2]
+- prj\Common.vpj
+  + Command Files
+  + XML Files
+scroll:0
+[State]
+SCREEN: 1920 1200 17 0 1865 1132 0 0 M 0 0 0 0 1592 690 0
+CWD: ..\System
+FILEHIST: 9
+src\ChronoTrack\ChronoTrackNetUIDX.xml
+src\ChronoTrack\ChronoTrackNetUI.bat
+src\ChronoTrack\ChronoTrackNetUIDX.bat
+src\ChronoTrack\ChronoTrackNetUIMS.bat
+src\Core\SynPSGNetCore.bat
+src\ChronoTrack\SynPSGNetCore.bat
+src\Core\SynPSGNetCore.xml
+src\ChronoTrack\SynPSGNetCore.xml
+bat\build.bat
+TBCLASS: 0 0

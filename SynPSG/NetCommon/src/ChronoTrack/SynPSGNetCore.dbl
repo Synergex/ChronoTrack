@@ -1,0 +1,5 @@
+.include SRCDIR:SynPSGNetCore1.dbl
+.include SRCDIR:SynPSGNetCore2.dbl
+.include SRCDIR:SynPSGNetCore3.dbl
+.include SRCDIR:SynPSGNetCore4.dbl
+.include SRCDIR:SynPSGNetCore5.dbl
