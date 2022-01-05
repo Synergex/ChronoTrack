@@ -1,0 +1,47 @@
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+;;
+;;   SMTPMAIL.DEF
+;;
+;;
+.ifndef SMTPMAIL_DEF
+    .define SMTPMAIL_DEF
+
+    .define SMERR_SUCCESS       1
+    .define SMERR_BADSERVER     2   ;Invalid server name or address
+    .define SMERR_NORELAY       3   ;Mail server can't relay
+    .define SMERR_NETPROB       4   ;Failed to connect to SMTP server
+    .define SMERR_TOLIST        5   ;No recipient address provided
+    .define SMERR_CCLIST        6
+    .define SMERR_BODYFILE      7   ;Failed to open body file
+    .define SMERR_SENDADDR      8
+    .define SMERR_SERVERFAIL    9   ;Invalid response from SMTP server
+    .define SMERR_BADLIST       10
+    .define SMERR_ATTACHFILE    11  ;Failed to open attachment file
+.endc
+
+external function
+    smtpmail,   ^val

@@ -1,0 +1,43 @@
+[Global]
+CurrentProject=prj\Text.vpj
+[ProjectDates]
+prj\Base.vpj=20090429082405597
+prj\IO.vpj=20090429082405644
+prj\Net.vpj=20090429082405628
+prj\Text.vpj=20090429082405675
+[TreeExpansion2]
+- prj\Base.vpj
+  - Source Files
+  + Header Files
+  + Toolkit Script Files
+  + Other Files
++ prj\IO.vpj
+  + Source Files
+  + Header Files
+  + Toolkit Script Files
+  + Other Files
++ prj\Net.vpj
+  + Source Files
+  + Header Files
+  + Toolkit Script Files
+  + Other Files
++ prj\Text.vpj
+  + Source Files
+  + Header Files
+  + Toolkit Script Files
+  + Other Files
+scroll:0
+[State]
+SCREEN: 1920 1200 17 0 1865 1132 0 0 M 0 0 0 0 1592 690 0
+CWD: ..\Builder
+FILEHIST: 9
+src\net\ContentType.dbc
+src\net\ContentDisposition.dbc
+src\net\AttachmentCollection.dbc
+src\net\AttachmentBase.dbc
+src\net\Attachment.dbc
+src\Text\makefile.mak
+src\Text\makeit.bat
+src\Text\makeit_unix
+src\Text\ASCIIEncoding.dbc
+TBCLASS: 0 0

@@ -1,0 +1,104 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+#
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=System ; export WORKSPACE
+PROJECT=IO ; export PROJECT
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+SynPSGNetLIB_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/lib ; export SynPSGNetLIB_CORE
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/Core ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetLIB=$SRCDEV/$DEVAREA/$COMMONAREA/lib/SynPSGNetLibrary.olb ; export SynPSGNetLIB
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+VARIANT_FLAGS= ; export VARIANT_FLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+SRC=$DEVROOT/src/$PROJECT ; export SRC
+NAMESPACE=synpsg-system-io ; export NAMESPACE
+SYNDEFNS=SynPSG.System.IO ; export SYNDEFNS
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+
+OLIB=$DEVROOT/lib ; export OLIB
+OBJ=$DEVROOT/obj/$PROJECT ; export OBJ
+
+EXE=$DEVROOT/exe ; export EXE
+DEF=$DEVROOT/src/Includes ; export DEF
+
+SYNEXPDIR=$DEVROOT/hdr ; export SYNEXPDIR
+SYNIMPDIR=$DEVROOT/hdr ; export SYNIMPDIR
+
+# *************************************************************
+# runtime settings
+# *************************************************************
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then
+ COMPILEFLAGS=;export COMPILEFLAGS
+ LINKERFLAGS=;export LINKERFLAGS
+fi
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $OLIB/SynPSGSystemIO.olb
+rm -f $OBJ/SynPSGSystemIO.dbo
+rm -f $OBJ/Stream.dbo
+rm -f $OBJ/MemoryStream.dbo
+rm -f $OBJ/FileStream.dbo
+rm -f $SYNEXPDIR/$NAMESPACE-stream.dbh
+rm -f $SYNEXPDIR/$NAMESPACE-memorystream.dbh
+rm -f $SYNEXPDIR/$NAMESPACE-filestream.dbh
+if [ "$NAMESPACE" != "*" ]
+then
+  rm -f $SYNEXPDIR/$NAMESPACE-*.dbh
+fi
+dblproto $VARIANT_FLAGS SRC:Stream.dbc
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:Stream.dbo SRC:Stream.dbc
+dblproto $VARIANT_FLAGS SRC:MemoryStream.dbc
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:MemoryStream.dbo SRC:MemoryStream.dbc
+dblproto $VARIANT_FLAGS SRC:FileStream.dbc
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:FileStream.dbo SRC:FileStream.dbc
+dblibr -ca OLIB:SynPSGSystemIO.olb
+dblibr -w -r OLIB:SynPSGSystemIO.olb  OBJ:Stream.dbo OBJ:MemoryStream.dbo OBJ:FileStream.dbo
+dblink $LINKERFLAGS -l EXE:SynPSGSystemIO.elb OLIB:SynPSGSystemIO.olb

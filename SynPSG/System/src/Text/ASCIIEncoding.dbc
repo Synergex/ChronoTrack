@@ -1,0 +1,84 @@
+;;**********************************************************************
+;;
+;; Title:       ASCIIEncoding.dbc
+;;
+;; Type:        Class
+;;
+;; Description:
+;;
+;; Author:      Tod Phillips, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+import SynPSG.System
+
+namespace SynPSG.System.Text.Encoding
+
+    class ASCIIEncoding
+        ;;;<summary></summary>
+        ;;;<remarks>
+        ;;; When overridden in a derived class, encodes all the characters in the specified String into a sequence of bytes.
+        ;;;</remarks>
+        public static method GetBytes   ,[#]@byte
+            req in s                    ,@string
+            endparams
+.align
+        record
+            mBlockSize ,i4
+            mCount     ,i4
+            mSLength   ,i4
+            mTempLength,i4
+            mByteCount ,i4
+        endrecord
+
+        record
+            mTempAlpha ,a32768
+            mTempByte  ,[^size(mTempAlpha)]byte    @mTempAlpha
+            mByteArray ,[#]@byte
+        endrecord
+
+        proc
+            if (s==^null || s.Length==0)
+                throw new System.ArgumentNullException("String is a null reference or has no value")
+            mSLength = s.Length
+            mBlockSize = ^size(mTempAlpha)
+            mByteArray = new @Byte[mSLength]
+            for mCount from 0 thru (mSLength/mBlockSize)
+                begin
+                if (mSLength>=(mCount+1)*mBlockSize)  then
+                    mTempLength = mBlockSize
+                else
+                    mTempLength = mSLength - (mCount*mBlockSize)
+                mTempAlpha = s((mCount*mBlockSize)+1:mTempLength)
+                for mByteCount from 1 thru mTempLength
+                    mByteArray[mByteCount]=(@byte)mTempByte[mByteCount]
+                end
+            mreturn mByteArray
+        endmethod
+
+    endclass
+
+endnamespace

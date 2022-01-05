@@ -1,0 +1,9 @@
+; Universal Time offset (UMT) for Standard Time
+.DEFINE SYNPSG_UMT_OFFSET   -700
+; Recognize Daylight Savings Time?
+.DEFINE SYNPSG_USE_DST      1
+; Month/Day/Hour that Daylight Savings Time begins
+.DEFINE SYNPSG_DST_BEGIN    030902
+; Month/Day/Hour that Daylight Savings Time ends
+.DEFINE SYNPSG_DST_END      110202
+

@@ -1,0 +1,157 @@
+;;**********************************************************************
+;;
+;; Title:       StringUtil.dbc
+;;
+;; Type:        Class
+;;
+;; Description: The StringUtil class currently gives access to two (2) methods,
+;;              including Split and Replace.  Both classes operate on
+;;              string parameters.  Split returns a dynamic array of
+;;              strings based on a "separator" parameter, and Replace
+;;              returns a string in which one parameter has been
+;;              replaced by the other.
+;;
+;; Author:      Tod Phillips, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+
+namespace SynPSG.System
+    ;;--------------------------------------------------------------------
+    ;;public class enumerations
+    ;;--------------------------------------------------------------------
+
+    ;;;<summary>
+    ;;;</summary>
+    public enum StringSplitOptions
+        None
+        RemoveEmptyEntries
+    endenum
+
+    public class StringUtil
+
+        ;;;<summary>
+        ;;;</summary>
+        ;;;<param name=inString></param>
+        ;;;<param name=seporator></param>
+        ;;;<param name=removeEmpty</param>
+        ;;;<return>String array</return>
+        public static method Split  ,[#]@string
+            req in inString         ,@string
+            req in separator        ,@string
+            req in removeEmpty      ,StringSplitOptions
+            endparams
+.align
+            stack record wrkVars
+                elementCount,i4
+                lastPos     ,i4
+                startPos    ,i4
+                splitArray  ,[#]@string
+            endrecord
+        proc
+            init wrkVars
+            elementCount = 1
+            startPos = 1 - separator.Length
+            lastPos = 1
+            while %instr(lastPos, inString, separator, startPos) do
+            begin
+                if (removeEmpty == StringSplitOptions.None || (startPos > lastPos && startPos < (inString.Length + 1 - separator.Length)))
+                    elementCount += 1
+                lastPos = startPos + separator.Length
+            end
+
+            splitArray = new @string[elementCount]
+
+            elementCount = 0
+            lastPos = 1
+            while %instr(lastPos, inString, separator, startPos) do
+            begin
+                if (startPos == lastPos) then
+                    ;; Nothing in this element
+                    if (removeEmpty == StringSplitOptions.None)
+                        splitArray[elementCount+=1]=""
+                else
+                    splitArray[elementCount +=1] = inString(lastPos:startPos-lastPos)
+                lastPos = startPos + separator.Length
+            end
+            ;; Get the final portion of the string and drop it in the last bucket of the Array
+            if (lastPos <= inString.Length) then
+                splitArray[elementCount+=1] = inString(lastPos:inString.Length-lastPos+1)
+            else
+                if (removeEmpty == StringSplitOptions.None) then
+                    splitArray[elementCount+=1] = ""
+                else
+                    if !elementCount
+                        splitArray[1] = inString
+            mreturn splitArray
+        endmethod
+
+        ;;;<summary>
+        ;;;</summary>
+        ;;;<param name=inString></param>
+        ;;;<param name=seporator></param>
+        ;;;<return>String array</return>
+        public static method Split  ,[#]@string
+            req in inString         ,@string
+            req in separator        ,@string
+            endparams
+        proc
+            mreturn Split(inString, separator, StringSplitOptions.None)
+        endmethod
+
+        ;;;<summary>
+        ;;;</summary>
+        ;;;<param name=inString></param>
+        ;;;<param name=find></param>
+        ;;;<param name=replace</param>
+        ;;;<return>String array</return>
+        public static method Replace    ,@string
+            req in inString             ,@string
+            req in find                 ,@string
+            req in replace              ,@string
+            endparams
+.align
+            stack record wrkVars
+                count           ,i4
+                newString       ,@string
+                splitString     ,[#]@string
+            endrecord
+        proc
+            init wrkVars
+            newString = ""
+            ;; Get an array of all substrings, with the string we're replacing removed
+            splitString = Split(inString, find, StringSplitOptions.None)
+            ;; Between each element of the array, insert the replacement string
+            for count from 1 thru (splitString.Length-1)
+                newString = String.Concat(newString, splitString[count] + replace)
+            ;; Add the last element of the original string to the end of the new string
+            newString = String.Concat(newString, splitString[count])
+            mreturn newString
+        endmethod
+
+    endclass
+
+endnamespace

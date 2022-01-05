@@ -1,0 +1,212 @@
+;;**********************************************************************
+;;
+;; Title:       MemoryStream.dbc
+;;
+;; Type:        Class (extends Stream class)
+;;
+;; Description:
+;;
+;; Author:      Tod Phillips, Synergex Professional Services Group
+;;
+;; Copyright    © 2009 Synergex International Corporation.  All rights reserved.
+;;
+;; WARNING:     All content constituting or related to this code ("Code") is the
+;;              property of Synergex International Corporation ("Synergex") and
+;;              is protected by U.S. and international copyright laws.
+;;              If you were given this Code by a Synergex employee then you may
+;;              use and modify it freely for use within your applications.
+;;
+;;              However, you may use the Code only for your personal use.
+;;              Any other use, unless otherwise authorized in writing by
+;;              Synergex is strictly prohibited.  You may not under any
+;;              circumstances distribute this Code, or any modified version
+;;              or part of this Code, to any third party without first
+;;              obtaining written permission to do so from Synergex.
+;;              In using this Code you accept that it is provided as is,
+;;              and without support or warranty of any kind.
+;;
+;;              Neither Synergex nor the author accept any responsibility
+;;              for any losses or damages of any nature which may arise
+;;              from the use of this Code.  This header information must
+;;              remain unaltered in the Code at all times.  Possession
+;;              of this Code, or any modified version or part of this Code,
+;;              indicates your acceptance of these terms.
+;;
+;;***********************************************************************************
+import SynPSG.System.IO
+
+namespace SynPSG.System.IO
+    public class MemoryStream extends Stream
+        mHandle        ,integer
+        mCanRead       ,boolean
+        mCanSeek       ,boolean
+        mCanWrite      ,boolean
+        mCapacity      ,integer
+        mLength        ,integer
+        pPosition      ,integer
+        mResizable     ,integer
+        mSetLength     ,integer
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;Initializes a new instance of the MemoryStream class with an expandable capacity initialized to zero.
+        ;;;</summary>
+        public method MemoryStream
+            endparams
+        proc
+            mHandle = %mem_proc(DM_ALLOC+DM_STATIC+DM_NULL,1)
+            mCanRead = %true
+            mCanWrite = %true
+            mCanSeek = %true
+            mCapacity = 1
+            mLength = 0
+            pPosition = 1
+        endmethod
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        method ~MemoryStream
+        proc
+            if (mHandle)
+                mHandle=%mem_proc(DM_FREE,mHandle)
+        endmethod
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;Gets a value indicating whether the current stream supports reading.
+        ;;;</summary>
+        public override property CanRead    ,boolean
+            method get
+            proc
+                mreturn mCanRead
+            endmethod
+        endproperty
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;Gets a value indicating whether the current stream supports seeking.
+        ;;;</summary>
+        public override property CanSeek    ,boolean
+            method get
+            proc
+                mreturn mCanSeek
+            endmethod
+        endproperty
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        public override property CanWrite   ,boolean
+            method get
+            proc
+                mreturn mCanWrite
+            endmethod
+        endproperty
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        public override property Length ,integer
+            method get
+            proc
+                mreturn mLength
+            endmethod
+        endproperty
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        public override property Position   ,integer
+            method get
+            proc
+                mreturn pPosition
+            endmethod
+        endproperty
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        public override method Flush    ,void
+        proc
+            mreturn
+        endmethod
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        public method Read  ,integer
+            req out buffer  ,a
+            req in offset   ,integer
+            req in count    ,integer
+        proc
+            if (offset<0 || (offset+count)>^size(buffer) || count<=0)
+                throw new ApplicationException("Argument out of range.")
+            if (!mCanRead)
+                throw new ApplicationException("Stream does not support reading.")
+
+            gets(mHandle,buffer(offset+1,count),ef)
+
+            ;; if NOT end of file, return the number of bytes read
+            mreturn count
+
+            ;; if End of File reached, return zero
+        ef, mreturn 0
+
+        endmethod
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        public override method Seek ,integer
+            in offset   ,integer
+            in origin   ,SeekOrigin
+            endparams
+        stack record
+            m_loc   ,integer
+        endrecord
+        proc
+            using origin select
+            (SeekOrigin.fromBegin),
+                m_loc = 1
+            (SeekOrigin.fromCurrent),
+                m_loc = pPosition
+            (SeekOrigin.fromEnd),
+                m_loc = mLength
+            endusing
+            if (m_loc+offset<1 || m_loc+offset>mLength)
+                throw new ApplicationException("Invalid start to seek origin.")
+            if (!mHandle)
+                throw new ApplicationException("The stream object has been closed.")
+            mreturn (pPosition=m_loc+offset)
+        endmethod
+
+        ;;********************************************************************
+
+        ;;;<summary>
+        ;;;</summary>
+        public override method SetLength    ,void
+            in length   ,integer
+            endparams
+        proc
+            if ((!mResizable && length>mCapacity) || length<0)
+                throw new ApplicationException("Stream is not resizable and specified length exceeds defined capacity.")
+            if (!mCanWrite)
+                throw new ApplicationException("Stream does not support writing.")
+            mLength = length
+            mreturn
+        endmethod
+
+    endclass
+
+endnamespace

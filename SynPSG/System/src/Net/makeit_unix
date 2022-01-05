@@ -1,0 +1,150 @@
+#
+# This build script is generated from the SynPSG build system
+# It can be used to re-build the complete project on UNIX
+#
+#
+#
+# *************************************************************
+# Set this to the base folder definition
+# *************************************************************"
+
+NOVCS=yes ; export NOVCS
+SRCDEV=~ ; export SRCDEV
+DEVAREA=Development/SynPSG ; export DEVAREA
+WORKSPACE=System ; export WORKSPACE
+PROJECT=Net ; export PROJECT
+
+# *************************************************************
+# This sets the root folder
+# *************************************************************
+
+ROOTFOLDER=$DEVAREA/$WORKSPACE ; export ROOTFOLDER
+DEVROOT=$SRCDEV/$ROOTFOLDER ; export DEVROOT
+SFWINIPATH=$SRCDEV/$DEVAREA/ini ; export SFWINIPATH
+
+# *************************************************************
+# These setings are for the base SynPSG NET wrapping core libray
+# *************************************************************
+
+SynPSGNetHDR=$SRCDEV/$DEVAREA/$COMMONAREA/genhdr ; export SynPSGNetHDR
+SynPSGNetLIB_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/lib ; export SynPSGNetLIB_CORE
+SynPSGNetSRC_CORE=$SRCDEV/$DEVAREA/$COMMONAREA/src/Core ; export SynPSGNetSRC_CORE
+SynPSGNetSRC_WINDEMO=$SRCDEV/$DEVAREA/$COMMONAREA/src/WinDemo ; export SynPSGNetSRC_WINDEMO
+SynPSGNetLIB=$SRCDEV/$DEVAREA/$COMMONAREA/lib/SynPSGNetLibrary.olb ; export SynPSGNetLIB
+
+# *************************************************************
+# change this depending if it's a development configuration
+# or a release configuration
+# these should be =nothing for release
+# *************************************************************
+
+DFLAGS=-d ; export DFLAGS
+LDFLAGS=-d ; export LDFLAGS
+VARIANT_FLAGS= ; export VARIANT_FLAGS
+
+# *************************************************************
+# Define configuration builder settings
+# *************************************************************
+
+OSTYPE=WINNT ; export OSTYPE
+SYSTEM_TYPE=WindowsNT ; export SYSTEM_TYPE
+CONF=$SRCDEV/Development/SynPSG/Builder/conf/ ; export CONF
+DEPSEXE=$SRCDEV/Development/SynPSG/Builder/exe/ ; export DEPSEXE
+
+# *************************************************************
+# Define here the required environment variables
+# *************************************************************
+
+SRC=$DEVROOT/src/$PROJECT ; export SRC
+NAMESPACE=synpsg-system-net ; export NAMESPACE
+SYNDEFNS=SynPSG.System.Net ; export SYNDEFNS
+
+RPSMFIL=$DEVROOT/rps/rpsmain.ism ; export RPSMFIL
+RPSTFIL=$DEVROOT/rps/rpstext.ism ; export RPSTFIL
+
+OLIB=$DEVROOT/lib ; export OLIB
+OBJ=$DEVROOT/obj/$PROJECT ; export OBJ
+
+EXE=$DEVROOT/exe ; export EXE
+DEF=$DEVROOT/src/Includes ; export DEF
+
+SYNEXPDIR=$DEVROOT/hdr ; export SYNEXPDIR
+SYNIMPDIR=$DEVROOT/hdr ; export SYNIMPDIR
+
+# *************************************************************
+# runtime settings
+# *************************************************************
+COMPILEFLAGS=$DFLAGS ; export COMPILEFLAGS
+LINKERFLAGS=$LDFLAGS ;export LINKERFLAGS
+if [ "$CONFIG" != "Debug" ]; then 
+ COMPILEFLAGS=;export COMPILEFLAGS 
+ LINKERFLAGS=;export LINKERFLAGS 
+fi 
+VARIANT_FLAGS=-qvariant=0 ; export VARIANT_FLAGS
+rm -f $OLIB/SynPSGSystemNet.olb 
+rm -f $OBJ/SynPSGSystemNet.dbo 
+rm -f $OBJ/testmail.dbo 
+rm -f $OBJ/testftp.dbo 
+rm -f $OBJ/ContentType.dbo 
+rm -f $OBJ/ContentDisposition.dbo 
+rm -f $OBJ/IPEndPoint.dbo 
+rm -f $OBJ/Socket.dbo 
+rm -f $OBJ/NetworkStream.dbo 
+rm -f $OBJ/TcpClient.dbo 
+rm -f $OBJ/AttachmentBase.dbo 
+rm -f $OBJ/Attachment.dbo 
+rm -f $OBJ/AttachmentCollection.dbo 
+rm -f $OBJ/MailAddress.dbo 
+rm -f $OBJ/MailAddressCollection.dbo 
+rm -f $OBJ/MailMessage.dbo 
+rm -f $OBJ/SmtpClient.dbo 
+rm -f $OBJ/FtpClient.dbo 
+rm -f $SYNEXPDIR/$NAMESPACE-contenttype.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-contentdisposition.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-ipendpoint.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-socket.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-networkstream.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-tcpclient.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-attachmentbase.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-attachment.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-attachmentcollection.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-mailaddress.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-mailaddresscollection.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-mailmessage.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-smtpclient.dbh 
+rm -f $SYNEXPDIR/$NAMESPACE-ftpclient.dbh 
+if [ "$NAMESPACE" != "*" ] 
+then 
+  rm -f $SYNEXPDIR/$NAMESPACE-*.dbh 
+fi 
+dblproto $VARIANT_FLAGS SRC:ContentType.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ContentType.dbo SRC:ContentType.dbc 
+dblproto $VARIANT_FLAGS SRC:ContentDisposition.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:ContentDisposition.dbo SRC:ContentDisposition.dbc 
+dblproto $VARIANT_FLAGS SRC:IPEndPoint.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:IPEndPoint.dbo SRC:IPEndPoint.dbc 
+dblproto $VARIANT_FLAGS SRC:Socket.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:Socket.dbo SRC:Socket.dbc 
+dblproto $VARIANT_FLAGS SRC:NetworkStream.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:NetworkStream.dbo SRC:NetworkStream.dbc 
+dblproto $VARIANT_FLAGS SRC:TcpClient.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:TcpClient.dbo SRC:TcpClient.dbc 
+dblproto $VARIANT_FLAGS SRC:AttachmentBase.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:AttachmentBase.dbo SRC:AttachmentBase.dbc 
+dblproto $VARIANT_FLAGS SRC:Attachment.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:Attachment.dbo SRC:Attachment.dbc 
+dblproto $VARIANT_FLAGS SRC:AttachmentCollection.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:AttachmentCollection.dbo SRC:AttachmentCollection.dbc 
+dblproto $VARIANT_FLAGS SRC:MailAddress.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:MailAddress.dbo SRC:MailAddress.dbc 
+dblproto $VARIANT_FLAGS SRC:MailAddressCollection.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:MailAddressCollection.dbo SRC:MailAddressCollection.dbc 
+dblproto $VARIANT_FLAGS SRC:MailMessage.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:MailMessage.dbo SRC:MailMessage.dbc 
+dblproto $VARIANT_FLAGS SRC:SmtpClient.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:SmtpClient.dbo SRC:SmtpClient.dbc 
+dblproto $VARIANT_FLAGS SRC:FtpClient.dbc 
+dbl $COMPILEFLAGS -TX -WD=919 $VARIANT_FLAGS  -o OBJ:FtpClient.dbo SRC:FtpClient.dbc 
+dblibr -ca OLIB:SynPSGSystemNet.olb 
+dblibr -w -r OLIB:SynPSGSystemNet.olb  OBJ:ContentType.dbo OBJ:ContentDisposition.dbo OBJ:IPEndPoint.dbo OBJ:Socket.dbo OBJ:NetworkStream.dbo OBJ:TcpClient.dbo OBJ:AttachmentBase.dbo OBJ:Attachment.dbo OBJ:AttachmentCollection.dbo OBJ:MailAddress.dbo OBJ:MailAddressCollection.dbo OBJ:MailMessage.dbo OBJ:SmtpClient.dbo OBJ:FtpClient.dbo 
+dblink $LINKERFLAGS -l EXE:SynPSGSystemNet.elb OLIB:SynPSGSystemNet.olb  
